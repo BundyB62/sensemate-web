@@ -1,13 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbopack: {
-      root: __dirname,
-    },
-  },
   images: {
-    domains: ['fal.media', 'storage.googleapis.com', 'fal.run'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'fal.media' },
+      { protocol: 'https', hostname: '**.fal.media' },
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
+      { protocol: 'https', hostname: 'fal.run' },
+    ],
   },
 };
 
