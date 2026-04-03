@@ -79,6 +79,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
 
       const data = await res.json()
 
+      // Voeg tekstbericht toe
       setMessages(prev => prev.filter(m => m.id !== 'typing').concat({
         id: Date.now().toString(),
         role: 'assistant',
@@ -88,6 +89,36 @@ export default function ChatInterface({ companion, initialMessages }: { companio
       }))
 
       setEmotion(data.emotion || 'neutral')
+
+      // Als de AI een foto wil sturen, genereer die via Fal.ai
+      if (data.generateImage) {
+        const imgLoadingId = `img_loading_${Date.now()}`
+        setMessages(prev => [...prev, {
+          id: imgLoadingId,
+          role: 'assistant',
+          content: '📸 Even een foto maken...',
+          emotion: data.emotion || 'neutral',
+          type: 'image_loading',
+          created_at: new Date().toISOString(),
+        }])
+
+        try {
+          const imgRes = await fetch('/api/image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: data.generateImage }),
+          })
+          const imgData = await imgRes.json()
+
+          setMessages(prev => prev.map(m =>
+            m.id === imgLoadingId
+              ? { ...m, content: imgData.url, type: 'image' }
+              : m
+          ))
+        } catch {
+          setMessages(prev => prev.filter(m => m.id !== imgLoadingId))
+        }
+      }
     } catch {
       setMessages(prev => prev.filter(m => m.id !== 'typing'))
     }
@@ -148,19 +179,31 @@ export default function ChatInterface({ companion, initialMessages }: { companio
                 <span className="text-sm">{EMOTION_EMOJIS[msg.emotion] || '😊'}</span>
               </div>
             )}
-            <div
-              className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.type === 'typing' ? 'animate-pulse' : ''}`}
-              style={{
-                background: msg.role === 'user'
-                  ? `linear-gradient(135deg, ${emotionColor}cc, ${emotionColor}99)`
-                  : 'var(--card)',
-                border: msg.role === 'assistant' ? '1px solid var(--card-border)' : 'none',
-                color: 'var(--foreground)',
-                borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
-              }}
-            >
-              {msg.content}
-            </div>
+
+            {/* Afbeelding bericht */}
+            {msg.type === 'image' ? (
+              <div className="max-w-[75%] rounded-2xl overflow-hidden" style={{ border: `1px solid ${emotionColor}44` }}>
+                <img src={msg.content} alt="foto" className="w-full object-cover" style={{ maxHeight: '400px' }} />
+              </div>
+            ) : msg.type === 'image_loading' ? (
+              <div className="max-w-[75%] px-4 py-3 rounded-2xl text-sm animate-pulse" style={{ background: 'var(--card)', border: `1px solid ${emotionColor}44`, color: emotionColor }}>
+                📸 Even een foto maken...
+              </div>
+            ) : (
+              <div
+                className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.type === 'typing' ? 'animate-pulse' : ''}`}
+                style={{
+                  background: msg.role === 'user'
+                    ? `linear-gradient(135deg, ${emotionColor}cc, ${emotionColor}99)`
+                    : 'var(--card)',
+                  border: msg.role === 'assistant' ? '1px solid var(--card-border)' : 'none',
+                  color: 'var(--foreground)',
+                  borderRadius: msg.role === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                }}
+              >
+                {msg.content}
+              </div>
+            )}
           </div>
         ))}
         <div ref={messagesEndRef} />
