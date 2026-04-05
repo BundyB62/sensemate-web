@@ -3,112 +3,102 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import Logo from '@/components/Logo'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState(false)
+  const [done, setDone] = useState(false)
+  const router = useRouter()
   const supabase = createClient()
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
-
+    const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${location.origin}/auth/callback` } })
     if (error) {
       setError(error.message)
       setLoading(false)
     } else {
-      setSuccess(true)
+      setDone(true)
     }
   }
 
-  if (success) {
+  if (done) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--background)' }}>
-        <div className="text-center max-w-md">
-          <div className="text-5xl mb-4">📧</div>
-          <h2 className="text-2xl font-bold mb-2">Check je e-mail!</h2>
-          <p className="text-gray-400">We hebben een bevestigingslink gestuurd naar <strong className="text-white">{email}</strong>. Klik op de link om je account te activeren.</p>
-          <Link href="/login" className="mt-6 inline-block text-sm" style={{ color: '#e91e8c' }}>Terug naar inloggen</Link>
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative' }}>
+        <div className="orb orb-1" /><div className="orb orb-2" />
+        <div style={{ textAlign: 'center', position: 'relative', zIndex: 1 }} className="animate-scalein">
+          <div style={{ fontSize: 64, marginBottom: 24, animation: 'float 3s ease-in-out infinite' }}>💌</div>
+          <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>Check your inbox</h1>
+          <p style={{ color: 'var(--muted-fg)', fontSize: 15, lineHeight: 1.7, maxWidth: 360, margin: '0 auto 28px' }}>
+            We sent a confirmation link to <strong style={{ color: 'var(--fg)' }}>{email}</strong>. Click the link to activate your account.
+          </p>
+          <Link href="/login" style={{ color: '#e91e8c', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
+            Back to login →
+          </Link>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--background)' }}>
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-full mx-auto mb-4" style={{ background: 'linear-gradient(135deg, #e91e8c, #ff6b6b)' }} />
-          <h1 className="text-2xl font-bold">Maak je account aan</h1>
-          <p className="text-gray-400 mt-2 text-sm">Gratis starten, geen creditcard nodig</p>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative' }}>
+      <div className="orb orb-1" /><div className="orb orb-2" />
+
+      <div style={{ width: '100%', maxWidth: 420, position: 'relative', zIndex: 1 }} className="animate-fadeup">
+        <div style={{ textAlign: 'center', marginBottom: 44 }}>
+          <Link href="/" style={{ display: 'inline-block', textDecoration: 'none' }}>
+            <Logo size="lg" />
+          </Link>
+          <h1 style={{ fontSize: 28, fontWeight: 800, marginTop: 28, marginBottom: 8, letterSpacing: '-0.5px' }}>Create your account</h1>
+          <p style={{ color: 'var(--muted-fg)', fontSize: 15 }}>Free to start, no credit card needed</p>
         </div>
 
-        <form onSubmit={handleSignup} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-300">E-mailadres</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none"
-              style={{ background: 'var(--card)', border: '1px solid var(--card-border)' }}
-              placeholder="jouw@email.com"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-2 text-gray-300">Wachtwoord</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-              className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none"
-              style={{ background: 'var(--card)', border: '1px solid var(--card-border)' }}
-              placeholder="Minimaal 8 tekens"
-            />
-          </div>
-
-          {error && (
-            <div className="px-4 py-3 rounded-xl text-sm text-red-400" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
-              {error}
+        <div className="glass" style={{ borderRadius: 26, padding: '40px' }}>
+          <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--muted-fg)', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>
+                Email address
+              </label>
+              <input className="input" type="email" value={email} onChange={e => setEmail(e.target.value)}
+                required placeholder="your@email.com" style={{ padding: '13px 16px', fontSize: 15 }} />
             </div>
-          )}
+            <div>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--muted-fg)', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>
+                Password
+              </label>
+              <input className="input" type="password" value={password} onChange={e => setPassword(e.target.value)}
+                required placeholder="At least 8 characters" minLength={8} style={{ padding: '13px 16px', fontSize: 15 }} />
+            </div>
 
-          <p className="text-xs text-gray-500">Door je aan te melden ga je akkoord met onze voorwaarden. SenseMate is alleen voor personen van 18 jaar en ouder.</p>
+            {error && (
+              <div style={{ padding: '12px 16px', borderRadius: 12, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#f87171', fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span>⚠️</span> {error}
+              </div>
+            )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl font-semibold text-white transition-all hover:scale-[1.02] disabled:opacity-50"
-            style={{ background: 'linear-gradient(135deg, #e91e8c, #ff6b6b)' }}
-          >
-            {loading ? 'Account aanmaken...' : 'Account aanmaken'}
-          </button>
-        </form>
+            <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '14px', fontSize: 16, marginTop: 4 }}>
+              {loading ? (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin-slow 0.7s linear infinite', display: 'inline-block' }} />
+                  Creating...
+                </span>
+              ) : 'Create Account →'}
+            </button>
 
-        <p className="text-center mt-6 text-sm text-gray-400">
-          Al een account?{' '}
-          <Link href="/login" className="font-medium hover:underline" style={{ color: '#e91e8c' }}>
-            Inloggen
-          </Link>
-        </p>
-        <p className="text-center mt-2">
-          <Link href="/" className="text-xs text-gray-600 hover:text-gray-400">← Terug naar home</Link>
+            <p style={{ textAlign: 'center', color: 'var(--muted-fg)', fontSize: 12, lineHeight: 1.6 }}>
+              By signing up you agree to our terms.<br />For adults 18+ only.
+            </p>
+          </form>
+        </div>
+
+        <p style={{ textAlign: 'center', marginTop: 24, color: 'var(--muted-fg)', fontSize: 14 }}>
+          Already have an account?{' '}
+          <Link href="/login" style={{ color: '#e91e8c', textDecoration: 'none', fontWeight: 600 }}>Log in</Link>
         </p>
       </div>
     </div>

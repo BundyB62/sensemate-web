@@ -1,15 +1,49 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import ParticleField from '@/components/ParticleField'
 
 export const metadata: Metadata = {
-  title: 'SenseMate — Jouw AI Companion',
-  description: 'Maak je eigen AI companion aan. Praat, flirt en bouw een echte band op.',
+  title: 'SenseMate — Your AI Companion',
+  description: 'Create your own AI companion. Talk, connect, and build a real bond.',
+  icons: {
+    icon: [
+      { url: '/logo.png', sizes: '32x32', type: 'image/png' },
+      { url: '/logo.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: '/logo.png',
+    shortcut: '/logo.png',
+  },
+  openGraph: {
+    title: 'SenseMate — Your AI Companion',
+    description: 'Create your own AI companion. Talk, connect, and build a real bond.',
+    images: [{ url: '/logo.png' }],
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="nl">
-      <body>{children}</body>
+    <html lang="en">
+      <body style={{ background: '#060514' }}>
+        <ParticleField />
+        {/* Silhouettes — black bg removed via mix-blend-mode screen */}
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/silhouettes.png"
+            alt=""
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              mixBlendMode: 'screen',
+              opacity: 0.45,
+              animation: 'silhouette-breathe 8s ease-in-out infinite',
+            }}
+          />
+        </div>
+        {children}
+      </body>
     </html>
   )
 }
