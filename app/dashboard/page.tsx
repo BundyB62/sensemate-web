@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getBondLevel, getBondProgress } from '@/lib/companions'
 import DeleteCompanionButton from '@/components/DeleteCompanionButton'
+import AvatarPreview from '@/components/AvatarPreview'
 
 const EMOTION_COLORS: Record<string, string> = {
   neutral: '#8888aa', happy: '#fbbf24', excited: '#f97316',
@@ -215,18 +216,12 @@ export default async function DashboardPage() {
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 18, marginBottom: 22 }}>
                           {/* Avatar */}
                           <div style={{ position: 'relative', flexShrink: 0 }}>
-                            <div style={{
-                              width: 78, height: 78, borderRadius: 22, overflow: 'hidden',
-                              border: `2px solid ${accent}55`,
-                              boxShadow: `0 0 30px ${accent}30, 0 0 60px ${accent}10`,
-                              background: `linear-gradient(135deg, ${accent}25, ${accent}08)`,
-                              display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
-                            {companion.avatar_url
-                              ? <img src={companion.avatar_url} alt={companion.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} />
-                              : <span style={{ fontSize: 32 }}>{EMOTION_EMOJIS[em]}</span>
-                            }
-                          </div>
+                            <AvatarPreview
+                              src={companion.avatar_url}
+                              name={companion.name}
+                              accent={accent}
+                              fallbackEmoji={EMOTION_EMOJIS[em]}
+                            />
                           <div style={{
                             position: 'absolute', bottom: -2, right: -2, width: 14, height: 14, borderRadius: '50%',
                             background: '#22c55e', border: '3px solid #07050f', boxShadow: '0 0 8px rgba(34,197,94,0.5)',
