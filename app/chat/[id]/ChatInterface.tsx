@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { getBondLevel, getBondProgress } from '@/lib/companions'
 import AvatarPreview from '@/components/AvatarPreview'
@@ -432,23 +433,14 @@ export default function ChatInterface({ companion, initialMessages }: { companio
         </div>
       </div>
 
-      {/* Lightbox */}
-      {lightboxImg && (
-        <div onClick={() => setLightboxImg(null)} style={{
-          position: 'fixed', inset: 0, zIndex: 100,
-          background: 'rgba(0,0,0,0.94)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          animation: 'fadeIn 0.2s ease',
-        }}>
-          <button onClick={() => setLightboxImg(null)} style={{
-            position: 'absolute', top: 20, right: 20, width: 40, height: 40, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', fontSize: 20, cursor: 'pointer',
-          }}>×</button>
-          <img src={lightboxImg} onClick={e => e.stopPropagation()}
-            style={{ maxWidth: '88vw', maxHeight: '88vh', objectFit: 'contain', borderRadius: 16, boxShadow: '0 0 60px rgba(0,0,0,0.5)' }}
-            alt=""
-          />
-        </div>
-      )}
+      {/* Lightbox — portaled to body */}
+      <ImageLightbox
+        src={lightboxImg}
+        onClose={() => setLightboxImg(null)}
+        gallery={gallery}
+        onNavigate={setLightboxImg}
+        accent={accent}
+      />
     </div>
   )
 }
@@ -586,4 +578,120 @@ function MessageBubble({ msg, accent, isHovered, onHover, onReply, onPin, isPinn
       )}
     </div>
   )
+}
+
+// ─── Image Lightbox (portaled) ───────────────────────────────────────────────
+function ImageLightbox({ src, onClose, gallery, onNavigate, accent }: {
+  src: string | null; onClose: () => void; gallery: string[];
+  onNavigate: (url: string) => void; accent: string;
+}) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    if (!src) return
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        const idx = gallery.indexOf(src)
+        if (idx === -1) return
+        const next = e.key === 'ArrowRight'
+          ? gallery[(idx + 1) % gallery.length]
+          : gallery[(idx - 1 + gallery.length) % gallery.length]
+        onNavigate(next)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [src, gallery, onClose, onNavigate])
+
+  if (!src || !mounted) return null
+
+  const idx = gallery.indexOf(src)
+  const hasPrev = gallery.length > 1
+  const hasNext = gallery.length > 1
+
+  const modal = (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 99999,
+        background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(20px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        cursor: 'zoom-out',
+        animation: 'avp-fade-in 0.25s ease both',
+      }}
+    >
+      {/* Close */}
+      <button onClick={(e) => { e.stopPropagation(); onClose() }} style={{
+        position: 'absolute', top: 20, right: 20, zIndex: 10,
+        width: 44, height: 44, borderRadius: '50%',
+        background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+        color: 'white', fontSize: 20, cursor: 'pointer',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>✕</button>
+
+      {/* Counter */}
+      {gallery.length > 1 && idx >= 0 && (
+        <div style={{
+          position: 'absolute', top: 24, left: 0, right: 0, textAlign: 'center',
+          fontSize: 13, color: 'rgba(255,255,255,0.4)', fontWeight: 500,
+        }}>
+          {idx + 1} / {gallery.length}
+        </div>
+      )}
+
+      {/* Prev arrow */}
+      {hasPrev && (
+        <button onClick={(e) => {
+          e.stopPropagation()
+          const i = gallery.indexOf(src)
+          onNavigate(gallery[(i - 1 + gallery.length) % gallery.length])
+        }} style={{
+          position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)',
+          width: 48, height: 48, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+          color: 'white', fontSize: 22, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>←</button>
+      )}
+
+      {/* Next arrow */}
+      {hasNext && (
+        <button onClick={(e) => {
+          e.stopPropagation()
+          const i = gallery.indexOf(src)
+          onNavigate(gallery[(i + 1) % gallery.length])
+        }} style={{
+          position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)',
+          width: 48, height: 48, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+          color: 'white', fontSize: 22, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>→</button>
+      )}
+
+      {/* Image */}
+      <div onClick={e => e.stopPropagation()} style={{
+        maxWidth: '90vw', maxHeight: '85vh',
+        borderRadius: 16, overflow: 'hidden',
+        boxShadow: `0 0 80px ${accent}30, 0 20px 60px rgba(0,0,0,0.5)`,
+        border: `2px solid ${accent}40`,
+        animation: 'avp-scale-in 0.3s cubic-bezier(0.34,1.2,0.64,1) both',
+        cursor: 'default',
+      }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={src} alt="" style={{
+          display: 'block', maxWidth: '90vw', maxHeight: '85vh', objectFit: 'contain',
+        }} />
+      </div>
+
+      <style>{`
+        @keyframes avp-fade-in { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes avp-scale-in { from { opacity: 0; transform: scale(0.85) } to { opacity: 1; transform: scale(1) } }
+      `}</style>
+    </div>
+  )
+
+  return createPortal(modal, document.body)
 }
