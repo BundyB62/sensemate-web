@@ -145,7 +145,7 @@ export default function LandingPage() {
               boxShadow: '0 4px 20px rgba(233,30,140,0.2)',
               letterSpacing: '0.01em',
             }}>
-              Create Your Companion
+              Create Your SenseMate
             </Link>
           </div>
         </div>

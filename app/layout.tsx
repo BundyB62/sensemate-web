@@ -3,8 +3,8 @@ import './globals.css'
 import ParticleField from '@/components/ParticleField'
 
 export const metadata: Metadata = {
-  title: 'SenseMate — Your AI Companion',
-  description: 'Create your own AI companion. Talk, connect, and build a real bond.',
+  title: 'SenseMate — Your AI SenseMate',
+  description: 'Create your own AI SenseMate. Talk, connect, and build a real bond.',
   icons: {
     icon: [
       { url: '/logo.png', sizes: '32x32', type: 'image/png' },
@@ -14,8 +14,8 @@ export const metadata: Metadata = {
     shortcut: '/logo.png',
   },
   openGraph: {
-    title: 'SenseMate — Your AI Companion',
-    description: 'Create your own AI companion. Talk, connect, and build a real bond.',
+    title: 'SenseMate — Your AI SenseMate',
+    description: 'Create your own AI SenseMate. Talk, connect, and build a real bond.',
     images: [{ url: '/logo.png' }],
   },
 }

@@ -143,7 +143,7 @@ export default async function DashboardPage() {
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>Welcome back</div>
             <h1 style={{ fontSize: 42, fontWeight: 800, letterSpacing: '-1.5px', marginBottom: 10, lineHeight: 1.1, color: '#fff' }}>
-              Your Companions
+              Your SenseMates
             </h1>
             <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 15 }}>
               {companions?.length ?? 0} of {maxCompanions >= 999 ? '∞' : maxCompanions} active
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
               border: '1px solid rgba(233,30,140,0.35)',
               boxShadow: '0 4px 20px rgba(233,30,140,0.2)',
             }}>
-              + New Companion
+              + New SenseMate
             </Link>
           ) : (
             <Link href="/upgrade" style={{
@@ -303,7 +303,7 @@ export default async function DashboardPage() {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 24, color: 'rgba(233,30,140,0.6)',
                     }}>+</div>
-                    <div style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>New Companion</div>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.5)' }}>New SenseMate</div>
                     <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>Choose prebuilt or create your own</div>
                   </div>
                 </Link>
@@ -313,7 +313,7 @@ export default async function DashboardPage() {
             {/* Stats */}
             <div style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
               {[
-                { icon: '💬', label: 'Companions', value: String(companions.length) },
+                { icon: '💬', label: 'SenseMates', value: String(companions.length) },
                 { icon: '❤️', label: 'Avg. Bond Level', value: companions.length > 0 ? String(Math.round(companions.reduce((s: number, c: any) => s + (c.bond_level || 1), 0) / companions.length * 10) / 10) : '0' },
                 { icon: '⭐', label: 'Plan', value: plan.charAt(0).toUpperCase() + plan.slice(1) },
               ].map(stat => (
@@ -347,9 +347,9 @@ export default async function DashboardPage() {
         ) : (
           <div style={{ textAlign: 'center', padding: '100px 24px' }}>
             <div style={{ fontSize: 80, marginBottom: 24, display: 'inline-block' }}>💝</div>
-            <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 12, letterSpacing: '-1px' }}>No companions yet</h2>
+            <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 12, letterSpacing: '-1px' }}>No SenseMates yet</h2>
             <p style={{ color: 'rgba(255,255,255,0.45)', marginBottom: 40, fontSize: 17, lineHeight: 1.7 }}>
-              Create your first AI companion.<br />Choose a prebuilt or build your own.
+              Create your first SenseMate.<br />Choose a prebuilt or design your own.
             </p>
             <Link href="/onboarding" style={{
               display: 'inline-flex', alignItems: 'center', padding: '16px 40px', fontSize: 16, fontWeight: 600,
@@ -358,7 +358,7 @@ export default async function DashboardPage() {
               border: '1px solid rgba(233,30,140,0.35)',
               boxShadow: '0 4px 28px rgba(233,30,140,0.25)',
             }}>
-              Create Your Companion →
+              Create Your SenseMate →
             </Link>
           </div>
         )}
