@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { getBondLevel, getBondProgress } from '@/lib/companions'
+import AvatarPreview from '@/components/AvatarPreview'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const EMOTION_COLORS: Record<string, string> = {
@@ -178,19 +179,14 @@ export default function ChatInterface({ companion, initialMessages }: { companio
           <div style={{ padding: '28px 20px 20px', borderBottom: '1px solid var(--card-border)', textAlign: 'center' }}>
             {/* Avatar */}
             <div style={{ position: 'relative', display: 'inline-block', marginBottom: 14 }}>
-              <div style={{
-                width: 88, height: 88, borderRadius: '50%', overflow: 'hidden',
-                border: `3px solid ${accent}`, boxShadow: `0 0 28px ${accent}50`,
-                background: `linear-gradient(135deg, ${accent}22, ${accent}08)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'border-color 0.6s, box-shadow 0.6s',
-                animation: 'breathe 3s ease-in-out infinite',
-              }}>
-                {companion.avatar_url
-                  ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} alt={name} />
-                  : <span style={{ fontSize: 36 }}>{EMOTION_EMOJIS[emotion]}</span>
-                }
-              </div>
+              <AvatarPreview
+                src={companion.avatar_url}
+                name={name}
+                accent={accent}
+                fallbackEmoji={EMOTION_EMOJIS[emotion]}
+                size={88}
+                borderRadius={44}
+              />
               <div style={{
                 position: 'absolute', bottom: 4, right: 4, width: 16, height: 16, borderRadius: '50%',
                 background: '#22c55e', border: '3px solid var(--bg)', boxShadow: '0 0 8px rgba(34,197,94,0.6)',
@@ -296,17 +292,14 @@ export default function ChatInterface({ companion, initialMessages }: { companio
             {showSidebar ? '◂' : '▸'}
           </button>
 
-          <div style={{
-            width: 38, height: 38, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-            border: `2px solid ${accent}66`, boxShadow: `0 0 12px ${accent}33`,
-            transition: 'border-color 0.6s, box-shadow 0.6s',
-            background: `${accent}15`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            {companion.avatar_url
-              ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }} alt={name} />
-              : <span style={{ fontSize: 18 }}>{EMOTION_EMOJIS[emotion]}</span>
-            }
-          </div>
+          <AvatarPreview
+            src={companion.avatar_url}
+            name={name}
+            accent={accent}
+            fallbackEmoji={EMOTION_EMOJIS[emotion]}
+            size={38}
+            borderRadius={19}
+          />
 
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 15 }}>{name}</div>
@@ -343,17 +336,15 @@ export default function ChatInterface({ companion, initialMessages }: { companio
         <div style={{ flex: 1, overflowY: 'auto', padding: '24px 20px', display: 'flex', flexDirection: 'column', gap: 4 }}>
           {messages.length === 0 && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 0', textAlign: 'center' }}>
-              <div style={{
-                width: 80, height: 80, borderRadius: '50%', marginBottom: 20, overflow: 'hidden',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: `linear-gradient(135deg, ${accent}22, ${accent}08)`,
-                border: `2px solid ${accent}44`, fontSize: 36,
-                animation: 'breathe 3s ease-in-out infinite',
-              }}>
-                {companion.avatar_url
-                  ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', borderRadius: '50%' }} alt={name} />
-                  : '💝'
-                }
+              <div style={{ marginBottom: 20 }}>
+                <AvatarPreview
+                  src={companion.avatar_url}
+                  name={name}
+                  accent={accent}
+                  fallbackEmoji="💝"
+                  size={80}
+                  borderRadius={40}
+                />
               </div>
               <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Begin je gesprek met {name}</div>
               <div style={{ color: 'var(--muted-fg)', fontSize: 14 }}>Stuur een bericht om te verbinden</div>
