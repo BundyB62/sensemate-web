@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getBondLevel, getBondProgress } from '@/lib/companions'
+import DeleteCompanionButton from '@/components/DeleteCompanionButton'
 
 const EMOTION_COLORS: Record<string, string> = {
   neutral: '#8888aa', happy: '#fbbf24', excited: '#f97316',
@@ -254,7 +255,10 @@ export default async function DashboardPage() {
                           </div>
                         </div>
 
-                          <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.15)', flexShrink: 0 }}>→</div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                            <DeleteCompanionButton companionId={companion.id} companionName={companion.name} />
+                            <div style={{ fontSize: 22, color: 'rgba(255,255,255,0.15)' }}>→</div>
+                          </div>
                         </div>
 
                         {/* Bond */}
