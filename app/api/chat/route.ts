@@ -4,6 +4,15 @@ import { NextResponse } from 'next/server'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
+// Model fallback chain — tries each until one works
+const MODELS = [
+  'nvidia/nemotron-3-super-120b-a12b:free',
+  'nousresearch/hermes-3-llama-3.1-405b:free',
+  'google/gemma-3-27b-it:free',
+  'meta-llama/llama-3.3-70b-instruct:free',
+  'google/gemma-3-12b-it:free',
+]
+
 const REL_STYLE_NL: Record<string, string> = {
   lover: 'romantische partner — intiem, verliefd, liefdevol en passioneel',
   soulmate: 'zielsverwant — diep verbonden, begrijpend, voor altijd',
@@ -152,30 +161,52 @@ export async function POST(request: Request) {
       { role: 'user', content: message },
     ]
 
-    const response = await fetch(OPENROUTER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://sensemate.app',
-        'X-Title': 'SenseMate',
-      },
-      body: JSON.stringify({
-        model: 'mistralai/mistral-7b-instruct:free',
-        messages: apiMessages,
-        max_tokens: 600,
-        temperature: 0.92,
-        top_p: 0.92,
-      }),
-    })
+    // Try models in order until one works
+    let rawContent = '{}'
+    let modelUsed = ''
 
-    if (!response.ok) {
-      console.error('OpenRouter error:', await response.text())
-      return NextResponse.json({ error: 'AI error' }, { status: 500 })
+    for (const model of MODELS) {
+      try {
+        const response = await fetch(OPENROUTER_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'https://sensemates.com',
+            'X-Title': 'SenseMates',
+          },
+          body: JSON.stringify({
+            model,
+            messages: apiMessages,
+            max_tokens: 600,
+            temperature: 0.92,
+            top_p: 0.92,
+          }),
+        })
+
+        if (!response.ok) {
+          console.error(`Model ${model} failed (${response.status}), trying next...`)
+          continue
+        }
+
+        const aiData = await response.json()
+        const content = aiData.choices?.[0]?.message?.content
+
+        if (content) {
+          rawContent = content
+          modelUsed = model
+          break
+        }
+      } catch (err) {
+        console.error(`Model ${model} error:`, err)
+        continue
+      }
     }
 
-    const aiData = await response.json()
-    const rawContent = aiData.choices?.[0]?.message?.content || '{}'
+    if (!modelUsed) {
+      console.error('All models failed')
+      return NextResponse.json({ error: 'AI error — all models unavailable' }, { status: 500 })
+    }
 
     let parsed: any = { text: rawContent, emotion: 'neutral', generate_image: null }
     try {
