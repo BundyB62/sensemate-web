@@ -3,7 +3,8 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { buildAvatarPrompt } from '@/lib/avatarPrompt'
 
-const FAL_URL = 'https://fal.run/fal-ai/flux/schnell'
+// Flux Dev — high quality, 30 steps, no content filter
+const FAL_URL = 'https://fal.run/fal-ai/flux/dev'
 
 export async function POST(request: Request) {
   try {
@@ -27,6 +28,7 @@ export async function POST(request: Request) {
     const { companionId, appearance, emotion = 'neutral' } = await request.json()
 
     const prompt = buildAvatarPrompt(appearance, emotion)
+    console.log(`[Avatar] Prompt: ${prompt.substring(0, 200)}...`)
 
     const response = await fetch(FAL_URL, {
       method: 'POST',
@@ -36,10 +38,11 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify({
         prompt,
-        image_size: 'portrait_4_3',
-        num_inference_steps: 8,
+        image_size: 'portrait_4_3',  // tall portrait for full body
+        num_inference_steps: 30,
         num_images: 1,
         enable_safety_checker: false,
+        guidance_scale: 3.5,
       }),
     })
 

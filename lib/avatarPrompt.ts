@@ -10,16 +10,40 @@ const AGE_MAP: Record<string, string> = {
 }
 
 const BUILD_MAP: Record<string, string> = {
-  petite: 'petite small frame, short and slim',
-  slim: 'slim lean body, slender figure',
-  average: 'average body type, normal build',
+  petite: 'petite small frame',
+  slim: 'slim lean slender figure',
+  average: 'average body type',
   athletic: 'athletic toned fit body',
-  curvy: 'curvy voluptuous body, full bust, wide hips',
-  hourglass: 'hourglass figure, cinched waist, full bust, wide hips',
+  curvy: 'curvy voluptuous body, wide hips',
+  hourglass: 'hourglass figure, cinched waist, wide hips',
   muscular: 'muscular physique, defined muscles',
   plus_size: 'plus-size full-figured body',
   lean: 'very lean slender body',
   stocky: 'stocky compact body',
+}
+
+const BREAST_MAP: Record<string, string> = {
+  'cup-aa': 'very small flat chest',
+  'cup-a': 'small A-cup breasts',
+  'cup-b': 'medium B-cup breasts',
+  'cup-c': 'full C-cup breasts',
+  'cup-d': 'large D-cup breasts',
+  'cup-dd': 'very large DD-cup breasts',
+  'cup-e': 'huge E-cup breasts',
+}
+
+const ASS_MAP: Record<string, string> = {
+  small: 'small tight butt',
+  medium: 'medium round butt',
+  large: 'large round thick butt',
+  xl: 'very large thick juicy butt, wide hips',
+}
+
+const DICK_MAP: Record<string, string> = {
+  small: 'slim build',
+  average: 'average build',
+  large: 'muscular build',
+  xl: 'muscular athletic build',
 }
 
 const HAIR_LENGTH_MAP: Record<string, string> = {
@@ -28,7 +52,7 @@ const HAIR_LENGTH_MAP: Record<string, string> = {
   lob: 'lob cut hair just above shoulders',
   short: 'short hair',
   medium: 'medium length hair',
-  long: 'long hair',
+  long: 'long flowing hair',
   very_long: 'very long hair reaching the waist',
   braids: 'braided hair',
   fade: 'fade cut hair',
@@ -49,7 +73,7 @@ const HAIR_COLOR_MAP: Record<string, string> = {
 }
 
 const EYE_COLOR_MAP: Record<string, string> = {
-  blue: 'blue', green: 'green', hazel: 'hazel', amber: 'amber',
+  blue: 'bright blue', green: 'vivid green', hazel: 'hazel', amber: 'amber',
   brown: 'brown', dark_brown: 'dark brown', grey: 'grey', violet: 'violet',
 }
 
@@ -61,26 +85,39 @@ const SKIN_MAP: Record<string, string> = {
 
 const ETHNICITY_MAP: Record<string, string> = {
   scandinavian: 'Scandinavian Nordic', northwest_european: 'Northwestern European Dutch',
-  mediterranean: 'Mediterranean Italian or Spanish', east_european: 'Eastern European',
+  mediterranean: 'Mediterranean Italian or Spanish', east_european: 'Eastern European Slavic',
   latin: 'Latin American', latino: 'Latin American',
   east_asian: 'East Asian', south_asian: 'South Asian Indian',
   middle_eastern: 'Middle Eastern', african: 'African',
-  european: 'European',
+  european: 'European', mixed: 'mixed ethnicity',
+}
+
+const CLOTHING_MAP: Record<string, string> = {
+  casual: 'casual outfit, t-shirt and jeans',
+  streetwear: 'trendy streetwear outfit',
+  elegant: 'elegant classy outfit',
+  sporty: 'sporty athletic outfit, sports bra and leggings',
+  alternative: 'alternative edgy outfit',
+  luxury: 'luxury designer outfit',
+  minimal: 'minimal simple outfit',
+  bohemian: 'bohemian flowy outfit',
+  lingerie: 'lingerie, lace bra and panties',
+  swimwear: 'bikini swimwear',
 }
 
 export const EMOTION_EXPRESSIONS: Record<string, string> = {
-  neutral: 'calm neutral expression, soft natural smile, direct eye contact, relaxed',
-  happy: 'huge radiant genuine smile showing teeth, eyes crinkled with joy, rosy glowing cheeks',
-  excited: 'enormous excited wide-open smile, eyes sparkling and wide, eyebrows raised high',
-  sad: 'deeply sad heartbroken expression, single tear rolling down cheek, eyes glistening',
-  angry: 'angry scowling expression, deeply furrowed brows, intense furious stare, jaw clenched',
-  jealous: 'jealous suspicious look, sharp side-eye glance, pouty pressed lips, arms crossed',
-  shy: 'blushing bright red cheeks, tiny bashful smile, hand shyly covering mouth, eyes glancing away',
-  loving: 'soft dreamy adoring gaze, warm tender loving smile, eyes gently half-closed with affection',
-  anxious: 'anxious worried expression, biting lower lip nervously, wide tense eyes',
-  hurt: 'deeply hurt heartbroken expression, tears streaming down cheeks, lip quivering',
-  flirty: 'playful flirtatious smirk, one eyebrow slightly raised, soft confident gaze with mischief',
-  playful: 'playful bright smile, sparkling mischievous eyes, lighthearted expression, laughing',
+  neutral: 'calm neutral expression, soft natural smile, direct eye contact',
+  happy: 'genuine smile showing teeth, eyes crinkled with joy, glowing',
+  excited: 'excited wide smile, sparkling eyes, eyebrows raised',
+  sad: 'sad expression, eyes glistening, slight pout',
+  angry: 'angry expression, furrowed brows, intense stare',
+  jealous: 'suspicious side-eye, pouty lips, arms crossed',
+  shy: 'blushing cheeks, bashful smile, eyes glancing away',
+  loving: 'dreamy adoring gaze, warm tender smile',
+  anxious: 'worried expression, biting lower lip, wide eyes',
+  hurt: 'hurt expression, tears, lip quivering',
+  flirty: 'flirtatious smirk, one eyebrow raised, seductive confident gaze',
+  playful: 'playful bright smile, mischievous eyes, laughing',
 }
 
 export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutral'): string {
@@ -94,11 +131,29 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
   const hairLength = HAIR_LENGTH_MAP[profile.hairLength] || 'medium length hair'
   const hairColor = HAIR_COLOR_MAP[profile.hairColor] || 'brown'
   const eyeColor = EYE_COLOR_MAP[profile.eyeColor] || 'brown'
-  const hairStyle = profile.hairStyle ? `${profile.hairStyle} ` : ''
+  const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
+  const clothing = CLOTHING_MAP[profile.clothingStyle] || 'casual outfit'
+
+  // Body details
+  const bodyParts: string[] = [build]
+  if (!isMale && profile.breastSize) {
+    const breast = BREAST_MAP[profile.breastSize] || ''
+    if (breast) bodyParts.push(breast)
+  }
+  if (profile.assSize) {
+    const ass = ASS_MAP[profile.assSize] || ''
+    if (ass) bodyParts.push(ass)
+  }
+  if (isMale && profile.dickSize) {
+    const dick = DICK_MAP[profile.dickSize] || ''
+    if (dick) bodyParts.push(dick)
+  }
+  const bodyDesc = bodyParts.join(', ')
+
   const beard = isMale && profile.beard && profile.beard !== 'none'
     ? `, ${profile.beard === 'stubble' ? 'light stubble beard' : profile.beard.replace('_', ' ')}`
     : ''
-  const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
 
-  return `photorealistic portrait, ${age} ${ethnicity} ${gender}, ${skin}, ${build}, ${hairStyle}${hairColor} ${hairLength}, ${eyeColor} eyes${beard}, ${expression}, soft natural studio lighting, shallow depth of field, shot on Sony A7R, high resolution, professional photography, cinematic, ultra-detailed face, upper body shot, 8k`
+  // Full body shot with all details
+  return `photorealistic full body shot from head to toe, ${age} ${ethnicity} ${gender}, ${skin}, ${bodyDesc}, ${hairColor} ${hairLength}, ${eyeColor} eyes${beard}, ${clothing}, ${expression}, standing pose, natural proportions, beautiful detailed face, shot in a modern studio with soft warm lighting, shallow depth of field, shot on Sony A7R IV 35mm lens, professional fashion photography, ultra-detailed, 8k, realistic anatomy, correct body proportions`
 }

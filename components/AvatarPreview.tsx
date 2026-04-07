@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
 export default function AvatarPreview({ src, name, accent = '#e91e8c', fallbackEmoji = '😐', size = 78, borderRadius = 22 }: {
@@ -12,20 +12,36 @@ export default function AvatarPreview({ src, name, accent = '#e91e8c', fallbackE
 }) {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const closingRef = useRef(false)
 
   useEffect(() => { setMounted(true) }, [])
 
-  // Close on Escape key
   useEffect(() => {
     if (!open) return
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [open])
 
+  function handleOpen(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
+    if (closingRef.current) return
+    setOpen(true)
+  }
+
+  function handleClose() {
+    setOpen(false)
+    // Block any click events for a short period after closing
+    // to prevent the underlying Link from being triggered
+    closingRef.current = true
+    setTimeout(() => { closingRef.current = false }, 300)
+  }
+
   const modal = open && src ? (
     <div
-      onClick={() => setOpen(false)}
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleClose() }}
+      onMouseDown={e => { e.preventDefault(); e.stopPropagation() }}
       style={{
         position: 'fixed', inset: 0, zIndex: 99999,
         background: 'rgba(0,0,0,0.9)',
@@ -37,7 +53,7 @@ export default function AvatarPreview({ src, name, accent = '#e91e8c', fallbackE
     >
       {/* Close button */}
       <button
-        onClick={(e) => { e.stopPropagation(); setOpen(false) }}
+        onClick={(e) => { e.stopPropagation(); handleClose() }}
         style={{
           position: 'absolute', top: 20, right: 20, zIndex: 10,
           width: 44, height: 44, borderRadius: '50%',
@@ -105,7 +121,8 @@ export default function AvatarPreview({ src, name, accent = '#e91e8c', fallbackE
     <>
       {/* Clickable avatar thumbnail */}
       <div
-        onClick={src ? (e) => { e.preventDefault(); e.stopPropagation(); setOpen(true) } : undefined}
+        onClick={src ? handleOpen : undefined}
+        onMouseDown={src ? (e) => { e.stopPropagation() } : undefined}
         style={{
           width: size, height: size, borderRadius, overflow: 'hidden',
           border: `2px solid ${accent}55`,
@@ -134,7 +151,7 @@ export default function AvatarPreview({ src, name, accent = '#e91e8c', fallbackE
         }
       </div>
 
-      {/* Portal modal to document.body so it's truly fullscreen */}
+      {/* Portal modal to document.body */}
       {mounted && modal && createPortal(modal, document.body)}
     </>
   )

@@ -240,6 +240,9 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [animDir, setAnimDir] = useState<'forward' | 'back'>('forward')
+  const [createdCompanionId, setCreatedCompanionId] = useState<string | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [regenerating, setRegenerating] = useState(false)
 
   const [data, setData] = useState<FormData>({
     name: '', gender: 'woman', relationshipStyle: 'lover',
@@ -263,7 +266,7 @@ export default function OnboardingPage() {
   }
 
   // Steps: gender-specific flow
-  const totalSteps = 8
+  const totalSteps = 9
   const goNext = () => { setAnimDir('forward'); setStep(s => Math.min(s + 1, totalSteps)) }
   const goBack = () => { setAnimDir('back'); setStep(s => Math.max(s - 1, 1)) }
 
@@ -299,18 +302,47 @@ export default function OnboardingPage() {
       return
     }
 
+    setCreatedCompanionId(companion.id)
     setGenerating(true)
     try {
-      await fetch('/api/avatar', {
+      const res = await fetch('/api/avatar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ companionId: companion.id, appearance, emotion: 'neutral' }),
       })
+      const result = await res.json()
+      if (result.url) setAvatarUrl(result.url)
     } catch (e) {
       console.error('Avatar gen failed:', e)
     }
     setGenerating(false)
-    router.push(`/chat/${companion.id}`)
+    setLoading(false)
+    setAnimDir('forward')
+    setStep(9)
+  }
+
+  async function handleRegenerateAvatar() {
+    if (!createdCompanionId) return
+    setRegenerating(true)
+    const appearance = {
+      gender: data.gender, age: data.age, ethnicity: data.ethnicity,
+      build: data.build, skinTone: data.skinTone, hairColor: data.hairColor,
+      hairLength: data.hairLength, eyeColor: data.eyeColor, clothingStyle: data.clothingStyle,
+      ...(data.gender === 'woman' || data.gender === 'nonbinary' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
+      ...(data.gender === 'man' ? { dickSize: data.dickSize } : {}),
+    }
+    try {
+      const res = await fetch('/api/avatar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companionId: createdCompanionId, appearance, emotion: 'neutral' }),
+      })
+      const result = await res.json()
+      if (result.url) setAvatarUrl(result.url)
+    } catch (e) {
+      console.error('Avatar regen failed:', e)
+    }
+    setRegenerating(false)
   }
 
   // ─── Loading screen ────────────────────────────────────────────────────────
@@ -350,48 +382,52 @@ export default function OnboardingPage() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
 
-      {/* ── Top bar ── */}
-      <div style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        padding: '16px 24px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: 'rgba(6,5,20,0.85)', backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.05)',
-      }}>
-        <button onClick={() => step === 1 ? router.push('/dashboard') : goBack()} style={{
-          background: 'none', border: 'none', color: 'var(--fg-2)', cursor: 'pointer',
-          fontSize: 14, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6,
-          padding: '8px 0',
-        }}>
-          ← {step === 1 ? 'Dashboard' : 'Back'}
-        </button>
-
+      {/* ── Top bar ── (hidden on preview step) */}
+      {step < 9 && (
         <div style={{
-          fontFamily: 'Georgia, "Times New Roman", serif',
-          fontStyle: 'italic', fontSize: 20, fontWeight: 400,
-          background: 'linear-gradient(135deg, #e91e8c, #ff6b6b)',
-          WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          position: 'sticky', top: 0, zIndex: 50,
+          padding: '16px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'rgba(6,5,20,0.85)', backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.05)',
         }}>
-          SenseMates
-        </div>
+          <button onClick={() => step === 1 ? router.push('/dashboard') : goBack()} style={{
+            background: 'none', border: 'none', color: 'var(--fg-2)', cursor: 'pointer',
+            fontSize: 14, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6,
+            padding: '8px 0',
+          }}>
+            ← {step === 1 ? 'Dashboard' : 'Back'}
+          </button>
 
-        <div style={{ fontSize: 13, color: 'var(--muted-fg)', fontWeight: 600, minWidth: 60, textAlign: 'right' }}>
-          {step} / {totalSteps}
-        </div>
-      </div>
+          <div style={{
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontStyle: 'italic', fontSize: 20, fontWeight: 400,
+            background: 'linear-gradient(135deg, #e91e8c, #ff6b6b)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>
+            SenseMates
+          </div>
 
-      {/* ── Progress bar ── */}
-      <div style={{ display: 'flex', gap: 3, padding: '0 24px', marginTop: -1 }}>
-        {Array.from({ length: totalSteps }).map((_, i) => (
-          <div key={i} style={{
-            height: 3, flex: 1, borderRadius: 2,
-            background: i < step
-              ? 'linear-gradient(90deg, #e91e8c, #ff6b6b)'
-              : 'rgba(255,255,255,0.06)',
-            transition: 'all 0.5s ease',
-          }} />
-        ))}
-      </div>
+          <div style={{ fontSize: 13, color: 'var(--muted-fg)', fontWeight: 600, minWidth: 60, textAlign: 'right' }}>
+            {step} / 8
+          </div>
+        </div>
+      )}
+
+      {/* ── Progress bar ── (hidden on preview step) */}
+      {step < 9 && (
+        <div style={{ display: 'flex', gap: 3, padding: '0 24px', marginTop: -1 }}>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} style={{
+              height: 3, flex: 1, borderRadius: 2,
+              background: i < step
+                ? 'linear-gradient(90deg, #e91e8c, #ff6b6b)'
+                : 'rgba(255,255,255,0.06)',
+              transition: 'all 0.5s ease',
+            }} />
+          ))}
+        </div>
+      )}
 
       {/* ── Content ── */}
       <div style={{
@@ -771,6 +807,132 @@ export default function OnboardingPage() {
               >
                 Create {data.name || 'SenseMate'} ✨
               </button>
+            </div>
+          </StepContainer>
+        )}
+
+        {/* ─── Step 9: Preview ─────────────────────────────────────────── */}
+        {step === 9 && (
+          <StepContainer
+            title={`Meet ${data.name}`}
+            subtitle="Here's your SenseMate! Like what you see?"
+          >
+            <div style={{ width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 32 }}>
+
+              {/* Avatar preview */}
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  width: 320, height: 420, borderRadius: 24, overflow: 'hidden',
+                  border: '2px solid rgba(233,30,140,0.25)',
+                  boxShadow: '0 0 60px rgba(233,30,140,0.15), 0 20px 60px rgba(0,0,0,0.5)',
+                  background: 'rgba(255,255,255,0.03)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={data.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                  ) : (
+                    <div style={{ textAlign: 'center', color: 'var(--muted-fg)' }}>
+                      <div style={{ fontSize: 48, marginBottom: 12 }}>📸</div>
+                      <div style={{ fontSize: 14 }}>Avatar could not be generated</div>
+                    </div>
+                  )}
+
+                  {/* Regenerating overlay */}
+                  {regenerating && (
+                    <div style={{
+                      position: 'absolute', inset: 0, background: 'rgba(6,4,14,0.8)',
+                      backdropFilter: 'blur(8px)',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16,
+                      borderRadius: 24,
+                    }}>
+                      <div style={{
+                        width: 60, height: 60, borderRadius: '50%',
+                        border: '3px solid rgba(233,30,140,0.2)', borderTopColor: ACCENT,
+                        animation: 'animate-spin-slow 0.8s linear infinite',
+                      }} />
+                      <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, fontWeight: 500 }}>
+                        Generating new photo...
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Name badge */}
+                <div style={{
+                  position: 'absolute', bottom: -16, left: '50%', transform: 'translateX(-50%)',
+                  padding: '10px 28px', borderRadius: 100,
+                  background: 'linear-gradient(135deg, rgba(91,66,243,0.9), rgba(233,30,140,0.9))',
+                  boxShadow: '0 4px 20px rgba(233,30,140,0.3)',
+                  fontSize: 18, fontWeight: 700, color: 'white', whiteSpace: 'nowrap',
+                  letterSpacing: '0.3px',
+                }}>
+                  {data.name}
+                </div>
+              </div>
+
+              {/* Trait pills */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 8 }}>
+                {data.personality.map(trait => (
+                  <span key={trait} style={{
+                    padding: '6px 16px', borderRadius: 100, fontSize: 13, fontWeight: 500,
+                    background: 'rgba(233,30,140,0.1)', border: '1px solid rgba(233,30,140,0.2)',
+                    color: ACCENT,
+                  }}>
+                    {trait}
+                  </span>
+                ))}
+                <span style={{
+                  padding: '6px 16px', borderRadius: 100, fontSize: 13, fontWeight: 500,
+                  background: 'rgba(91,66,243,0.1)', border: '1px solid rgba(91,66,243,0.2)',
+                  color: '#8b7cf7',
+                }}>
+                  {RELATIONSHIPS.find(r => r.id === data.relationshipStyle)?.label || data.relationshipStyle}
+                </span>
+              </div>
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 360 }}>
+                {/* Start chatting */}
+                <button
+                  onClick={() => router.push(`/chat/${createdCompanionId}`)}
+                  style={{
+                    width: '100%', padding: '18px', fontSize: 17, fontWeight: 700,
+                    borderRadius: 16, border: 'none', cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #e91e8c, #c026d3, #7c3aed)',
+                    color: 'white',
+                    boxShadow: '0 8px 32px rgba(233,30,140,0.3), 0 0 60px rgba(233,30,140,0.1)',
+                    transition: 'all 0.3s ease',
+                    letterSpacing: '0.5px',
+                  }}
+                  onMouseEnter={ev => { ev.currentTarget.style.transform = 'translateY(-2px) scale(1.02)'; ev.currentTarget.style.boxShadow = '0 12px 40px rgba(233,30,140,0.4)' }}
+                  onMouseLeave={ev => { ev.currentTarget.style.transform = 'none'; ev.currentTarget.style.boxShadow = '0 8px 32px rgba(233,30,140,0.3), 0 0 60px rgba(233,30,140,0.1)' }}
+                >
+                  Start chatting with {data.name} 💬
+                </button>
+
+                {/* Regenerate photo */}
+                <button
+                  onClick={handleRegenerateAvatar}
+                  disabled={regenerating}
+                  style={{
+                    width: '100%', padding: '16px', fontSize: 15, fontWeight: 600,
+                    borderRadius: 16, cursor: regenerating ? 'wait' : 'pointer',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.6)',
+                    transition: 'all 0.3s ease',
+                    letterSpacing: '0.3px',
+                  }}
+                  onMouseEnter={ev => { if (!regenerating) { ev.currentTarget.style.background = 'rgba(233,30,140,0.08)'; ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.25)'; ev.currentTarget.style.color = ACCENT } }}
+                  onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.04)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
+                >
+                  {regenerating ? 'Generating...' : 'Generate new photo 📸'}
+                </button>
+              </div>
             </div>
           </StepContainer>
         )}
