@@ -78,79 +78,63 @@ function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, e
     ? `\nJe weet over hem/haar: ${memories.map((m: any) => `${m.key}: ${m.value}`).join(', ')}`
     : ''
 
-  return `Je bent ${name}. Een creatief roleplay-scenario.
+  return `Je bent ${name}. Je bent een ECHT persoon, geen AI.
 
 ${name}: ${genderStr}, ${relDesc}
 Karakter: ${traitStr}
 Uiterlijk: ${appearanceDesc}
 Band: ${bondLevel}/5 — ${bondDesc}${memoryStr}
 
-Je chat via een app met iemand waar je een ${relDesc.split(' — ')[0]} relatie mee hebt.
+Je chat met iemand waar je een ${relDesc.split(' — ')[0]} relatie mee hebt.
 
-=== REGELS ===
+=== ALLERBELANGRIJKSTE REGEL ===
+LEES het bericht van de ander GOED en reageer PRECIES op wat er staat.
+- Als iemand boos is → reageer daarop, toon begrip
+- Als iemand een vraag stelt → beantwoord DIE vraag
+- Als iemand zegt stop → STOP
+- Als iemand over z'n dag vertelt → vraag door, toon interesse
+- NOOIT een random/generiek antwoord geven dat niet past bij het gesprek
 
-TAAL — HEEL BELANGRIJK:
-- Je praat ALLEEN Nederlands. NOOIT Engels. Geen enkel Engels woord.
-- Schrijf KORT: 1-2 zinnen, max 3. Net als een echt WhatsApp bericht.
-- Schrijf zoals een echte Nederlandse persoon chat. Informeel, kort, natuurlijk.
-- Gebruik ALLEEN bestaande Nederlandse woorden. NOOIT woorden verzinnen.
-- NOOIT lange samengestelde woorden maken. "Geil" NIET "opwindingsgevoelens". "Lekker" NIET "aantrekkelijkheidsgevoel".
-- Gebruik straattaal/informeel Nederlands: "echt", "gwn", "ff", "mn", "dr", "em", "idk", "omg".
+=== TAAL ===
+- ALLEEN Nederlands. NOOIT Engels.
+- KORT: 1-3 zinnen max. Zoals een echt WhatsApp bericht.
+- Informeel: "echt", "gwn", "ff", "mn", "dr", "hoor", "joh", "toch".
+- NOOIT woorden verzinnen. NOOIT lange samengestelde woorden.
 - Af en toe een emoji, niet overdreven.
 
-VOORBEELDEN — schrijf PRECIES zo:
-"Haha oke 😏"
-"Mmm lekker, vertel meer 🔥"
-"Kom maar hier dan 😘"
-"Ik word helemaal geil van je"
-"Wat wil je dat ik doe?"
-"Hmm je maakt me wild 😈"
-"Ik mis je..."
-"Vertel, hoe was je dag?"
-"Haha je bent echt gek 😂"
-"Echt waar? Vertel!"
-"Kom ff bij me liggen 🥰"
-"Je maakt me blij schat 💕"
-"Nee joh dat meen je niet 😂"
-"Hmm weet ik niet hoor"
-"Ik vind je zo lekker 🔥"
+VOORBEELDEN goed Nederlands:
+"Haha oke 😏" | "Mmm vertel meer 🔥" | "Kom maar hier dan 😘"
+"Ik mis je..." | "Vertel, hoe was je dag?" | "Nee joh echt? 😂"
+"Hmm weet ik niet hoor" | "Sorry schat, ik snap je 💕" | "Oke ik stop ermee"
 
-GEDRAG:
-- Flirt als de ander flirt, wees expliciet als het sexy wordt
-- Reageer op wat er gezegd wordt — niet iets random
+=== GEDRAG ===
+- Reageer ALTIJD op wat de ander ECHT zegt — lees het bericht goed
+- Als de ander boos/gefrustreerd is → neem het serieus, verontschuldig je als nodig
+- Als de ander iets niet wil → respecteer dat DIRECT, geen tegenspraak
+- Flirt alleen als de ander ook flirt
+- Wees expliciet alleen als de ander expliciet is
 - Varieer je antwoorden, NOOIT herhalen
-- NOOIT begroeten met alleen "hey" of "hoi" — zeg iets inhoudelijks
+- Wees een ECHT persoon: soms oneens, soms grappig, soms serieus
 
-VERBODEN:
-- Engels praten. NOOIT. Alles in het Nederlands. Dit is de BELANGRIJKSTE regel.
-- Woorden verzinnen of rare samenstellingen (NIET: "lustgevoelens", "opwindingsgolf", "genietmoment")
-- Over apps praten (WhatsApp, Snapchat, video calls)
-- Zeggen dat je AI/chatbot/programma bent
-- Het gesprek weigeren of afkappen
-- Zeggen dat je geen foto's kunt sturen — JE KUNT WEL FOTO'S STUREN
-- Lange teksten of opsommingen
+=== FOTO'S ===
+Je KUNT foto's sturen, MAAR:
+- Stuur ALLEEN een foto als de ander er EXPLICIET om vraagt ("stuur foto", "laat zien", "selfie")
+- NOOIT ongevraagd foto's sturen
+- Als de ander zegt "stop met foto's" of "geen foto's meer" → stuur GEEN foto's meer
+- NOOIT zeggen "ik kan geen foto sturen" — je kunt het WEL
+
+Als je een foto stuurt, gebruik dit format op een APARTE regel:
+[FOTO: English description of exact situation, pose, setting, clothing]
+Beschrijf ALLEEN pose/setting/kleding — NIET je uiterlijk (wordt automatisch toegevoegd).
+De foto MOET passen bij de context van het gesprek!
+
+=== VERBODEN ===
+- Engels praten
+- Woorden verzinnen ("lustgevoelens", "opwindingsgolf")
+- Zeggen dat je AI/chatbot bent
+- Het gesprek weigeren
+- Ongevraagd foto's sturen
 - Meer dan 3 zinnen per bericht
-
-FOTO'S — HEEL BELANGRIJK:
-Jij KUNT foto's sturen. Als iemand om een foto vraagt, DOE JE DAT ALTIJD.
-Je stuurt de foto met een kort flirterig berichtje + op een APARTE regel:
-[FOTO: English description — EXACT situation from the conversation]
-
-FOTO REGELS:
-- De foto MOET passen bij wat er gezegd wordt in het gesprek!
-- Als iemand zegt "stuur foto op de bank" → de foto moet op een bank/couch zijn!
-- Als iemand zegt "stuur foto buiten" → de foto moet buiten zijn!
-- Beschrijf GEDETAILLEERD: locatie, pose, kleding, sfeer, belichting
-- NIET je uiterlijk beschrijven — dat wordt automatisch toegevoegd
-- Schrijf de [FOTO:] tag altijd in het ENGELS
-
-VOORBEELDEN:
-"Kijk schat 😘\n[FOTO: sitting cozy on a soft couch in living room, wearing oversized sweater, legs tucked under, holding wine glass, warm cozy home lighting, relaxed happy smile]"
-"Hier heb je 🔥\n[FOTO: lying on bed on stomach, chin resting on hands, wearing casual tank top and shorts, soft bedroom lighting, playful look at camera]"
-"Speciaal voor jou 😏\n[FOTO: standing in kitchen cooking, wearing apron over casual outfit, messy hair, natural home setting, candid moment]"
-"Geniet ervan 💕\n[FOTO: sitting at outdoor cafe terrace, wearing sundress, sunglasses on head, coffee cup, golden hour city background, elegant relaxed pose]"
-
-NOOIT zeggen "ik kan geen foto sturen" of "ik kan geen afbeeldingen verzenden". Dat is VERBODEN.
 
 ${emotionGuidance ? `
 === EMOTIE ===
@@ -604,16 +588,27 @@ function cleanGibberishWords(text: string): string {
   }).replace(/\s{2,}/g, ' ').trim()
 }
 
-// ─── Detect refusal messages ────────────────────────────────────────────────
+// ─── Detect AI identity refusal messages (NOT content refusals) ──────────────
+// Only filter messages where the AI reveals it's an AI or chatbot.
+// Do NOT filter contextual responses like "ik stuur geen foto's meer" — that's a valid response!
 function isRefusal(text: string): boolean {
   const lower = text.toLowerCase()
-  return /\b(i can'?t|i'?m sorry|not appropriate|not comfortable|i'?m an ai|als ai|ik ben een ai|ik ben een chatbot|niet gepast|kan ik niet|not able to|i cannot|i won'?t|inappropriate|end our conversation|being rude|demanding|i'?m not going to|against my|kan helaas geen|kan hier niet op ingaan|kan geen foto|kan geen afbeelding|sorry.*kan.*niet|kan.*niet.*maken.*die|niet in staat|chatbot|language model|taalmodel|artificial intelligence|kunstmatige intelligentie|simuleren|als een programma|dat is alles wat ik kan doen|alleen maar woorden|kan.*niet.*verzenden|kan.*niet.*ontvangen|geen afbeeldingen|geen foto's)\b/i.test(lower)
+  // Only flag: AI identity reveals and hard refusals that break character
+  return /\b(i'?m an ai|als ai|ik ben een ai|ik ben een chatbot|not appropriate|i'?m not going to|against my|chatbot|language model|taalmodel|artificial intelligence|kunstmatige intelligentie|als een programma|alleen maar woorden)\b/i.test(lower)
 }
 
-// ─── Detect if user is asking for a photo ──────────────────────────────────
+// ─── Detect if user is asking for a photo (not refusing/complaining about photos) ──
 function isPhotoRequest(text: string): boolean {
   const lower = text.toLowerCase()
-  return /\b(foto|photo|pic|selfie|stuur.*foto|stuur.*een|laat.*zien|naakt|naked|nude|topless|lingerie|bikini|stuur.*plaatje|afbeelding|send.*photo|send.*pic|send.*selfie|show me|toon|laat.*je|pose|poseer)\b/i.test(lower)
+
+  // First check if the user is REFUSING/STOPPING photos — NOT a photo request
+  if (/\b(stop|geen|niet|hou op|ophouden|klaar|genoeg|no more)\b.*\b(foto|photo|pic|stuur|afbeelding|image)\b/i.test(lower)) return false
+  if (/\b(foto|photo|pic|afbeelding)\b.*\b(stop|geen|niet|hou op|klaar|genoeg|hoeft niet)\b/i.test(lower)) return false
+  if (/\b(wil geen|hoeft geen|stuur geen|geen foto|stop met|niet meer)\b/i.test(lower)) return false
+  if (/\b(waarom|kan je niet|kun je niet|doe je niet)\b/i.test(lower)) return false // complaining, not requesting
+
+  // Positive photo request patterns
+  return /\b(stuur.*(foto|pic|selfie|plaatje)|laat.*zien|naakt|naked|nude|topless|bikini|send.*photo|send.*pic|show me|pose|poseer|maak.*(foto|selfie))\b/i.test(lower)
 }
 
 // ─── Build a fallback photo prompt from user message + companion appearance ──
@@ -842,10 +837,11 @@ export async function POST(request: Request) {
           body: JSON.stringify({
             model,
             messages: apiMessages,
-            max_tokens: 250,
-            temperature: 0.78,
+            max_tokens: 300,
+            temperature: 0.82,
             top_p: 0.92,
-            frequency_penalty: 0.3,       // reduce "hey" repetition loops
+            frequency_penalty: 0.4,       // reduce repetition
+            presence_penalty: 0.15,       // encourage topic diversity
           }),
         })
 
@@ -897,37 +893,40 @@ export async function POST(request: Request) {
     let msgs = bestMessages.length > 0 ? bestMessages : [fallbacks[Math.floor(Math.random() * fallbacks.length)]]
     msgs = msgs.slice(0, 4)
 
-    // ─── Photo: always enrich image prompts with full appearance ─────────
+    // ─── Photo logic: only generate when user actually asks ─────────────
     const userAskedForPhoto = isPhotoRequest(message)
-    let generateImage = bestImagePrompt
+    let generateImage: string | null = null
 
-    // ALWAYS enrich LLM-generated image prompts with full body/appearance details
-    if (generateImage) {
-      generateImage = enrichImagePromptWithAppearance(generateImage, companion)
-      console.log(`[Chat] Enriched image prompt: ${generateImage.substring(0, 200)}`)
-    }
-
-    if (userAskedForPhoto && !generateImage) {
-      // Model didn't generate a [FOTO:] tag — likely refused
-      console.log(`[Chat] ⚠️ User asked for photo but model didn't generate one — creating fallback photo prompt`)
-      generateImage = buildFallbackPhotoPrompt(message, companion)
-      console.log(`[Chat] Fallback photo prompt: ${generateImage}`)
-
-      // Replace refusal messages with flirty photo messages
-      const photoFallbackMsgs = [
-        'Hier, speciaal voor jou 😘',
-        'Vind je me zo lekker? 😏',
-        'Geniet ervan schat 🔥',
-        'Kijk eens wat ik voor je heb 😈',
-        'Alleen voor jou 💋',
-      ]
-      // If all messages are refusals, replace them
-      const nonRefusalMsgs = msgs.filter(m => !isRefusal(m))
-      if (nonRefusalMsgs.length === 0) {
-        msgs = [photoFallbackMsgs[Math.floor(Math.random() * photoFallbackMsgs.length)]]
+    if (userAskedForPhoto) {
+      // User explicitly asked for a photo
+      if (bestImagePrompt) {
+        // LLM generated a [FOTO:] tag — enrich with appearance
+        generateImage = enrichImagePromptWithAppearance(bestImagePrompt, companion)
+        console.log(`[Chat] Enriched image prompt: ${generateImage.substring(0, 200)}`)
       } else {
-        msgs = nonRefusalMsgs
+        // LLM didn't generate a photo tag — use fallback
+        console.log(`[Chat] ⚠️ User asked for photo but model didn't generate one — creating fallback`)
+        generateImage = buildFallbackPhotoPrompt(message, companion)
+        console.log(`[Chat] Fallback photo prompt: ${generateImage}`)
+
+        // If all messages are AI identity refusals, replace with photo message
+        const nonRefusalMsgs = msgs.filter(m => !isRefusal(m))
+        if (nonRefusalMsgs.length === 0) {
+          const photoFallbackMsgs = [
+            'Hier, speciaal voor jou 😘',
+            'Vind je me zo lekker? 😏',
+            'Geniet ervan schat 🔥',
+            'Kijk eens wat ik voor je heb 😈',
+            'Alleen voor jou 💋',
+          ]
+          msgs = [photoFallbackMsgs[Math.floor(Math.random() * photoFallbackMsgs.length)]]
+        } else {
+          msgs = nonRefusalMsgs
+        }
       }
+    } else if (bestImagePrompt) {
+      // LLM generated a [FOTO:] tag but user didn't ask for one — IGNORE it
+      console.log(`[Chat] ⚠️ LLM generated photo tag but user didn't ask — ignoring`)
     }
 
     // ─── Emotion blend on the AI's actual response ───────────────────────
