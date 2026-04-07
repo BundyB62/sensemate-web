@@ -160,7 +160,7 @@ export default function LandingPage() {
           alignItems: 'center', gap: 40,
         }}>
           {/* Left: text */}
-          <div>
+          <div style={{ position: 'relative', zIndex: 5 }}>
             <h1 className="mobile-hero-title" style={{ fontSize: 58, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-2px', marginBottom: 28, color: '#fff' }}>
               Someone who listens.<br />
               <span style={{

@@ -562,39 +562,43 @@ body {
     font-size: 12px !important;
   }
   .mobile-dash-right {
-    gap: 8px !important;
+    gap: 6px !important;
+  }
+  .mobile-dash-right form button {
+    font-size: 11px !important;
   }
 
   /* ─── Landing Hero ──────────────────────────────────────────────────── */
   .mobile-hero {
     grid-template-columns: 1fr !important;
-    padding: 90px 20px 40px !important;
+    padding: 85px 20px 20px !important;
     min-height: auto !important;
     text-align: center;
+    gap: 0 !important;
   }
   .mobile-hero-title {
     font-size: 34px !important;
     letter-spacing: -1px !important;
   }
   .mobile-hero-figure {
-    height: 420px !important;
-    margin: 0 auto;
+    height: 380px !important;
+    margin: -20px auto 0 !important;
   }
   .hero-glow-outer {
-    width: 400px !important;
-    height: 400px !important;
+    width: 360px !important;
+    height: 360px !important;
   }
   .hero-glow-mid {
-    width: 300px !important;
-    height: 300px !important;
+    width: 260px !important;
+    height: 260px !important;
   }
   .hero-glow-pink {
-    width: 180px !important;
-    height: 180px !important;
+    width: 160px !important;
+    height: 160px !important;
   }
   .hero-glow-core {
-    width: 120px !important;
-    height: 120px !important;
+    width: 100px !important;
+    height: 100px !important;
   }
 
   /* ─── Landing Sections ──────────────────────────────────────────────── */
@@ -642,6 +646,12 @@ body {
     width: 100% !important;
     z-index: 50 !important;
   }
+  .chat-sidebar-close {
+    display: flex !important;
+  }
+  .chat-sidebar-go-chat {
+    display: flex !important;
+  }
 
   /* ─── Chat header ───────────────────────────────────────────────────── */
   .chat-header {
@@ -673,6 +683,15 @@ body {
   /* ─── Dashboard main ────────────────────────────────────────────────── */
   .mobile-dash-main {
     padding: 24px 16px !important;
+  }
+  .mobile-dash-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+    margin-bottom: 32px !important;
+  }
+  .mobile-dash-title {
+    font-size: 30px !important;
   }
 
   /* ─── Dashboard companion grid — single column on mobile ────────────── */

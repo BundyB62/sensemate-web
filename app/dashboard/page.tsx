@@ -137,14 +137,14 @@ export default async function DashboardPage() {
 
       <main className="mobile-dash-main" style={{ maxWidth: 1100, margin: '0 auto', padding: '60px 52px', position: 'relative', zIndex: 1 }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 56 }}>
+        <div className="mobile-dash-header" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 56 }}>
           <div>
             <div style={{
               fontSize: 14, fontWeight: 500, marginBottom: 10,
               background: 'linear-gradient(135deg, #e91e8c, #f472b6)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>Welcome back</div>
-            <h1 style={{ fontSize: 42, fontWeight: 800, letterSpacing: '-1.5px', marginBottom: 10, lineHeight: 1.1, color: '#fff' }}>
+            <h1 className="mobile-dash-title" style={{ fontSize: 42, fontWeight: 800, letterSpacing: '-1.5px', marginBottom: 10, lineHeight: 1.1, color: '#fff' }}>
               Your SenseMates
             </h1>
             <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 15 }}>

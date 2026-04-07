@@ -38,7 +38,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
   const [bondScore, setBondScore] = useState(companion.bond_score || 0)
   const [bondLevelNum, setBondLevelNum] = useState(companion.bond_level || 1)
   const [replyTo, setReplyTo] = useState<Msg | null>(null)
-  const [showSidebar, setShowSidebar] = useState(true)
+  const [showSidebar, setShowSidebar] = useState(typeof window !== 'undefined' ? window.innerWidth > 768 : true)
   const [gallery, setGallery] = useState<string[]>([])
   const [lightboxImg, setLightboxImg] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
@@ -236,6 +236,15 @@ export default function ChatInterface({ companion, initialMessages }: { companio
           background: 'rgba(6,4,14,0.95)', backdropFilter: 'blur(40px) saturate(180%)',
           zIndex: 10, overflowY: 'auto', transition: 'border-color 1s ease',
         }}>
+          {/* Close button — visible on mobile */}
+          <button className="chat-sidebar-close" onClick={() => setShowSidebar(false)} style={{
+            display: 'none', position: 'absolute', top: 16, right: 16, zIndex: 20,
+            width: 40, height: 40, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+            color: 'rgba(255,255,255,0.6)', fontSize: 20, cursor: 'pointer',
+            alignItems: 'center', justifyContent: 'center',
+          }}>×</button>
+
           {/* Profile header */}
           <div style={{ padding: '32px 24px 24px', textAlign: 'center', position: 'relative' }}>
             {/* Decorative gradient — emotion reactive */}
@@ -367,8 +376,18 @@ export default function ChatInterface({ companion, initialMessages }: { companio
             </div>
           )}
 
-          {/* Back link */}
-          <div style={{ padding: '16px 24px', marginTop: 'auto' }}>
+          {/* Bottom actions */}
+          <div style={{ padding: '16px 24px', marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {/* Go to Chat — mobile only */}
+            <button className="chat-sidebar-go-chat" onClick={() => setShowSidebar(false)} style={{
+              display: 'none', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px',
+              borderRadius: 12, background: `linear-gradient(135deg, ${PURPLE}, ${accent})`,
+              border: 'none', color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              boxShadow: `0 4px 20px ${accent}30`,
+              transition: 'all 0.2s',
+            }}>
+              💬 Chat met {name}
+            </button>
             <Link href="/dashboard" style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px',
               borderRadius: 12, background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)',
