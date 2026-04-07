@@ -318,13 +318,19 @@ export default function OnboardingPage() {
     setCreatedCompanionId(companion.id)
     setGenerating(true)
     try {
+      console.log('[Onboarding] Generating avatar...', { companionId: companion.id, appearance })
       const res = await fetch('/api/avatar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ companionId: companion.id, appearance, emotion: 'neutral' }),
       })
       const result = await res.json()
-      if (result.url) setAvatarUrl(result.url)
+      console.log('[Onboarding] Avatar result:', result)
+      if (result.url) {
+        setAvatarUrl(result.url)
+      } else {
+        console.error('[Onboarding] Avatar failed:', result.error || 'No URL returned')
+      }
     } catch (e) {
       console.error('Avatar gen failed:', e)
     }

@@ -106,9 +106,11 @@ export async function POST(request: Request) {
 
     const { companionId, appearance, emotion = 'neutral' } = await request.json()
 
+    console.log(`[Avatar] Appearance:`, JSON.stringify(appearance).substring(0, 300))
+
     // SFW mode for profile avatar — skip explicit body parts, use appropriate clothing
     const prompt = buildAvatarPrompt(appearance, emotion, true)
-    console.log(`[Avatar] Prompt: ${prompt.substring(0, 200)}...`)
+    console.log(`[Avatar] SFW Prompt: ${prompt.substring(0, 300)}`)
 
     let imageUrl: string | null = null
 
@@ -136,8 +138,9 @@ export async function POST(request: Request) {
       clearTimeout(timeout)
 
       if (response.ok) {
-        const data = await response.json()
-        const url = data.images?.[0]?.url
+        const falData = await response.json()
+        const url = falData.images?.[0]?.url
+        console.log(`[Avatar] Flux response: ${url ? 'got URL' : 'no URL'} — ${JSON.stringify(falData).substring(0, 150)}`)
 
         if (url) {
           // Check for black placeholder image (blocked by safety filter)
