@@ -51,6 +51,20 @@ const DICK_MAP: Record<string, string> = {
   xl: 'muscular athletic build',
 }
 
+const BEARD_MAP: Record<string, string> = {
+  none: '',
+  clean: 'clean shaven smooth face',
+  stubble: 'light stubble shadow, 2-day beard growth',
+  short: 'short trimmed beard, well-groomed',
+  medium: 'medium length full beard, well-maintained',
+  long: 'long full thick beard',
+  goatee: 'goatee beard, chin beard with mustache',
+  mustache: 'thick mustache, no beard, clean shaven chin',
+  vandyke: 'Van Dyke beard, pointed goatee with separate mustache',
+  circle: 'circle beard, connected mustache and goatee',
+  designer: 'designer stubble, perfectly shaped jawline beard, faded edges',
+}
+
 const HAIR_LENGTH_MAP: Record<string, string> = {
   pixie: 'pixie cut hair',
   bob: 'bob cut hair at chin length',
@@ -193,9 +207,10 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
   }
   const bodyDesc = bodyParts.join(', ')
 
-  const beard = isMale && profile.beard && profile.beard !== 'none'
-    ? `, ${profile.beard === 'stubble' ? 'light stubble beard' : profile.beard.replace('_', ' ')}`
+  const beardDesc = isMale && profile.beard && profile.beard !== 'none'
+    ? BEARD_MAP[profile.beard] || ''
     : ''
+  const beard = beardDesc ? `, ${beardDesc}` : ''
 
   // Full body shot with all details
   return `photorealistic full body shot from head to toe, ${age} ${ethnicity} ${gender}, ${skin}, ${bodyDesc}, ${hairColor} ${hairLength}, ${eyeColor} eyes${beard}, ${clothing}, ${expression}, standing pose, natural proportions, beautiful detailed face, shot in a modern studio with soft warm lighting, shallow depth of field, shot on Sony A7R IV 35mm lens, professional fashion photography, ultra-detailed, 8k, realistic anatomy, correct body proportions`

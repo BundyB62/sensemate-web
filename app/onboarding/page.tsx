@@ -24,6 +24,7 @@ interface FormData {
   breastSize: string
   assSize: string
   dickSize: string
+  beard: string
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -116,6 +117,19 @@ const DICK_SIZES = [
   { id: 'average', label: 'Average', img: '/onboarding/dick-size/average.jpg' },
   { id: 'large', label: 'Large', img: '/onboarding/dick-size/large.jpg' },
   { id: 'xl', label: 'Extra Large', img: '/onboarding/dick-size/xl.jpg' },
+]
+
+const BEARD_STYLES = [
+  { id: 'none', label: 'Clean Shaven', img: '/onboarding/beard/none.jpg' },
+  { id: 'stubble', label: 'Stubble', img: '/onboarding/beard/stubble.jpg' },
+  { id: 'designer', label: 'Designer Stubble', img: '/onboarding/beard/designer.jpg' },
+  { id: 'short', label: 'Short Beard', img: '/onboarding/beard/short.jpg' },
+  { id: 'medium', label: 'Full Beard', img: '/onboarding/beard/medium.jpg' },
+  { id: 'long', label: 'Long Beard', img: '/onboarding/beard/long.jpg' },
+  { id: 'goatee', label: 'Goatee', img: '/onboarding/beard/goatee.jpg' },
+  { id: 'mustache', label: 'Mustache', img: '/onboarding/beard/mustache.jpg' },
+  { id: 'vandyke', label: 'Van Dyke', img: '/onboarding/beard/vandyke.jpg' },
+  { id: 'circle', label: 'Circle Beard', img: '/onboarding/beard/circle.jpg' },
 ]
 
 const VIBES = [
@@ -263,6 +277,7 @@ export default function OnboardingPage() {
     build: 'slim', skinTone: 'fair', hairColor: 'brown',
     hairLength: 'long', eyeColor: 'brown', clothingStyle: 'casual',
     vibe: 'sweet', breastSize: 'cup-c', assSize: 'medium', dickSize: 'average',
+    beard: 'none',
   })
 
   const set = useCallback((key: string, val: string | string[]) => {
@@ -294,7 +309,7 @@ export default function OnboardingPage() {
       build: data.build, skinTone: data.skinTone, hairColor: data.hairColor,
       hairLength: data.hairLength, eyeColor: data.eyeColor, clothingStyle: data.clothingStyle,
       ...(data.gender === 'woman' || data.gender === 'nonbinary' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
-      ...(data.gender === 'man' ? { dickSize: data.dickSize } : {}),
+      ...(data.gender === 'man' ? { dickSize: data.dickSize, beard: data.beard } : {}),
     }
 
     const { data: companion, error } = await supabase
@@ -348,7 +363,7 @@ export default function OnboardingPage() {
       build: data.build, skinTone: data.skinTone, hairColor: data.hairColor,
       hairLength: data.hairLength, eyeColor: data.eyeColor, clothingStyle: data.clothingStyle,
       ...(data.gender === 'woman' || data.gender === 'nonbinary' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
-      ...(data.gender === 'man' ? { dickSize: data.dickSize } : {}),
+      ...(data.gender === 'man' ? { dickSize: data.dickSize, beard: data.beard } : {}),
     }
     try {
       const res = await fetch('/api/avatar', {
@@ -616,22 +631,40 @@ export default function OnboardingPage() {
 
             {/* Dick size (man) */}
             {data.gender === 'man' && (
-              <div style={{ marginBottom: 32 }}>
-                <SectionTitle>Size</SectionTitle>
-                <ImageGrid cols={3}>
-                  {DICK_SIZES.map(d => (
-                    <ImageCard
-                      key={d.id}
-                      img={d.img}
-                      label={d.label}
-                      selected={data.dickSize === d.id}
-                      onClick={() => set('dickSize', d.id)}
-                      aspectRatio="3/4"
-                      small
-                    />
-                  ))}
-                </ImageGrid>
-              </div>
+              <>
+                <div style={{ marginBottom: 32 }}>
+                  <SectionTitle>Size</SectionTitle>
+                  <ImageGrid cols={3}>
+                    {DICK_SIZES.map(d => (
+                      <ImageCard
+                        key={d.id}
+                        img={d.img}
+                        label={d.label}
+                        selected={data.dickSize === d.id}
+                        onClick={() => set('dickSize', d.id)}
+                        aspectRatio="3/4"
+                        small
+                      />
+                    ))}
+                  </ImageGrid>
+                </div>
+                <div style={{ marginBottom: 32 }}>
+                  <SectionTitle>Facial Hair</SectionTitle>
+                  <ImageGrid cols={5}>
+                    {BEARD_STYLES.map(b => (
+                      <ImageCard
+                        key={b.id}
+                        img={b.img}
+                        label={b.label}
+                        selected={data.beard === b.id}
+                        onClick={() => set('beard', b.id)}
+                        aspectRatio="3/4"
+                        small
+                      />
+                    ))}
+                  </ImageGrid>
+                </div>
+              </>
             )}
 
             <NavButton onClick={goNext} label="Continue →" />
