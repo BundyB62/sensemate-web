@@ -281,6 +281,49 @@ const PERSONALITIES = [
   { id: 'Creative', emoji: '🎨' }, { id: 'Protective', emoji: '🛡️' },
 ]
 
+// ─── Random name lists ──────────────────────────────────────────────────────
+const RANDOM_NAMES_WOMAN = ['Luna', 'Maya', 'Nana', 'Yuki', 'Sofia', 'Aria', 'Mila', 'Zara', 'Lina', 'Nova', 'Ivy', 'Jade', 'Ruby', 'Suki', 'Kira', 'Mimi', 'Cleo', 'Ava', 'Ella', 'Lola']
+const RANDOM_NAMES_MAN = ['Kai', 'Leo', 'Ren', 'Axel', 'Dante', 'Zane', 'Milo', 'Nico', 'Ezra', 'Jax', 'Ryu', 'Soren', 'Theo', 'Liam', 'Finn', 'Hugo', 'Marco', 'Rafael', 'Mateo', 'Aiden']
+const RANDOM_NAMES_NB = ['Sky', 'Sage', 'River', 'Quinn', 'Rowan', 'Ash', 'Eden', 'Ari', 'Kai', 'Nova', 'Phoenix', 'Rain', 'Sol', 'Zen', 'Indigo', 'Blair', 'Remi', 'Jules', 'Morgan', 'Alex']
+
+function pick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)] }
+
+function randomizeAll(): FormData {
+  const gender = pick(['woman', 'man', 'nonbinary'] as Gender[])
+  const isMale = gender === 'man'
+  const isNB = gender === 'nonbinary'
+
+  const names = isMale ? RANDOM_NAMES_MAN : isNB ? RANDOM_NAMES_NB : RANDOM_NAMES_WOMAN
+  const builds = isMale ? BUILDS_MAN : BUILDS_WOMAN
+  const hairStyles = isMale ? HAIR_STYLES_MAN : HAIR_STYLES_WOMAN
+  const clothingList = isMale ? CLOTHING_MAN : CLOTHING_WOMAN
+
+  // Pick 2-4 random personality traits
+  const shuffled = [...PERSONALITIES].sort(() => Math.random() - 0.5)
+  const traitCount = 2 + Math.floor(Math.random() * 3)
+  const traits = shuffled.slice(0, traitCount).map(t => t.id)
+
+  return {
+    name: pick(names),
+    gender,
+    relationshipStyle: 'lover',
+    personality: traits,
+    age: pick(AGES).id,
+    ethnicity: pick(ETHNICITY_LIST).id,
+    build: pick(builds).id,
+    skinTone: pick(SKIN_TONES).id,
+    hairColor: pick(HAIR_COLORS).id,
+    hairLength: pick(hairStyles).id,
+    eyeColor: pick(EYE_COLORS).id,
+    clothingStyle: pick(clothingList).id,
+    vibe: '',
+    breastSize: !isMale ? pick(BREAST_SIZES).id : '',
+    assSize: !isMale ? pick(ASS_SIZES).id : '',
+    dickSize: isMale ? pick(DICK_SIZES).id : '',
+    beard: isMale ? pick(BEARD_STYLES).id : '',
+  }
+}
+
 // ─── Main Component ──────────────────────────────────────────────────────────
 export default function OnboardingPage() {
   const router = useRouter()
@@ -510,6 +553,40 @@ export default function OnboardingPage() {
                 />
               ))}
             </ImageGrid>
+
+            {/* Randomize button */}
+            <button
+              onClick={() => {
+                const randomData = randomizeAll()
+                setData(randomData)
+                setAnimDir('forward')
+                setStep(7) // Jump to Name & Personality (last step before create)
+              }}
+              style={{
+                marginTop: 32, padding: '16px 32px', fontSize: 16, fontWeight: 700,
+                borderRadius: 16, cursor: 'pointer',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                color: 'rgba(255,255,255,0.5)',
+                transition: 'all 0.3s ease',
+                display: 'flex', alignItems: 'center', gap: 10,
+                letterSpacing: '0.3px',
+              }}
+              onMouseEnter={ev => {
+                ev.currentTarget.style.background = 'linear-gradient(135deg, rgba(233,30,140,0.15), rgba(124,58,237,0.15))'
+                ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.4)'
+                ev.currentTarget.style.color = '#fff'
+                ev.currentTarget.style.transform = 'scale(1.05)'
+              }}
+              onMouseLeave={ev => {
+                ev.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+                ev.currentTarget.style.color = 'rgba(255,255,255,0.5)'
+                ev.currentTarget.style.transform = 'scale(1)'
+              }}
+            >
+              <span style={{ fontSize: 22 }}>🎲</span> Surprise me — Randomize!
+            </button>
           </StepContainer>
         )}
 
