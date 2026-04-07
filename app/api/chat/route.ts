@@ -615,7 +615,7 @@ function isRefusal(text: string): boolean {
 }
 
 // ─── Detect if user is asking for a photo (not refusing/complaining about photos) ──
-function isPhotoRequest(text: string): boolean {
+function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   const lower = text.toLowerCase()
 
   // First check if the user is REFUSING/STOPPING photos — NOT a photo request
@@ -645,6 +645,18 @@ function isPhotoRequest(text: string): boolean {
   // "sexy foto", "leuke foto", "geile foto" — adjective + foto
   if (/(sexy|leuk|geil|mooi|lekker|stoute?).{0,10}(foto|pic|selfie|plaatje|fototje)/i.test(lower)) return true
 
+  // Context-aware: if last assistant message mentioned foto/photo and user gives short affirmation
+  if (lastAssistantMsg) {
+    const lastLower = lastAssistantMsg.toLowerCase()
+    const lastMentionedPhoto = /(foto|photo|pic|selfie|stuur|komt-ie|hier is|verstuurd|gestuurd)/i.test(lastLower)
+    if (lastMentionedPhoto) {
+      // Short affirmative responses in context of photos
+      if (/^(ja|yes|ok(e|é)?|sure|do(e)?\s*(maar|het)|stuur\s*(maar)?|kom\s*(maar)?|graag|please|alsjeblieft|go|send|nu|now|goed|prima|top|oke|oké|tuurlijk|natuurlijk|ja\s*(graag|please|alsjeblieft))\s*[.!?😘😏🔥💕]*\s*$/i.test(lower)) {
+        return true
+      }
+    }
+  }
+
   return false
 }
 
@@ -664,10 +676,16 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any): string {
   else if (/topless/i.test(lower)) scenario = 'topless, covering with hands playfully, bedroom'
   else if (/lingerie|ondergoed|underwear/i.test(lower)) scenario = 'wearing lace lingerie, bedroom, seductive pose'
   else if (/bikini/i.test(lower)) scenario = 'wearing bikini, beach, sunny, wet skin'
-  else if (/sexy|verleidel/i.test(lower)) scenario = 'seductive pose, bedroom, sensual warm lighting'
-  else if (/achteren|behind|butt|kont/i.test(lower)) scenario = 'from behind, looking over shoulder, showing butt'
-  else if (/voorover|bend/i.test(lower)) scenario = 'bending forward, seductive, showing cleavage'
-  else if (/dildo|toy/i.test(lower)) scenario = 'holding a toy, playful expression, bedroom'
+  else if (/achteren|behind|butt|kont(?!je)/i.test(lower)) scenario = 'from behind, looking over shoulder, showing butt'
+  else if (/voorover|bend|buig|bukken/i.test(lower)) scenario = 'bending forward, seductive, showing cleavage'
+  else if (/knie[eë]n|knees|kneeling|op.*knie/i.test(lower)) scenario = 'on her knees, kneeling on floor, looking up at camera, seductive expression, bedroom'
+  else if (/spreid|spread|benen.*open|legs.*open/i.test(lower)) scenario = 'legs spread open, sitting on bed, seductive, intimate bedroom lighting'
+  else if (/lig|ligg|liggen|lying|lay/i.test(lower)) scenario = 'lying down on bed, looking up at camera, relaxed seductive pose, soft sheets, intimate lighting'
+  else if (/hurk|squat/i.test(lower)) scenario = 'squatting down, looking at camera, seductive pose'
+  else if (/sta|staan|standing/i.test(lower)) scenario = 'standing full body, confident pose, looking at camera'
+  else if (/zit|zitten|sitting/i.test(lower)) scenario = 'sitting down, relaxed pose, looking at camera, cozy setting'
+  else if (/dildo|toy|speeltje/i.test(lower)) scenario = 'holding a toy, playful expression, bedroom'
+  else if (/sexy|verleidel|geil|hot|heet/i.test(lower)) scenario = 'seductive pose, bedroom, sensual warm lighting, looking at camera with desire'
   // Home/cozy scenarios
   else if (/bank|couch|sofa|knus|knuffelen/i.test(lower)) scenario = 'sitting cozy on soft couch, legs tucked under, wearing oversized sweater or comfy outfit, warm cozy living room, soft warm lighting, relaxed happy smile'
   else if (/thuis|home/i.test(lower)) scenario = 'at home in living room, casual comfortable outfit, warm cozy atmosphere, natural candid pose, soft lighting'
@@ -933,9 +951,11 @@ export async function POST(request: Request) {
     }
 
     // ─── Photo logic: only generate when user actually asks ─────────────
-    const userAskedForPhoto = isPhotoRequest(message)
+    // Get last assistant message for context-aware photo detection
+    const lastAssistantMsg = [...(history || [])].reverse().find((m: any) => m.role === 'assistant')?.content || ''
+    const userAskedForPhoto = isPhotoRequest(message, lastAssistantMsg)
     let generateImage: string | null = null
-    console.log(`[Chat] Photo check → userAskedForPhoto: ${userAskedForPhoto} | message: "${message.substring(0, 80)}" | bestImagePrompt: ${bestImagePrompt ? 'yes' : 'no'}`)
+    console.log(`[Chat] Photo check → userAskedForPhoto: ${userAskedForPhoto} | message: "${message.substring(0, 80)}" | lastAssistant: "${lastAssistantMsg.substring(0, 60)}" | bestImagePrompt: ${bestImagePrompt ? 'yes' : 'no'}`)
 
     if (userAskedForPhoto) {
       // User explicitly asked for a photo
