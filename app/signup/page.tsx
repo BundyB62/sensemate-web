@@ -58,7 +58,7 @@ export default function SignupPage() {
           <p style={{ color: 'var(--muted-fg)', fontSize: 15 }}>Free to start, no credit card needed</p>
         </div>
 
-        <div className="glass" style={{ borderRadius: 26, padding: '40px' }}>
+        <div className="glass mobile-auth-card" style={{ borderRadius: 26, padding: '40px' }}>
           <form onSubmit={handleSignup} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--muted-fg)', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>

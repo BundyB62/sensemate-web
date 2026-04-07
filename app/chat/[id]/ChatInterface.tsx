@@ -195,67 +195,130 @@ export default function ChatInterface({ companion, initialMessages }: { companio
     if (ev.key === 'Escape') setReplyTo(null)
   }
 
+  // ─── Heartbeat speed per emotion ─────────────────────────────────────
+  const heartbeatSpeed: Record<string, number> = {
+    neutral: 3, happy: 2.2, excited: 1.2, sad: 4, flirty: 1.8,
+    loving: 2.5, playful: 1.6, angry: 1, shy: 2.8, anxious: 1.3, calm: 4.5, hurt: 3.5,
+  }
+  const hbSpeed = heartbeatSpeed[emotion] || 3
+  const isActive = loading || batching
+
   // ─── Render ──────────────────────────────────────────────────────────
   return (
     <div style={{ display: 'flex', height: '100dvh', background: '#060514', color: 'rgba(255,255,255,0.92)', overflow: 'hidden', position: 'relative', fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif" }}>
 
-      {/* Ambient glows — landing page style */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
-        <div style={{ position: 'absolute', top: '-10%', right: '10%', width: 600, height: 600, borderRadius: '50%', background: `radial-gradient(circle, rgba(233,30,140,0.08) 0%, transparent 70%)`, filter: 'blur(80px)' }} />
-        <div style={{ position: 'absolute', bottom: '0%', left: '20%', width: 500, height: 500, borderRadius: '50%', background: `radial-gradient(circle, rgba(91,66,243,0.06) 0%, transparent 70%)`, filter: 'blur(80px)' }} />
+      {/* ─── Dynamic ambient glow — reacts to emotion ───────────────────── */}
+      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', transition: 'all 2s ease' }}>
+        <div style={{
+          position: 'absolute', top: '-15%', right: '5%', width: 700, height: 700, borderRadius: '50%',
+          background: `radial-gradient(circle, ${accent}14 0%, transparent 70%)`,
+          filter: 'blur(100px)', transition: 'background 2s ease',
+        }} />
+        <div style={{
+          position: 'absolute', bottom: '-10%', left: '15%', width: 500, height: 500, borderRadius: '50%',
+          background: `radial-gradient(circle, ${PURPLE}10 0%, transparent 70%)`,
+          filter: 'blur(80px)',
+        }} />
+        {/* Emotion-reactive center glow — follows the heartbeat */}
+        <div className="emotion-ambient" style={{
+          position: 'absolute', top: '30%', left: '55%', width: 400, height: 400, borderRadius: '50%',
+          background: `radial-gradient(circle, ${accent}0a 0%, transparent 70%)`,
+          filter: 'blur(60px)', transition: 'background 2s ease',
+          animation: `ambient-breathe ${hbSpeed * 1.5}s ease-in-out infinite`,
+        }} />
       </div>
 
       {/* ─── Sidebar ──────────────────────────────────────────────────────── */}
       {showSidebar && (
-        <aside style={{
-          width: 320, flexShrink: 0, display: 'flex', flexDirection: 'column',
-          borderRight: `1px solid rgba(233,30,140,0.1)`,
-          background: 'rgba(6,4,14,0.92)', backdropFilter: 'blur(40px) saturate(180%)',
-          zIndex: 10, overflowY: 'auto',
+        <aside className="chat-sidebar" style={{
+          width: 300, flexShrink: 0, display: 'flex', flexDirection: 'column',
+          borderRight: `1px solid ${accent}18`,
+          background: 'rgba(6,4,14,0.95)', backdropFilter: 'blur(40px) saturate(180%)',
+          zIndex: 10, overflowY: 'auto', transition: 'border-color 1s ease',
         }}>
           {/* Profile header */}
-          <div style={{ padding: '36px 28px 28px', textAlign: 'center', position: 'relative' }}>
-            {/* Decorative gradient */}
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 120, background: `linear-gradient(180deg, rgba(233,30,140,0.08), transparent)`, borderRadius: '0 0 50% 50%' }} />
+          <div style={{ padding: '32px 24px 24px', textAlign: 'center', position: 'relative' }}>
+            {/* Decorative gradient — emotion reactive */}
+            <div style={{
+              position: 'absolute', top: 0, left: 0, right: 0, height: 140,
+              background: `linear-gradient(180deg, ${accent}12, transparent)`,
+              borderRadius: '0 0 50% 50%', transition: 'background 2s ease',
+            }} />
 
-            <div style={{ position: 'relative', display: 'inline-block', marginBottom: 18 }}>
-              <AvatarPreview src={companion.avatar_url} name={name} accent={PINK} fallbackEmoji={e.emoji} size={110} borderRadius={55} />
+            {/* Avatar with heartbeat ring */}
+            <div style={{ position: 'relative', display: 'inline-block', marginBottom: 16 }}>
+              {/* Heartbeat glow rings */}
+              <div className="heartbeat-ring" style={{
+                position: 'absolute', inset: -8, borderRadius: '50%',
+                border: `2px solid ${accent}40`,
+                animation: `heartbeat-pulse ${hbSpeed}s ease-in-out infinite`,
+                transition: 'border-color 1s ease',
+              }} />
+              <div className="heartbeat-ring-outer" style={{
+                position: 'absolute', inset: -16, borderRadius: '50%',
+                border: `1px solid ${accent}20`,
+                animation: `heartbeat-pulse ${hbSpeed}s ease-in-out infinite 0.15s`,
+                transition: 'border-color 1s ease',
+              }} />
+
               <div style={{
-                position: 'absolute', bottom: 4, right: 4, width: 20, height: 20, borderRadius: '50%',
+                width: 100, height: 100, borderRadius: '50%', overflow: 'hidden',
+                border: `2px solid ${accent}50`,
+                boxShadow: `0 0 20px ${accent}30, 0 0 40px ${accent}15`,
+                transition: 'border-color 1s ease, box-shadow 1s ease',
+              }}>
+                {companion.avatar_url
+                  ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                  : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 36 }}>{e.emoji}</div>
+                }
+              </div>
+              {/* Online dot */}
+              <div style={{
+                position: 'absolute', bottom: 2, right: 2, width: 16, height: 16, borderRadius: '50%',
                 background: '#22c55e', border: '3px solid #060514',
-                boxShadow: '0 0 12px rgba(34,197,94,0.5)',
+                boxShadow: '0 0 10px rgba(34,197,94,0.6)',
               }} />
             </div>
 
-            <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 6 }}>{name}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 4 }}>{name}</div>
 
-            {/* Status pill */}
+            {/* Status pill with heartbeat dot */}
             <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 16px', borderRadius: 100,
-              background: `rgba(233,30,140,0.08)`, border: `1px solid rgba(233,30,140,0.15)`,
-              marginBottom: 22, transition: 'all 0.6s',
+              display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 14px', borderRadius: 100,
+              background: `${accent}10`, border: `1px solid ${accent}20`,
+              marginBottom: 20, transition: 'all 1s ease',
             }}>
-              <div style={{ width: 7, height: 7, borderRadius: '50%', background: accent, boxShadow: `0 0 10px ${accent}` }} />
-              <span style={{ fontSize: 13, fontWeight: 600, color: accent }}>
+              <div style={{
+                width: 8, height: 8, borderRadius: '50%', background: accent,
+                boxShadow: `0 0 8px ${accent}`,
+                animation: isActive ? `heartbeat-dot 0.6s ease-in-out infinite` : `heartbeat-dot ${hbSpeed}s ease-in-out infinite`,
+                transition: 'background 1s ease, box-shadow 1s ease',
+              }} />
+              <span style={{ fontSize: 12, fontWeight: 600, color: accent, transition: 'color 1s ease' }}>
                 {batching ? 'leest...' : loading ? 'typt...' : `${e.emoji} ${e.label}`}
               </span>
-              {generating && <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>· 📸</span>}
+              {generating && <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>· 📸</span>}
             </div>
 
             {/* Bond progress */}
             <div style={{
-              background: 'rgba(255,255,255,0.03)', borderRadius: 18, padding: '16px 18px',
-              border: '1px solid rgba(255,255,255,0.06)',
+              background: 'rgba(255,255,255,0.025)', borderRadius: 16, padding: '14px 16px',
+              border: '1px solid rgba(255,255,255,0.05)',
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 1 }}>Band</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: PINK }}>{bondLevel.emoji} {bondLevel.label}</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1 }}>Band</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: accent, transition: 'color 1s ease' }}>{bondLevel.emoji} {bondLevel.label}</span>
               </div>
-              <div style={{ height: 5, borderRadius: 5, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', borderRadius: 5, width: `${bondProgress.pct}%`, background: `linear-gradient(90deg, ${PURPLE}, ${PINK})`, transition: 'width 0.8s ease' }} />
+              <div style={{ height: 4, borderRadius: 4, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: 4, width: `${bondProgress.pct}%`,
+                  background: `linear-gradient(90deg, ${PURPLE}, ${accent})`,
+                  boxShadow: `0 0 8px ${accent}40`,
+                  transition: 'width 0.8s ease, background 1s ease',
+                }} />
               </div>
               {bondProgress.toNext > 0 && (
-                <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 8, textAlign: 'right' }}>
+                <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginTop: 6, textAlign: 'right' }}>
                   nog {bondProgress.toNext} berichten
                 </div>
               )}
@@ -263,20 +326,20 @@ export default function ChatInterface({ companion, initialMessages }: { companio
           </div>
 
           {/* Stats */}
-          <div style={{ padding: '0 28px 18px' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+          <div style={{ padding: '0 24px 16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
               {[
                 { label: 'Relatie', value: companion.relationship_style, icon: '💕' },
                 { label: 'Berichten', value: messages.filter(m => !['typing', 'image_loading'].includes(m.type || '')).length, icon: '💬' },
                 { label: "Foto's", value: gallery.length, icon: '📸' },
               ].map(s => (
                 <div key={s.label} style={{
-                  textAlign: 'center', padding: '12px 6px', borderRadius: 14,
-                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+                  textAlign: 'center', padding: '10px 4px', borderRadius: 12,
+                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)',
                 }}>
-                  <div style={{ fontSize: 18, marginBottom: 3 }}>{s.icon}</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>{s.value}</div>
-                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 0.8 }}>{s.label}</div>
+                  <div style={{ fontSize: 16, marginBottom: 2 }}>{s.icon}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.8)' }}>{s.value}</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: 0.8 }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -284,18 +347,18 @@ export default function ChatInterface({ companion, initialMessages }: { companio
 
           {/* Gallery */}
           {gallery.length > 0 && (
-            <div style={{ padding: '0 28px 18px' }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
+            <div style={{ padding: '0 24px 16px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10 }}>
                 Galerij
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
                 {gallery.slice(0, 9).map((url, i) => (
                   <div key={i} onClick={() => setLightboxImg(url)} style={{
-                    borderRadius: 12, overflow: 'hidden', cursor: 'pointer', aspectRatio: '1',
-                    border: '1px solid rgba(255,255,255,0.06)', transition: 'all 0.25s cubic-bezier(0.34,1.2,0.64,1)',
+                    borderRadius: 10, overflow: 'hidden', cursor: 'pointer', aspectRatio: '1',
+                    border: '1px solid rgba(255,255,255,0.05)', transition: 'all 0.25s cubic-bezier(0.34,1.2,0.64,1)',
                   }}
-                    onMouseEnter={ev => { ev.currentTarget.style.transform = 'scale(1.06)'; ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.35)'; ev.currentTarget.style.boxShadow = '0 0 20px rgba(233,30,140,0.15)' }}
-                    onMouseLeave={ev => { ev.currentTarget.style.transform = 'scale(1)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; ev.currentTarget.style.boxShadow = 'none' }}
+                    onMouseEnter={ev => { ev.currentTarget.style.transform = 'scale(1.06)'; ev.currentTarget.style.borderColor = `${accent}50`; ev.currentTarget.style.boxShadow = `0 0 16px ${accent}20` }}
+                    onMouseLeave={ev => { ev.currentTarget.style.transform = 'scale(1)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; ev.currentTarget.style.boxShadow = 'none' }}
                   >
                     <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
                   </div>
@@ -305,15 +368,15 @@ export default function ChatInterface({ companion, initialMessages }: { companio
           )}
 
           {/* Back link */}
-          <div style={{ padding: '18px 28px', marginTop: 'auto' }}>
+          <div style={{ padding: '16px 24px', marginTop: 'auto' }}>
             <Link href="/dashboard" style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px',
-              borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
-              color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: 14, fontWeight: 500,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px',
+              borderRadius: 12, background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)',
+              color: 'rgba(255,255,255,0.35)', textDecoration: 'none', fontSize: 13, fontWeight: 500,
               transition: 'all 0.2s',
             }}
-              onMouseEnter={ev => { ev.currentTarget.style.background = 'rgba(233,30,140,0.08)'; ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.2)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.7)' }}
-              onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.03)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+              onMouseEnter={ev => { ev.currentTarget.style.background = `${accent}10`; ev.currentTarget.style.borderColor = `${accent}25`; ev.currentTarget.style.color = 'rgba(255,255,255,0.7)' }}
+              onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.025)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.35)' }}
             >
               ← Dashboard
             </Link>
@@ -324,81 +387,112 @@ export default function ChatInterface({ companion, initialMessages }: { companio
       {/* ─── Chat Area ────────────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
 
-        {/* Header */}
-        <header style={{
-          display: 'flex', alignItems: 'center', gap: 20, padding: '18px 64px',
-          borderBottom: '1px solid rgba(233,30,140,0.08)',
-          background: 'rgba(6,4,14,0.88)', backdropFilter: 'blur(36px) saturate(180%)', flexShrink: 0,
+        {/* Header — cleaner, with heartbeat avatar */}
+        <header className="chat-header" style={{
+          display: 'flex', alignItems: 'center', gap: 16, padding: '14px 48px',
+          borderBottom: `1px solid ${accent}10`,
+          background: 'rgba(6,4,14,0.92)', backdropFilter: 'blur(40px) saturate(180%)', flexShrink: 0,
+          transition: 'border-color 1s ease',
         }}>
           <button onClick={() => setShowSidebar(s => !s)} style={{
-            width: 38, height: 38, borderRadius: 12, background: 'rgba(255,255,255,0.04)',
-            border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
-            fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer',
+            fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center',
             transition: 'all 0.2s',
           }}
-            onMouseEnter={ev => { ev.currentTarget.style.background = 'rgba(233,30,140,0.1)'; ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.2)' }}
-            onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.04)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' }}
+            onMouseEnter={ev => { ev.currentTarget.style.background = `${accent}10`; ev.currentTarget.style.borderColor = `${accent}25` }}
+            onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.03)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
           >
             {showSidebar ? '◂' : '▸'}
           </button>
 
-          <div style={{
-            width: 56, height: 56, borderRadius: 28, overflow: 'hidden',
-            border: '1px solid rgba(233,30,140,0.2)',
-            boxShadow: '0 0 18px rgba(233,30,140,0.2), 0 0 8px rgba(91,66,243,0.15)',
-          }}>
-            {companion.avatar_url
-              ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-              : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 }}>{e.emoji}</div>
-            }
+          {/* Avatar with mini heartbeat */}
+          <div style={{ position: 'relative' }}>
+            <div style={{
+              position: 'absolute', inset: -4, borderRadius: '50%',
+              border: `1.5px solid ${accent}35`,
+              animation: `heartbeat-pulse ${hbSpeed}s ease-in-out infinite`,
+              transition: 'border-color 1s ease',
+            }} />
+            <div style={{
+              width: 46, height: 46, borderRadius: 23, overflow: 'hidden',
+              border: `1.5px solid ${accent}40`,
+              boxShadow: `0 0 14px ${accent}25`,
+              transition: 'border-color 1s ease, box-shadow 1s ease',
+            }}>
+              {companion.avatar_url
+                ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{e.emoji}</div>
+              }
+            </div>
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: 22, color: 'rgba(255,255,255,0.92)' }}>{name}</div>
-            <div style={{ fontSize: 16, color: accent, display: 'flex', alignItems: 'center', gap: 6, transition: 'color 0.5s' }}>
-              {batching ? <span style={{ color: 'rgba(255,255,255,0.4)' }}>leest je berichten...</span>
-                : loading ? <span style={{ color: 'rgba(255,255,255,0.4)' }}>aan het typen...</span>
+            <div style={{ fontWeight: 700, fontSize: 18, color: 'rgba(255,255,255,0.92)', letterSpacing: '-0.3px' }}>{name}</div>
+            <div style={{ fontSize: 13, color: accent, display: 'flex', alignItems: 'center', gap: 5, transition: 'color 1s ease' }}>
+              {batching ? <span style={{ color: 'rgba(255,255,255,0.35)' }}>leest je berichten...</span>
+                : loading ? (
+                  <span style={{ color: 'rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    aan het typen
+                    <span style={{ display: 'flex', gap: 3 }}>
+                      {[0,1,2].map(i => <span key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: accent, animation: `typing-dot 1.2s ${i * 0.15}s infinite`, transition: 'background 1s ease' }} />)}
+                    </span>
+                  </span>
+                )
                 : <><span>{e.emoji}</span> {e.label}</>
               }
             </div>
           </div>
 
           <div style={{
-            fontSize: 14, padding: '7px 16px', borderRadius: 100,
-            background: `linear-gradient(135deg, rgba(91,66,243,0.15), rgba(233,30,140,0.15))`,
-            border: `1px solid rgba(233,30,140,0.2)`,
-            color: PINK, fontWeight: 700, letterSpacing: 0.3,
+            fontSize: 12, padding: '6px 14px', borderRadius: 100,
+            background: `${accent}12`, border: `1px solid ${accent}20`,
+            color: accent, fontWeight: 700, letterSpacing: 0.3,
+            transition: 'all 1s ease',
           }}>
             {bondLevel.emoji} Lvl {bondLevelNum}
           </div>
         </header>
 
         {/* Messages */}
-        <div style={{
-          flex: 1, overflowY: 'auto', padding: '36px 64px', display: 'flex', flexDirection: 'column', gap: 5,
+        <div className="chat-messages" style={{
+          flex: 1, overflowY: 'auto', padding: '28px 48px', display: 'flex', flexDirection: 'column', gap: 4,
         }}>
           {/* Empty state */}
           {messages.length === 0 && (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 20 }}>
-              <div style={{
-                width: 120, height: 120, borderRadius: 60, overflow: 'hidden',
-                border: '2px solid rgba(233,30,140,0.2)',
-                boxShadow: '0 0 40px rgba(233,30,140,0.2), 0 0 80px rgba(91,66,243,0.1)',
-              }}>
-                {companion.avatar_url
-                  ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-                  : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 48 }}>💝</div>
-                }
+              {/* Heartbeat avatar */}
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  position: 'absolute', inset: -12, borderRadius: '50%',
+                  border: `2px solid ${accent}30`,
+                  animation: `heartbeat-pulse ${hbSpeed}s ease-in-out infinite`,
+                }} />
+                <div style={{
+                  position: 'absolute', inset: -24, borderRadius: '50%',
+                  border: `1px solid ${accent}15`,
+                  animation: `heartbeat-pulse ${hbSpeed}s ease-in-out infinite 0.2s`,
+                }} />
+                <div style={{
+                  width: 110, height: 110, borderRadius: 55, overflow: 'hidden',
+                  border: `2px solid ${accent}35`,
+                  boxShadow: `0 0 40px ${accent}25, 0 0 80px ${accent}10`,
+                }}>
+                  {companion.avatar_url
+                    ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                    : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 44 }}>💝</div>
+                  }
+                </div>
               </div>
               <div>
                 <div style={{
-                  fontSize: 38, fontWeight: 800, marginBottom: 12,
+                  fontSize: 32, fontWeight: 800, marginBottom: 10, letterSpacing: '-1px',
                   background: `linear-gradient(110deg, #f9a8d4 0%, ${PINK} 50%, #be185d 100%)`,
                   WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
                 }}>
                   Chat met {name}
                 </div>
-                <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: 20 }}>Stuur een bericht om het gesprek te starten</div>
+                <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 16 }}>Stuur een bericht om het gesprek te starten</div>
               </div>
             </div>
           )}
@@ -415,13 +509,13 @@ export default function ChatInterface({ companion, initialMessages }: { companio
 
           {/* Batching indicator */}
           {batching && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', animation: 'fadeIn 0.3s ease' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', animation: 'fadeIn 0.3s ease' }}>
               <div style={{
-                width: 36, height: 36, borderRadius: '50%',
-                background: `rgba(233,30,140,0.08)`, border: `1px solid rgba(233,30,140,0.15)`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14,
+                width: 32, height: 32, borderRadius: '50%',
+                background: `${accent}10`, border: `1px solid ${accent}18`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13,
               }}>👀</div>
-              <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>{name} leest je berichten...</span>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', fontStyle: 'italic' }}>{name} leest je berichten...</span>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -429,43 +523,43 @@ export default function ChatInterface({ companion, initialMessages }: { companio
 
         {/* Reply bar */}
         {replyTo && (
-          <div style={{
-            padding: '12px 64px', background: 'rgba(6,4,14,0.6)', borderTop: '1px solid rgba(255,255,255,0.06)',
-            display: 'flex', alignItems: 'center', gap: 12, backdropFilter: 'blur(20px)',
+          <div className="chat-reply-bar" style={{
+            padding: '10px 48px', background: 'rgba(6,4,14,0.7)', borderTop: '1px solid rgba(255,255,255,0.05)',
+            display: 'flex', alignItems: 'center', gap: 10, backdropFilter: 'blur(20px)',
           }}>
-            <div style={{ width: 3, height: 32, borderRadius: 2, background: `linear-gradient(180deg, ${PURPLE}, ${PINK})`, flexShrink: 0 }} />
+            <div style={{ width: 3, height: 28, borderRadius: 2, background: `linear-gradient(180deg, ${PURPLE}, ${accent})`, flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 15, fontWeight: 600, color: PINK }}>Reageer op {replyTo.role === 'assistant' ? name : 'jezelf'}</div>
-              <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: accent }}>{replyTo.role === 'assistant' ? name : 'Jij'}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {replyTo.type === 'image' ? '📷 Foto' : replyTo.content}
               </div>
             </div>
-            <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 20, padding: 4 }}>×</button>
+            <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', fontSize: 18, padding: 4 }}>×</button>
           </div>
         )}
 
         {/* Input bar */}
-        <div style={{
-          padding: '20px 64px 30px', borderTop: '1px solid rgba(233,30,140,0.08)',
-          background: 'rgba(6,4,14,0.88)', backdropFilter: 'blur(36px) saturate(180%)', flexShrink: 0,
-          position: 'relative',
+        <div className="chat-input-bar" style={{
+          padding: '16px 48px 24px', borderTop: `1px solid ${accent}08`,
+          background: 'rgba(6,4,14,0.92)', backdropFilter: 'blur(40px) saturate(180%)', flexShrink: 0,
+          position: 'relative', transition: 'border-color 1s ease',
         }}>
           {/* Emoji Picker Popup */}
           {showEmojis && (
-            <div ref={emojiRef} style={{
-              position: 'absolute', bottom: '100%', left: 64, marginBottom: 8,
+            <div ref={emojiRef} className="chat-emoji-picker" style={{
+              position: 'absolute', bottom: '100%', left: 48, marginBottom: 8,
               width: 380, maxHeight: 360, overflowY: 'auto',
-              background: 'rgba(12,8,28,0.96)', backdropFilter: 'blur(40px) saturate(180%)',
-              border: '1px solid rgba(233,30,140,0.15)', borderRadius: 20,
-              boxShadow: '0 -8px 40px rgba(0,0,0,0.5), 0 0 30px rgba(233,30,140,0.08)',
-              padding: '14px 16px', zIndex: 50,
+              background: 'rgba(12,8,28,0.97)', backdropFilter: 'blur(40px) saturate(180%)',
+              border: `1px solid ${accent}18`, borderRadius: 18,
+              boxShadow: `0 -8px 40px rgba(0,0,0,0.5), 0 0 20px ${accent}08`,
+              padding: '12px 14px', zIndex: 50,
               animation: 'emojiSlideUp 0.2s cubic-bezier(0.34,1.2,0.64,1)',
             }}>
               <EmojiPicker onSelect={(emoji) => { insertEmoji(emoji); setShowEmojis(false) }} />
             </div>
           )}
 
-          <form onSubmit={sendMessage} style={{ display: 'flex', gap: 14, alignItems: 'flex-end' }}>
+          <form onSubmit={sendMessage} style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
             <textarea
               ref={inputRef}
               value={input}
@@ -474,50 +568,67 @@ export default function ChatInterface({ companion, initialMessages }: { companio
               placeholder={`Bericht aan ${name}...`}
               rows={1}
               style={{
-                flex: 1, padding: '20px 28px', borderRadius: 32, resize: 'none',
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                color: 'rgba(255,255,255,0.92)', outline: 'none', fontSize: 20, lineHeight: 1.5,
+                flex: 1, padding: '14px 22px', borderRadius: 24, resize: 'none',
+                background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)',
+                color: 'rgba(255,255,255,0.92)', outline: 'none', fontSize: 16, lineHeight: 1.5,
                 transition: 'border-color 0.3s, box-shadow 0.3s, background 0.3s',
-                maxHeight: 140, fontFamily: 'inherit',
+                maxHeight: 120, fontFamily: 'inherit',
               }}
-              onFocus={ev => { ev.target.style.borderColor = 'rgba(233,30,140,0.35)'; ev.target.style.boxShadow = '0 0 0 3px rgba(233,30,140,0.08)'; ev.target.style.background = 'rgba(255,255,255,0.06)' }}
-              onBlur={ev => { ev.target.style.borderColor = 'rgba(255,255,255,0.08)'; ev.target.style.boxShadow = 'none'; ev.target.style.background = 'rgba(255,255,255,0.04)' }}
+              onFocus={ev => { ev.target.style.borderColor = `${accent}40`; ev.target.style.boxShadow = `0 0 0 3px ${accent}08`; ev.target.style.background = 'rgba(255,255,255,0.05)' }}
+              onBlur={ev => { ev.target.style.borderColor = 'rgba(255,255,255,0.07)'; ev.target.style.boxShadow = 'none'; ev.target.style.background = 'rgba(255,255,255,0.035)' }}
             />
 
             {/* Emoji button */}
             <button type="button" onClick={() => setShowEmojis(s => !s)} style={{
-              width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
-              background: showEmojis ? 'rgba(233,30,140,0.12)' : 'rgba(255,255,255,0.04)',
-              border: showEmojis ? '1px solid rgba(233,30,140,0.25)' : '1px solid rgba(255,255,255,0.08)',
+              width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+              background: showEmojis ? `${accent}15` : 'rgba(255,255,255,0.035)',
+              border: showEmojis ? `1px solid ${accent}30` : '1px solid rgba(255,255,255,0.06)',
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 24, transition: 'all 0.2s',
+              fontSize: 20, transition: 'all 0.2s',
             }}
-              onMouseEnter={ev => { if (!showEmojis) { ev.currentTarget.style.background = 'rgba(233,30,140,0.08)'; ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.2)' } }}
-              onMouseLeave={ev => { if (!showEmojis) { ev.currentTarget.style.background = 'rgba(255,255,255,0.04)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)' } }}
+              onMouseEnter={ev => { if (!showEmojis) { ev.currentTarget.style.background = `${accent}0a`; ev.currentTarget.style.borderColor = `${accent}20` } }}
+              onMouseLeave={ev => { if (!showEmojis) { ev.currentTarget.style.background = 'rgba(255,255,255,0.035)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' } }}
             >
               😊
             </button>
 
             {/* Send button */}
             <button type="submit" disabled={!input.trim() || loading} style={{
-              width: 64, height: 64, borderRadius: '50%', flexShrink: 0,
-              background: input.trim() && !loading ? `linear-gradient(135deg, ${PURPLE}, ${PINK})` : 'rgba(255,255,255,0.04)',
-              border: input.trim() && !loading ? 'none' : '1px solid rgba(255,255,255,0.06)',
+              width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
+              background: input.trim() && !loading ? `linear-gradient(135deg, ${PURPLE}, ${accent})` : 'rgba(255,255,255,0.035)',
+              border: input.trim() && !loading ? 'none' : '1px solid rgba(255,255,255,0.05)',
               cursor: input.trim() && !loading ? 'pointer' : 'default',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.3s cubic-bezier(0.34,1.2,0.64,1)',
-              boxShadow: input.trim() && !loading ? '0 4px 24px rgba(233,30,140,0.3), 0 0 40px rgba(91,66,243,0.15)' : 'none',
+              boxShadow: input.trim() && !loading ? `0 4px 20px ${accent}35, 0 0 30px ${PURPLE}15` : 'none',
               transform: input.trim() && !loading ? 'scale(1)' : 'scale(0.9)',
-              opacity: input.trim() && !loading ? 1 : 0.4,
+              opacity: input.trim() && !loading ? 1 : 0.35,
             }}>
               {loading
-                ? <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)', borderTopColor: 'white', animation: 'animate-spin-slow 0.7s linear infinite' }} />
-                : <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                ? <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)', borderTopColor: 'white', animation: 'animate-spin-slow 0.7s linear infinite' }} />
+                : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
               }
             </button>
           </form>
 
-          <style>{`@keyframes emojiSlideUp { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }`}</style>
+          <style>{`
+            @keyframes emojiSlideUp { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+            @keyframes heartbeat-pulse {
+              0%, 100% { transform: scale(1); opacity: 0.5; }
+              14% { transform: scale(1.08); opacity: 1; }
+              28% { transform: scale(1); opacity: 0.6; }
+              42% { transform: scale(1.05); opacity: 0.9; }
+              56% { transform: scale(1); opacity: 0.5; }
+            }
+            @keyframes heartbeat-dot {
+              0%, 100% { transform: scale(1); opacity: 0.6; }
+              50% { transform: scale(1.4); opacity: 1; }
+            }
+            @keyframes ambient-breathe {
+              0%, 100% { opacity: 0.4; transform: scale(1); }
+              50% { opacity: 0.8; transform: scale(1.15); }
+            }
+          `}</style>
         </div>
       </div>
 
@@ -578,33 +689,34 @@ function ChatBubble({ msg, accent, name, isGrouped, onReply, onImageClick, avata
 
   if (isTyping) {
     return (
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16, padding: '10px 0' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, padding: '6px 0' }}>
         <div style={{
-          width: 56, height: 56, borderRadius: '50%', overflow: 'hidden',
-          border: '1px solid rgba(233,30,140,0.15)',
-          boxShadow: '0 0 12px rgba(233,30,140,0.1)',
+          width: 38, height: 38, borderRadius: '50%', overflow: 'hidden',
+          border: `1px solid ${accent}25`,
+          boxShadow: `0 0 10px ${accent}15`,
+          transition: 'border-color 1s ease, box-shadow 1s ease',
         }}>
           {avatarUrl
             ? <img src={avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-            : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{emotionEmoji}</div>
+            : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{emotionEmoji}</div>
           }
         </div>
         <div style={{
-          padding: '22px 30px', borderRadius: '28px 28px 28px 8px',
-          background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)',
-          backdropFilter: 'blur(20px)',
+          padding: '14px 20px', borderRadius: '20px 20px 20px 6px',
+          background: 'rgba(255,255,255,0.04)', border: `1px solid ${accent}12`,
+          backdropFilter: 'blur(20px)', transition: 'border-color 1s ease',
         }}>
-          <div style={{ display: 'flex', gap: 7 }}>
+          <div style={{ display: 'flex', gap: 5 }}>
             {[0, 1, 2].map(i => (
               <div key={i} style={{
-                width: 11, height: 11, borderRadius: '50%', background: PINK,
+                width: 8, height: 8, borderRadius: '50%', background: accent,
                 animation: `typing-bounce 1.2s ease-in-out ${i * 0.15}s infinite`,
-                opacity: 0.7,
+                opacity: 0.6, transition: 'background 1s ease',
               }} />
             ))}
           </div>
         </div>
-        <style>{`@keyframes typing-bounce { 0%,60%,100% { transform: translateY(0) } 30% { transform: translateY(-6px) } }`}</style>
+        <style>{`@keyframes typing-bounce { 0%,60%,100% { transform: translateY(0) } 30% { transform: translateY(-5px) } }`}</style>
       </div>
     )
   }
@@ -612,33 +724,35 @@ function ChatBubble({ msg, accent, name, isGrouped, onReply, onImageClick, avata
   return (
     <div style={{
       display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start',
-      padding: isGrouped ? '4px 0' : '12px 0', alignItems: 'flex-end', gap: 16,
+      padding: isGrouped ? '2px 0' : '8px 0', alignItems: 'flex-end', gap: 12,
     }}>
       {/* Avatar — only show for first in group */}
       {!isUser && (
-        <div style={{ width: 56, flexShrink: 0 }}>
+        <div style={{ width: 38, flexShrink: 0 }}>
           {!isGrouped && (
             <div style={{
-              width: 56, height: 56, borderRadius: '50%', overflow: 'hidden',
-              border: '1px solid rgba(233,30,140,0.15)',
-              boxShadow: '0 0 12px rgba(233,30,140,0.1)',
+              width: 38, height: 38, borderRadius: '50%', overflow: 'hidden',
+              border: `1px solid ${accent}25`,
+              boxShadow: `0 0 10px ${accent}15`,
+              transition: 'border-color 1s ease, box-shadow 1s ease',
             }}>
               {avatarUrl
                 ? <img src={avatarUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-                : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{emotionEmoji}</div>
+                : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{emotionEmoji}</div>
               }
             </div>
           )}
         </div>
       )}
 
-      <div style={{ maxWidth: '70%', display: 'flex', flexDirection: 'column', gap: 3, alignItems: isUser ? 'flex-end' : 'flex-start', position: 'relative' }}>
+      <div style={{ maxWidth: '72%', display: 'flex', flexDirection: 'column', gap: 2, alignItems: isUser ? 'flex-end' : 'flex-start', position: 'relative' }}>
         {/* Reply reference */}
         {msg.replyTo && (
           <div style={{
-            fontSize: 13, color: 'rgba(255,255,255,0.3)', padding: '6px 14px',
-            borderLeft: `2px solid ${PINK}60`, background: 'rgba(255,255,255,0.02)', borderRadius: 10,
+            fontSize: 12, color: 'rgba(255,255,255,0.3)', padding: '5px 12px',
+            borderLeft: `2px solid ${accent}50`, background: 'rgba(255,255,255,0.02)', borderRadius: 8,
             maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            transition: 'border-color 1s ease',
           }}>
             {msg.replyTo.content}
           </div>
@@ -646,40 +760,43 @@ function ChatBubble({ msg, accent, name, isGrouped, onReply, onImageClick, avata
 
         {isImage ? (
           <div onClick={() => onImageClick(msg.content)} style={{
-            borderRadius: 22, overflow: 'hidden', cursor: 'pointer', maxWidth: 480,
-            border: '1px solid rgba(233,30,140,0.12)',
-            boxShadow: '0 8px 40px rgba(0,0,0,0.4), 0 0 20px rgba(233,30,140,0.08)',
+            borderRadius: 18, overflow: 'hidden', cursor: 'pointer', maxWidth: 400,
+            border: `1px solid ${accent}18`,
+            boxShadow: `0 6px 30px rgba(0,0,0,0.4), 0 0 15px ${accent}08`,
             transition: 'all 0.3s cubic-bezier(0.34,1.2,0.64,1)',
           }}
-            onMouseEnter={ev => { ev.currentTarget.style.transform = 'scale(1.02)'; ev.currentTarget.style.boxShadow = '0 12px 50px rgba(233,30,140,0.2), 0 0 40px rgba(91,66,243,0.1)' }}
-            onMouseLeave={ev => { ev.currentTarget.style.transform = 'scale(1)'; ev.currentTarget.style.boxShadow = '0 8px 40px rgba(0,0,0,0.4), 0 0 20px rgba(233,30,140,0.08)' }}
+            onMouseEnter={ev => { ev.currentTarget.style.transform = 'scale(1.02)'; ev.currentTarget.style.boxShadow = `0 10px 40px ${accent}20, 0 0 30px ${accent}10` }}
+            onMouseLeave={ev => { ev.currentTarget.style.transform = 'scale(1)'; ev.currentTarget.style.boxShadow = `0 6px 30px rgba(0,0,0,0.4), 0 0 15px ${accent}08` }}
           >
             <img src={msg.content} style={{ width: '100%', display: 'block' }} alt="" />
           </div>
         ) : isImgLoading ? (
           <div style={{
-            padding: '22px 30px', borderRadius: '28px 28px 28px 8px',
-            background: 'rgba(233,30,140,0.05)', border: `1px solid rgba(233,30,140,0.12)`,
-            color: PINK, fontSize: 20, display: 'flex', alignItems: 'center', gap: 12,
+            padding: '14px 20px', borderRadius: '20px 20px 20px 6px',
+            background: `${accent}08`, border: `1px solid ${accent}18`,
+            color: accent, fontSize: 14, display: 'flex', alignItems: 'center', gap: 10,
+            transition: 'all 1s ease',
           }}>
-            <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid rgba(233,30,140,0.25)`, borderTopColor: PINK, animation: 'animate-spin-slow 0.8s linear infinite' }} />
+            <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${accent}30`, borderTopColor: accent, animation: 'animate-spin-slow 0.8s linear infinite', transition: 'border-color 1s ease' }} />
             Foto maken...
           </div>
         ) : (
           <div onClick={handleBubbleClick} style={{
-            padding: '20px 28px',
+            padding: '12px 18px',
             borderRadius: isUser
-              ? (isGrouped ? '28px 8px 8px 28px' : '28px 28px 8px 28px')
-              : (isGrouped ? '8px 28px 28px 8px' : '28px 28px 28px 8px'),
+              ? (isGrouped ? '20px 6px 6px 20px' : '20px 20px 6px 20px')
+              : (isGrouped ? '6px 20px 20px 6px' : '20px 20px 20px 6px'),
             background: isUser
-              ? `linear-gradient(135deg, rgba(91,66,243,0.45), rgba(233,30,140,0.4))`
-              : 'rgba(255,255,255,0.05)',
-            border: isUser ? '1px solid rgba(233,30,140,0.25)' : '1px solid rgba(255,255,255,0.07)',
+              ? `linear-gradient(135deg, rgba(91,66,243,0.35), rgba(233,30,140,0.3))`
+              : `rgba(255,255,255,0.04)`,
+            border: isUser ? `1px solid rgba(233,30,140,0.2)` : `1px solid ${accent}10`,
             backdropFilter: 'blur(20px)',
-            fontSize: 20, lineHeight: 1.7, color: isUser ? 'white' : 'rgba(255,255,255,0.92)',
+            fontSize: 15, lineHeight: 1.65, color: isUser ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.88)',
             wordBreak: 'break-word', cursor: 'pointer', userSelect: 'text',
-            boxShadow: isUser ? '0 4px 20px rgba(233,30,140,0.15), 0 0 30px rgba(91,66,243,0.08)' : 'none',
-            transition: 'all 0.15s ease',
+            boxShadow: isUser
+              ? '0 2px 12px rgba(233,30,140,0.12), 0 0 20px rgba(91,66,243,0.06)'
+              : `0 1px 8px ${accent}06`,
+            transition: 'all 0.2s ease, border-color 1s ease, box-shadow 1s ease',
           }}>
             {msg.content}
           </div>
@@ -687,7 +804,7 @@ function ChatBubble({ msg, accent, name, isGrouped, onReply, onImageClick, avata
 
         {/* Timestamp */}
         {!isGrouped && !isImgLoading && (
-          <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.2)', padding: '4px 6px' }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.18)', padding: '2px 4px', letterSpacing: '0.02em' }}>
             {new Date(msg.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
           </div>
         )}
@@ -700,13 +817,13 @@ function ChatBubble({ msg, accent, name, isGrouped, onReply, onImageClick, avata
             ...(isUser ? { right: window.innerWidth - menuPos.x } : { left: menuPos.x }),
             transform: 'translateY(-100%)',
             zIndex: 100,
-            background: 'rgba(18,12,36,0.97)',
+            background: 'rgba(14,10,28,0.97)',
             backdropFilter: 'blur(40px) saturate(180%)',
-            border: '1px solid rgba(233,30,140,0.15)',
-            borderRadius: 16,
-            boxShadow: '0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(233,30,140,0.08)',
+            border: `1px solid ${accent}18`,
+            borderRadius: 14,
+            boxShadow: `0 6px 30px rgba(0,0,0,0.6), 0 0 15px ${accent}08`,
             overflow: 'hidden',
-            minWidth: 180,
+            minWidth: 160,
             animation: 'menuPop 0.15s cubic-bezier(0.34,1.2,0.64,1)',
           }}>
             {[
@@ -714,17 +831,17 @@ function ChatBubble({ msg, accent, name, isGrouped, onReply, onImageClick, avata
               { icon: copied ? '✓' : '📋', label: copied ? 'Gekopieerd!' : 'Kopiëren', action: handleCopy },
             ].map((item, i) => (
               <button key={i} onClick={item.action} style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                width: '100%', padding: '14px 20px',
+                display: 'flex', alignItems: 'center', gap: 12,
+                width: '100%', padding: '11px 16px',
                 background: 'transparent', border: 'none',
-                color: 'rgba(255,255,255,0.85)', fontSize: 16, cursor: 'pointer',
+                color: 'rgba(255,255,255,0.8)', fontSize: 14, cursor: 'pointer',
                 textAlign: 'left', transition: 'background 0.15s',
-                borderBottom: i < 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                borderBottom: i < 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
               }}
-                onMouseEnter={ev => { ev.currentTarget.style.background = 'rgba(233,30,140,0.1)' }}
+                onMouseEnter={ev => { ev.currentTarget.style.background = `${accent}12` }}
                 onMouseLeave={ev => { ev.currentTarget.style.background = 'transparent' }}
               >
-                <span style={{ fontSize: 18, width: 24, textAlign: 'center' }}>{item.icon}</span>
+                <span style={{ fontSize: 15, width: 20, textAlign: 'center' }}>{item.icon}</span>
                 <span>{item.label}</span>
               </button>
             ))}

@@ -41,7 +41,7 @@ export default function LoginPage() {
           <p style={{ color: 'var(--muted-fg)', fontSize: 15 }}>Log in to continue</p>
         </div>
 
-        <div className="glass" style={{ borderRadius: 26, padding: '40px' }}>
+        <div className="glass mobile-auth-card" style={{ borderRadius: 26, padding: '40px' }}>
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: 'var(--muted-fg)', letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 8 }}>

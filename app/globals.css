@@ -520,7 +520,7 @@ body {
 
 @media (max-width: 768px) {
 
-  /* ─── Disable hover transforms on touch (prevent jank) ──────────────── */
+  /* ─── Disable hover transforms on touch ──────────────────────────────── */
   .companion-card:hover {
     transform: none !important;
   }
@@ -540,12 +540,97 @@ body {
     transform: none !important;
   }
 
-  /* ─── Mobile nav brand ──────────────────────────────────────────────── */
+  /* ─── Landing / Dashboard Nav ────────────────────────────────────────── */
+  .mobile-nav {
+    height: 70px !important;
+  }
+  .mobile-nav-inner {
+    grid-template-columns: 1fr auto !important;
+    padding: 0 16px !important;
+  }
   .nav-brand-text {
     font-size: 28px !important;
   }
+  .mobile-hide {
+    display: none !important;
+  }
+  .mobile-nav-actions {
+    gap: 8px !important;
+  }
+  .mobile-nav-cta {
+    padding: 8px 16px !important;
+    font-size: 12px !important;
+  }
+  .mobile-dash-right {
+    gap: 8px !important;
+  }
 
-  /* ─── Onboarding image grid — 2 cols on mobile ─────────────────────── */
+  /* ─── Landing Hero ──────────────────────────────────────────────────── */
+  .mobile-hero {
+    grid-template-columns: 1fr !important;
+    padding: 90px 20px 40px !important;
+    min-height: auto !important;
+    text-align: center;
+  }
+  .mobile-hero-title {
+    font-size: 34px !important;
+    letter-spacing: -1px !important;
+  }
+  .mobile-hero-figure {
+    height: 420px !important;
+    margin: 0 auto;
+  }
+  .hero-glow-outer {
+    width: 400px !important;
+    height: 400px !important;
+  }
+  .hero-glow-mid {
+    width: 300px !important;
+    height: 300px !important;
+  }
+  .hero-glow-pink {
+    width: 180px !important;
+    height: 180px !important;
+  }
+  .hero-glow-core {
+    width: 120px !important;
+    height: 120px !important;
+  }
+
+  /* ─── Landing Sections ──────────────────────────────────────────────── */
+  .mobile-section {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* ─── Dynamic Cards — 2×2 grid ──────────────────────────────────────── */
+  .mobile-dynamic-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  /* ─── Chat Preview — no hover zoom on mobile ────────────────────────── */
+  .mobile-chat-preview {
+    transform: none !important;
+    max-width: 100% !important;
+  }
+
+  /* ─── Pricing Cards — single column ─────────────────────────────────── */
+  .mobile-pricing-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+    max-width: 400px !important;
+  }
+
+  /* ─── Footer ────────────────────────────────────────────────────────── */
+  .mobile-footer {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 24px 16px !important;
+    gap: 12px !important;
+  }
+
+  /* ─── Onboarding image grid — 2 cols ───────────────────────────────── */
   .onb-image-grid {
     grid-template-columns: repeat(2, 1fr) !important;
   }
@@ -560,28 +645,51 @@ body {
 
   /* ─── Chat header ───────────────────────────────────────────────────── */
   .chat-header {
-    padding: 12px 16px !important;
+    padding: 10px 14px !important;
   }
 
   /* ─── Chat messages area ────────────────────────────────────────────── */
   .chat-messages {
-    padding: 16px !important;
+    padding: 12px 14px !important;
   }
 
   /* ─── Chat input bar ────────────────────────────────────────────────── */
   .chat-input-bar {
-    padding: 12px 16px 20px !important;
+    padding: 10px 14px 16px !important;
   }
 
   /* ─── Chat reply bar ────────────────────────────────────────────────── */
   .chat-reply-bar {
-    padding: 10px 16px !important;
+    padding: 8px 14px !important;
   }
 
   /* ─── Chat emoji picker ─────────────────────────────────────────────── */
   .chat-emoji-picker {
-    left: 16px !important;
-    right: 16px !important;
+    left: 14px !important;
+    right: 14px !important;
     width: auto !important;
+  }
+
+  /* ─── Dashboard main ────────────────────────────────────────────────── */
+  .mobile-dash-main {
+    padding: 24px 16px !important;
+  }
+
+  /* ─── Dashboard companion grid — single column on mobile ────────────── */
+  .mobile-companion-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  /* ─── Dashboard stats — stack on mobile ─────────────────────────────── */
+  .mobile-stats-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    margin-top: 32px !important;
+  }
+
+  /* ─── Login / Signup card padding ──────────────────────────────────── */
+  .mobile-auth-card {
+    padding: 24px !important;
   }
 }

@@ -988,7 +988,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function ImageGrid({ cols, children }: { cols: number; children: React.ReactNode }) {
   return (
-    <div style={{
+    <div className="onb-image-grid" style={{
       display: 'grid',
       gridTemplateColumns: `repeat(${cols}, 1fr)`,
       gap: 12,
