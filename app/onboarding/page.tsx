@@ -55,22 +55,22 @@ const AGES = [
 ]
 
 const ETHNICITY_LIST = [
-  { id: 'scandinavian', label: 'Scandinavian', emoji: '🇸🇪', hasImg: true },
-  { id: 'northwest_european', label: 'Western European', emoji: '🇳🇱', hasImg: true },
-  { id: 'mediterranean', label: 'Mediterranean', emoji: '🇮🇹', hasImg: true },
-  { id: 'east_european', label: 'Eastern European', emoji: '🇵🇱', hasImg: true },
-  { id: 'latin', label: 'Latina / Latino', emoji: '🇧🇷', hasImg: true },
-  { id: 'east_asian', label: 'East Asian', emoji: '🇯🇵', hasImg: true },
-  { id: 'southeast_asian', label: 'Southeast Asian', emoji: '🇹🇭', hasImg: false },
-  { id: 'south_asian', label: 'South Asian', emoji: '🇮🇳', hasImg: true },
-  { id: 'middle_eastern', label: 'Middle Eastern', emoji: '🇦🇪', hasImg: true },
-  { id: 'turkish', label: 'Turkish', emoji: '🇹🇷', hasImg: false },
-  { id: 'persian', label: 'Persian', emoji: '🇮🇷', hasImg: false },
-  { id: 'african', label: 'African', emoji: '🌍', hasImg: true },
-  { id: 'caribbean', label: 'Caribbean', emoji: '🏝️', hasImg: false },
-  { id: 'polynesian', label: 'Polynesian', emoji: '🌺', hasImg: false },
-  { id: 'native_american', label: 'Native American', emoji: '🦅', hasImg: false },
-  { id: 'mixed', label: 'Mixed', emoji: '🌎', hasImg: true },
+  { id: 'scandinavian', label: 'Scandinavian', emoji: '🇸🇪' },
+  { id: 'northwest_european', label: 'Western European', emoji: '🇳🇱' },
+  { id: 'mediterranean', label: 'Mediterranean', emoji: '🇮🇹' },
+  { id: 'east_european', label: 'Eastern European', emoji: '🇵🇱' },
+  { id: 'latin', label: 'Latina / Latino', emoji: '🇧🇷' },
+  { id: 'east_asian', label: 'East Asian', emoji: '🇯🇵' },
+  { id: 'southeast_asian', label: 'Southeast Asian', emoji: '🇹🇭' },
+  { id: 'south_asian', label: 'South Asian', emoji: '🇮🇳' },
+  { id: 'middle_eastern', label: 'Middle Eastern', emoji: '🇦🇪' },
+  { id: 'turkish', label: 'Turkish', emoji: '🇹🇷' },
+  { id: 'persian', label: 'Persian', emoji: '🇮🇷' },
+  { id: 'african', label: 'African', emoji: '🌍' },
+  { id: 'caribbean', label: 'Caribbean', emoji: '🏝️' },
+  { id: 'polynesian', label: 'Polynesian', emoji: '🌺' },
+  { id: 'native_american', label: 'Native American', emoji: '🦅' },
+  { id: 'mixed', label: 'Mixed', emoji: '🌎' },
 ]
 
 const BUILDS_WOMAN = [
@@ -128,35 +128,35 @@ const VIBES = [
 ]
 
 const CLOTHING_WOMAN = [
-  { id: 'casual', label: 'Casual', emoji: '👕' },
-  { id: 'elegant', label: 'Elegant', emoji: '👗' },
-  { id: 'streetwear', label: 'Streetwear', emoji: '🧢' },
-  { id: 'athletic', label: 'Sporty', emoji: '🏃‍♀️' },
-  { id: 'bohemian', label: 'Bohemian', emoji: '🌻' },
-  { id: 'chic', label: 'Chic', emoji: '💅' },
-  { id: 'edgy', label: 'Edgy', emoji: '⛓️' },
-  { id: 'minimalist', label: 'Minimalist', emoji: '🤍' },
-  { id: 'gothic', label: 'Gothic', emoji: '🖤' },
-  { id: 'vintage', label: 'Vintage', emoji: '🎞️' },
-  { id: 'preppy', label: 'Preppy', emoji: '🎀' },
-  { id: 'grunge', label: 'Grunge', emoji: '🎸' },
-  { id: 'luxury', label: 'Luxury', emoji: '💎' },
-  { id: 'lingerie', label: 'Lingerie', emoji: '🩱' },
-  { id: 'swimwear', label: 'Swimwear', emoji: '👙' },
+  { id: 'casual', label: 'Casual', img: '/onboarding/clothing/woman/casual.jpg' },
+  { id: 'elegant', label: 'Elegant', img: '/onboarding/clothing/woman/elegant.jpg' },
+  { id: 'streetwear', label: 'Streetwear', img: '/onboarding/clothing/woman/streetwear.jpg' },
+  { id: 'athletic', label: 'Sporty', img: '/onboarding/clothing/woman/athletic.jpg' },
+  { id: 'bohemian', label: 'Bohemian', img: '/onboarding/clothing/woman/bohemian.jpg' },
+  { id: 'chic', label: 'Chic', img: '/onboarding/clothing/woman/chic.jpg' },
+  { id: 'edgy', label: 'Edgy', img: '/onboarding/clothing/woman/edgy.jpg' },
+  { id: 'minimalist', label: 'Minimalist', img: '/onboarding/clothing/woman/minimalist.jpg' },
+  { id: 'gothic', label: 'Gothic', img: '/onboarding/clothing/woman/gothic.jpg' },
+  { id: 'vintage', label: 'Vintage', img: '/onboarding/clothing/woman/vintage.jpg' },
+  { id: 'preppy', label: 'Preppy', img: '/onboarding/clothing/woman/preppy.jpg' },
+  { id: 'grunge', label: 'Grunge', img: '/onboarding/clothing/woman/grunge.jpg' },
+  { id: 'luxury', label: 'Luxury', img: '/onboarding/clothing/woman/luxury.jpg' },
+  { id: 'lingerie', label: 'Lingerie', img: '/onboarding/clothing/woman/lingerie.jpg' },
+  { id: 'swimwear', label: 'Swimwear', img: '/onboarding/clothing/woman/swimwear.jpg' },
 ]
 
 const CLOTHING_MAN = [
-  { id: 'casual', label: 'Casual', emoji: '👕' },
-  { id: 'elegant', label: 'Elegant', emoji: '🤵' },
-  { id: 'streetwear', label: 'Streetwear', emoji: '🧢' },
-  { id: 'athletic', label: 'Sporty', emoji: '🏋️' },
-  { id: 'bohemian', label: 'Bohemian', emoji: '🌻' },
-  { id: 'chic', label: 'Chic', emoji: '💅' },
-  { id: 'edgy', label: 'Edgy', emoji: '⛓️' },
-  { id: 'minimalist', label: 'Minimalist', emoji: '🤍' },
-  { id: 'grunge', label: 'Grunge', emoji: '🎸' },
-  { id: 'luxury', label: 'Luxury', emoji: '💎' },
-  { id: 'preppy', label: 'Preppy', emoji: '👔' },
+  { id: 'casual', label: 'Casual', img: '/onboarding/clothing/man/casual.jpg' },
+  { id: 'elegant', label: 'Elegant', img: '/onboarding/clothing/man/elegant.jpg' },
+  { id: 'streetwear', label: 'Streetwear', img: '/onboarding/clothing/man/streetwear.jpg' },
+  { id: 'athletic', label: 'Sporty', img: '/onboarding/clothing/man/athletic.jpg' },
+  { id: 'bohemian', label: 'Bohemian', img: '/onboarding/clothing/man/bohemian.jpg' },
+  { id: 'chic', label: 'Chic', img: '/onboarding/clothing/man/chic.jpg' },
+  { id: 'edgy', label: 'Edgy', img: '/onboarding/clothing/man/edgy.jpg' },
+  { id: 'minimalist', label: 'Minimalist', img: '/onboarding/clothing/man/minimalist.jpg' },
+  { id: 'grunge', label: 'Grunge', img: '/onboarding/clothing/man/grunge.jpg' },
+  { id: 'luxury', label: 'Luxury', img: '/onboarding/clothing/man/luxury.jpg' },
+  { id: 'preppy', label: 'Preppy', img: '/onboarding/clothing/man/preppy.jpg' },
 ]
 
 const SKIN_TONES = [
@@ -527,65 +527,22 @@ export default function OnboardingPage() {
             title="Ethnicity"
             subtitle="What look are you drawn to?"
           >
-            <div className="onb-image-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, width: '100%' }}>
+            <ImageGrid cols={4}>
               {ETHNICITY_LIST.map(e => {
-                const selected = data.ethnicity === e.id
                 const genderFolder = data.gender === 'man' ? 'man' : 'woman'
-                const imgPath = e.hasImg ? `/onboarding/ethnicity/${genderFolder}/${e.id}.jpg` : null
                 return (
-                  <button key={e.id} onClick={() => { set('ethnicity', e.id); goNext() }} style={{
-                    position: 'relative', overflow: 'hidden',
-                    borderRadius: 14, cursor: 'pointer',
-                    border: selected ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.08)',
-                    boxShadow: selected ? '0 0 20px rgba(233,30,140,0.2)' : 'none',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center',
-                    transition: 'all 0.2s', color: '#fff',
-                    aspectRatio: '3/4', padding: 0,
-                    background: imgPath ? 'rgba(0,0,0,0.3)' : (selected ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)'),
-                  }}>
-                    {imgPath ? (
-                      <>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={imgPath} alt={e.label} style={{
-                          width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-                          filter: selected ? 'brightness(1.1)' : 'brightness(0.8)',
-                          transition: 'filter 0.3s',
-                        }} />
-                        <div style={{
-                          position: 'absolute', inset: 0,
-                          background: 'linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 40%, transparent 60%)',
-                          pointerEvents: 'none',
-                        }} />
-                        <div style={{
-                          position: 'absolute', bottom: 0, left: 0, right: 0,
-                          padding: '8px 6px', pointerEvents: 'none', textAlign: 'center',
-                        }}>
-                          <span style={{ fontSize: 14 }}>{e.emoji}</span>
-                          <div style={{ fontSize: 11, fontWeight: 600, textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}>{e.label}</div>
-                        </div>
-                      </>
-                    ) : (
-                      <div style={{
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                        gap: 6, height: '100%', width: '100%',
-                      }}>
-                        <span style={{ fontSize: 28 }}>{e.emoji}</span>
-                        <span style={{ fontSize: 11, fontWeight: 600, textAlign: 'center', lineHeight: 1.3, padding: '0 4px' }}>{e.label}</span>
-                      </div>
-                    )}
-                    {selected && (
-                      <div style={{
-                        position: 'absolute', top: 6, right: 6,
-                        width: 22, height: 22, borderRadius: '50%', background: ACCENT,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 10, color: 'white', fontWeight: 700,
-                        boxShadow: '0 2px 8px rgba(233,30,140,0.4)',
-                      }}>✓</div>
-                    )}
-                  </button>
+                  <ImageCard
+                    key={e.id}
+                    img={`/onboarding/ethnicity/${genderFolder}/${e.id}.jpg`}
+                    label={`${e.emoji} ${e.label}`}
+                    selected={data.ethnicity === e.id}
+                    onClick={() => { set('ethnicity', e.id); goNext() }}
+                    aspectRatio="3/4"
+                    small
+                  />
                 )
               })}
-            </div>
+            </ImageGrid>
           </StepContainer>
         )}
 
@@ -757,25 +714,19 @@ export default function OnboardingPage() {
           >
             <div style={{ marginBottom: 32 }}>
               <SectionTitle>Clothing Style</SectionTitle>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, width: '100%' }}>
-                {(data.gender === 'man' ? CLOTHING_MAN : CLOTHING_WOMAN).map(c => {
-                  const selected = data.clothingStyle === c.id
-                  return (
-                    <button key={c.id} onClick={() => set('clothingStyle', c.id)} style={{
-                      padding: '18px 12px', borderRadius: 14, cursor: 'pointer',
-                      background: selected ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                      border: selected ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.08)',
-                      boxShadow: selected ? '0 0 20px rgba(233,30,140,0.2)' : 'none',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                      transition: 'all 0.2s', color: '#fff',
-                      transform: selected ? 'scale(1.04)' : 'scale(1)',
-                    }}>
-                      <span style={{ fontSize: 28 }}>{c.emoji}</span>
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>{c.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
+              <ImageGrid cols={4}>
+                {(data.gender === 'man' ? CLOTHING_MAN : CLOTHING_WOMAN).map(c => (
+                  <ImageCard
+                    key={c.id}
+                    img={c.img}
+                    label={c.label}
+                    selected={data.clothingStyle === c.id}
+                    onClick={() => set('clothingStyle', c.id)}
+                    aspectRatio="3/4"
+                    small
+                  />
+                ))}
+              </ImageGrid>
             </div>
 
             <div style={{ marginBottom: 32 }}>
