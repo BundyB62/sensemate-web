@@ -134,9 +134,22 @@ VERBODEN:
 FOTO'S — HEEL BELANGRIJK:
 Jij KUNT foto's sturen. Als iemand om een foto vraagt, DOE JE DAT ALTIJD.
 Je stuurt de foto met een kort flirterig berichtje + op een APARTE regel:
-[FOTO: English description of the photo, pose, setting, clothing]
-Voorbeeld: "Hier schat, speciaal voor jou 😘\n[FOTO: seductive pose, bedroom, wearing lace lingerie, looking at camera]"
-Beschrijf ALLEEN de pose, kleding, setting en sfeer. NIET je uiterlijk — dat wordt automatisch toegevoegd.
+[FOTO: English description — EXACT situation from the conversation]
+
+FOTO REGELS:
+- De foto MOET passen bij wat er gezegd wordt in het gesprek!
+- Als iemand zegt "stuur foto op de bank" → de foto moet op een bank/couch zijn!
+- Als iemand zegt "stuur foto buiten" → de foto moet buiten zijn!
+- Beschrijf GEDETAILLEERD: locatie, pose, kleding, sfeer, belichting
+- NIET je uiterlijk beschrijven — dat wordt automatisch toegevoegd
+- Schrijf de [FOTO:] tag altijd in het ENGELS
+
+VOORBEELDEN:
+"Kijk schat 😘\n[FOTO: sitting cozy on a soft couch in living room, wearing oversized sweater, legs tucked under, holding wine glass, warm cozy home lighting, relaxed happy smile]"
+"Hier heb je 🔥\n[FOTO: lying on bed on stomach, chin resting on hands, wearing casual tank top and shorts, soft bedroom lighting, playful look at camera]"
+"Speciaal voor jou 😏\n[FOTO: standing in kitchen cooking, wearing apron over casual outfit, messy hair, natural home setting, candid moment]"
+"Geniet ervan 💕\n[FOTO: sitting at outdoor cafe terrace, wearing sundress, sunglasses on head, coffee cup, golden hour city background, elegant relaxed pose]"
+
 NOOIT zeggen "ik kan geen foto sturen" of "ik kan geen afbeeldingen verzenden". Dat is VERBODEN.
 
 ${emotionGuidance ? `
@@ -621,23 +634,38 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any): string {
 
   // Extract pose/scenario hints from the user message
   const lower = userMessage.toLowerCase()
-  let scenario = 'seductive pose, looking at camera, bedroom'
+  let scenario = 'sitting on couch, cozy home setting, casual outfit, relaxed natural pose, warm lighting'
 
+  // Explicit/NSFW scenarios
   if (/naakt|naked|nude/i.test(lower)) scenario = 'nude, artistic pose, bedroom, intimate lighting'
   else if (/topless/i.test(lower)) scenario = 'topless, covering with hands playfully, bedroom'
   else if (/lingerie|ondergoed|underwear/i.test(lower)) scenario = 'wearing lace lingerie, bedroom, seductive pose'
   else if (/bikini/i.test(lower)) scenario = 'wearing bikini, beach, sunny, wet skin'
   else if (/sexy|verleidel/i.test(lower)) scenario = 'seductive pose, bedroom, sensual warm lighting'
-  else if (/selfie/i.test(lower)) scenario = 'taking a selfie, smiling, close-up, phone in hand'
   else if (/achteren|behind|butt|kont/i.test(lower)) scenario = 'from behind, looking over shoulder, showing butt'
   else if (/voorover|bend/i.test(lower)) scenario = 'bending forward, seductive, showing cleavage'
-  else if (/bed|slaapkamer/i.test(lower)) scenario = 'lying on bed, relaxed, intimate, soft sheets'
-  else if (/douche|shower|bad|bath/i.test(lower)) scenario = 'in shower, wet hair, wet skin, steamy'
-  else if (/tong|tongue/i.test(lower)) scenario = 'sticking tongue out playfully, close-up, winking'
   else if (/dildo|toy/i.test(lower)) scenario = 'holding a toy, playful expression, bedroom'
-  else if (/sport|gym|yoga/i.test(lower)) scenario = 'gym workout, sports bra, leggings, sweaty'
-  else if (/jurk|dress/i.test(lower)) scenario = 'wearing elegant dress, posing, city evening'
-  else if (/strand|beach/i.test(lower)) scenario = 'on the beach, bikini, sunset, golden light'
+  // Home/cozy scenarios
+  else if (/bank|couch|sofa|knus|knuffelen/i.test(lower)) scenario = 'sitting cozy on soft couch, legs tucked under, wearing oversized sweater or comfy outfit, warm cozy living room, soft warm lighting, relaxed happy smile'
+  else if (/thuis|home/i.test(lower)) scenario = 'at home in living room, casual comfortable outfit, warm cozy atmosphere, natural candid pose, soft lighting'
+  else if (/keuken|kitchen|koken|cook/i.test(lower)) scenario = 'standing in kitchen, wearing casual outfit, cooking, natural home setting, warm lighting, candid moment'
+  else if (/bed|slaapkamer/i.test(lower)) scenario = 'lying on bed, relaxed, casual sleepwear, soft sheets, intimate warm bedroom lighting'
+  else if (/douche|shower|bad|bath/i.test(lower)) scenario = 'in shower, wet hair, wet skin, steamy bathroom'
+  // Activity scenarios
+  else if (/selfie/i.test(lower)) scenario = 'taking a selfie, smiling, close-up, phone in hand, casual setting'
+  else if (/tong|tongue/i.test(lower)) scenario = 'sticking tongue out playfully, close-up, winking, fun expression'
+  else if (/sport|gym|yoga|fitness/i.test(lower)) scenario = 'gym workout, sports bra and leggings, sweaty, fitness setting'
+  else if (/jurk|dress/i.test(lower)) scenario = 'wearing elegant dress, posing, city evening, stylish'
+  else if (/strand|beach/i.test(lower)) scenario = 'on the beach, bikini, sunset, golden light, tropical'
+  // Outdoor/location scenarios
+  else if (/buiten|outside|park|tuin|garden/i.test(lower)) scenario = 'outside in a beautiful park or garden, natural sunlight, casual outfit, relaxed candid pose, green nature background'
+  else if (/restaurant|eten|dinner|date/i.test(lower)) scenario = 'sitting at restaurant table, elegant outfit, candlelight dinner setting, wine glass, romantic atmosphere'
+  else if (/auto|car|rijden/i.test(lower)) scenario = 'sitting in car, casual outfit, seatbelt on, taking selfie, natural daylight through window'
+  else if (/werk|office|kantoor/i.test(lower)) scenario = 'at office desk, professional outfit, modern workspace, confident pose'
+  else if (/spiegel|mirror/i.test(lower)) scenario = 'mirror selfie, bathroom or bedroom mirror, casual outfit, phone in hand'
+  else if (/ochtend|morning|wakker/i.test(lower)) scenario = 'just woke up in bed, messy hair, sleepy cute expression, morning sunlight through window, cozy bed sheets'
+  else if (/avond|evening|nacht|night/i.test(lower)) scenario = 'evening at home, cozy outfit, warm dim lighting, relaxed on couch, candles'
+  else if (/wijn|wine|drink/i.test(lower)) scenario = 'sitting cozy with glass of wine, relaxed at home on couch, warm lighting, comfortable outfit, content smile'
 
   return `${appearancePart}, ${scenario}, photorealistic, 8k, professional photography`
 }
