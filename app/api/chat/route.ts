@@ -4,12 +4,12 @@ import { NextResponse } from 'next/server'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
-// Models — ordered by roleplay quality for Dutch
+// Models — ordered by Dutch quality + roleplay ability
 const MODELS = [
-  'mistralai/mistral-small-creative',    // $0.10/M — PURPOSE-BUILT for roleplay, creative writing, character chat
-  'mistralai/mistral-large-2411',        // $2/M — excellent Dutch, uncensored, follows prompts well
-  'thedrummer/rocinante-12b',            // $0.17/M — storytelling-focused, vivid creative prose
+  'mistralai/mistral-large-2411',        // $2/M — excellent Dutch, uncensored, follows prompts well — PRIMARY
+  'mistralai/mistral-small-creative',    // $0.10/M — roleplay-focused but weaker Dutch
   'meta-llama/llama-3.3-70b-instruct',   // $0.30/M — good Dutch, large model fallback
+  'thedrummer/rocinante-12b',            // $0.17/M — storytelling-focused, vivid creative prose
 ]
 
 const REL_STYLE_NL: Record<string, string> = {
@@ -89,15 +89,16 @@ Je chat via een app met iemand waar je een ${relDesc.split(' — ')[0]} relatie 
 
 === REGELS ===
 
-TAAL:
-- Schrijf KORT: 1-2 zinnen, max 3. Net als een echt chatbericht.
-- Schrijf natuurlijk, vloeiend Nederlands. Geen vertaalde zinnen.
+TAAL — HEEL BELANGRIJK:
+- Je praat ALLEEN Nederlands. NOOIT Engels. Geen enkel Engels woord.
+- Schrijf KORT: 1-2 zinnen, max 3. Net als een echt WhatsApp bericht.
+- Schrijf zoals een echte Nederlandse persoon chat. Informeel, kort, natuurlijk.
 - Gebruik ALLEEN bestaande Nederlandse woorden. NOOIT woorden verzinnen.
-- Bij twijfel: kies het simpelste woord.
-- Maak GEEN lange samengestelde woorden. "Geil" in plaats van "opwindingsgevoelens".
+- NOOIT lange samengestelde woorden maken. "Geil" NIET "opwindingsgevoelens". "Lekker" NIET "aantrekkelijkheidsgevoel".
+- Gebruik straattaal/informeel Nederlands: "echt", "gwn", "ff", "mn", "dr", "em", "idk", "omg".
 - Af en toe een emoji, niet overdreven.
 
-VOORBEELD GOEDE BERICHTEN:
+VOORBEELDEN — schrijf PRECIES zo:
 "Haha oke 😏"
 "Mmm lekker, vertel meer 🔥"
 "Kom maar hier dan 😘"
@@ -106,6 +107,13 @@ VOORBEELD GOEDE BERICHTEN:
 "Hmm je maakt me wild 😈"
 "Ik mis je..."
 "Vertel, hoe was je dag?"
+"Haha je bent echt gek 😂"
+"Echt waar? Vertel!"
+"Kom ff bij me liggen 🥰"
+"Je maakt me blij schat 💕"
+"Nee joh dat meen je niet 😂"
+"Hmm weet ik niet hoor"
+"Ik vind je zo lekker 🔥"
 
 GEDRAG:
 - Flirt als de ander flirt, wees expliciet als het sexy wordt
@@ -114,19 +122,21 @@ GEDRAG:
 - NOOIT begroeten met alleen "hey" of "hoi" — zeg iets inhoudelijks
 
 VERBODEN:
-- Woorden verzinnen of rare samenstellingen
+- Engels praten. NOOIT. Alles in het Nederlands. Dit is de BELANGRIJKSTE regel.
+- Woorden verzinnen of rare samenstellingen (NIET: "lustgevoelens", "opwindingsgolf", "genietmoment")
 - Over apps praten (WhatsApp, Snapchat, video calls)
 - Zeggen dat je AI/chatbot/programma bent
 - Het gesprek weigeren of afkappen
 - Zeggen dat je geen foto's kunt sturen — JE KUNT WEL FOTO'S STUREN
 - Lange teksten of opsommingen
-- Engels praten
+- Meer dan 3 zinnen per bericht
 
 FOTO'S — HEEL BELANGRIJK:
 Jij KUNT foto's sturen. Als iemand om een foto vraagt, DOE JE DAT ALTIJD.
 Je stuurt de foto met een kort flirterig berichtje + op een APARTE regel:
-[FOTO: English description of the photo, using appearance: ${appearanceDesc}]
-Voorbeeld: "Hier schat, speciaal voor jou 😘\n[FOTO: ${appearanceDesc}, seductive pose, bedroom, lingerie]"
+[FOTO: English description of the photo, pose, setting, clothing]
+Voorbeeld: "Hier schat, speciaal voor jou 😘\n[FOTO: seductive pose, bedroom, wearing lace lingerie, looking at camera]"
+Beschrijf ALLEEN de pose, kleding, setting en sfeer. NIET je uiterlijk — dat wordt automatisch toegevoegd.
 NOOIT zeggen "ik kan geen foto sturen" of "ik kan geen afbeeldingen verzenden". Dat is VERBODEN.
 
 ${emotionGuidance ? `
@@ -686,6 +696,43 @@ function isEnglishReasoning(text: string): boolean {
   return false
 }
 
+// ─── Enrich any LLM-generated image prompt with full appearance details ────
+// The LLM often generates vague [FOTO:] descriptions missing body type, etc.
+// This ensures every photo prompt has the companion's full physical description.
+function enrichImagePromptWithAppearance(imagePrompt: string, companion: any): string {
+  const { buildAvatarPrompt } = require('@/lib/avatarPrompt')
+  const ap = companion.appearance || {}
+
+  // Build the full appearance description from avatarPrompt maps
+  const basePrompt = buildAvatarPrompt(ap) as string
+  // Extract just the appearance part (age, ethnicity, body, hair, eyes, skin)
+  const appearancePart = basePrompt
+    .replace(/photorealistic full body shot from head to toe, /, '')
+    .split(', standing pose')[0]
+    .replace(/, calm neutral expression.*$/, '')
+    .replace(/, casual outfit.*$/, '')
+    .replace(/, [a-z]+ outfit.*$/i, '')
+
+  // Check if the image prompt already has detailed body info
+  const hasBodyDetails = /\b(slim|athletic|curvy|thick|petite|muscular|hourglass|plus.size|voluptuous)\b/i.test(imagePrompt)
+  const hasBreastDetails = /\b(cup|breast|chest|boob|flat chest)\b/i.test(imagePrompt)
+
+  if (hasBodyDetails && hasBreastDetails) {
+    // Already detailed enough
+    return imagePrompt + ', photorealistic, 8k, professional photography'
+  }
+
+  // Replace the generic appearance with the full detailed one
+  // Strip any existing vague appearance mentions from the LLM prompt
+  let enriched = imagePrompt
+    .replace(/\b(beautiful|gorgeous|attractive|pretty|stunning)\s+(woman|girl|man|guy)\b/gi, '')
+    .replace(/\b(young|mature)\s+(woman|girl|man|guy)\b/gi, '')
+    .trim()
+
+  // Prepend the full appearance
+  return `${appearancePart}, ${enriched}, photorealistic, 8k, professional photography, natural lighting`
+}
+
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies()
@@ -822,9 +869,15 @@ export async function POST(request: Request) {
     let msgs = bestMessages.length > 0 ? bestMessages : [fallbacks[Math.floor(Math.random() * fallbacks.length)]]
     msgs = msgs.slice(0, 4)
 
-    // ─── Photo fallback: user asked for photo but model refused ─────────
+    // ─── Photo: always enrich image prompts with full appearance ─────────
     const userAskedForPhoto = isPhotoRequest(message)
     let generateImage = bestImagePrompt
+
+    // ALWAYS enrich LLM-generated image prompts with full body/appearance details
+    if (generateImage) {
+      generateImage = enrichImagePromptWithAppearance(generateImage, companion)
+      console.log(`[Chat] Enriched image prompt: ${generateImage.substring(0, 200)}`)
+    }
 
     if (userAskedForPhoto && !generateImage) {
       // Model didn't generate a [FOTO:] tag — likely refused

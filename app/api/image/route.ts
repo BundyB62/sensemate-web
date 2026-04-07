@@ -178,7 +178,7 @@ async function mergeAvatarFace(imageUrl: string, avatarUrl: string, apiKey: stri
     const imgBase64 = Buffer.from(imgBuf).toString('base64')
     const avatarBase64 = Buffer.from(avatarBuf).toString('base64')
 
-    console.log('[Image] Merging avatar face onto generated image...')
+    console.log(`[Image] Merging avatar face onto generated image... (img: ${Math.round(imgBuf.byteLength/1024)}KB, avatar: ${Math.round(avatarBuf.byteLength/1024)}KB)`)
 
     const mergeRes = await fetch(NOVITA_MERGE_FACE_URL, {
       method: 'POST',
@@ -191,6 +191,7 @@ async function mergeAvatarFace(imageUrl: string, avatarUrl: string, apiKey: stri
         face_image_file: avatarBase64,
         extra: {
           response_image_type: 'jpeg',
+          enterprise_plan: { enabled: false },
         },
       }),
     })
@@ -291,14 +292,22 @@ export async function POST(request: Request) {
     }
 
     // Face merge — swap the avatar's face onto the generated image for consistency
+    // Retry up to 2 times if face merge fails (it can be flaky)
     if (avatarUrl && novitaKey) {
-      const mergedUrl = await mergeAvatarFace(imageUrl, avatarUrl, novitaKey)
-      if (mergedUrl) {
-        console.log(`[Image] ✅ Face merged successfully`)
-        return NextResponse.json({ url: mergedUrl })
+      let mergedUrl: string | null = null
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        mergedUrl = await mergeAvatarFace(imageUrl, avatarUrl, novitaKey)
+        if (mergedUrl) {
+          console.log(`[Image] ✅ Face merged successfully (attempt ${attempt})`)
+          return NextResponse.json({ url: mergedUrl })
+        }
+        if (attempt < 2) {
+          console.warn(`[Image] Face merge attempt ${attempt} failed, retrying...`)
+          await new Promise(r => setTimeout(r, 1000))
+        }
       }
-      // If merge fails, return the original image anyway
-      console.warn('[Image] Face merge failed, returning original image')
+      // If merge fails after retries, return the original image anyway
+      console.warn('[Image] Face merge failed after 2 attempts, returning original image')
     }
 
     console.log(`[Image] ✅ Success: ${imageUrl.substring(0, 80)}...`)
