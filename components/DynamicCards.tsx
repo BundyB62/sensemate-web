@@ -128,7 +128,7 @@ function DynamicCard({ d }: { d: typeof DYNAMICS[0] }) {
 
 export default function DynamicCards() {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
+    <div className="mobile-dynamic-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
       {DYNAMICS.map(d => <DynamicCard key={d.name} d={d} />)}
     </div>
   )

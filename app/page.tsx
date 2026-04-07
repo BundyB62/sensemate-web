@@ -80,7 +80,7 @@ export default function LandingPage() {
       </div>
 
       {/* Nav */}
-      <nav style={{
+      <nav className="mobile-nav" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
         height: 110,
         background: 'rgba(6,4,14,0.88)',
@@ -89,7 +89,7 @@ export default function LandingPage() {
         overflow: 'hidden',
       }}>
         {/* Ambient glow behind brand */}
-        <div style={{
+        <div className="mobile-hide" style={{
           position: 'absolute', left: -60, top: '50%', transform: 'translateY(-50%)',
           width: 420, height: 180,
           background: 'radial-gradient(ellipse at 30% 50%, rgba(233,30,140,0.14) 0%, rgba(91,66,243,0.08) 50%, transparent 75%)',
@@ -101,12 +101,12 @@ export default function LandingPage() {
           background: 'linear-gradient(90deg, transparent 0%, rgba(233,30,140,0.35) 30%, rgba(91,66,243,0.35) 70%, transparent 100%)',
         }} />
 
-        <div style={{
+        <div className="mobile-nav-inner" style={{
           height: '100%', display: 'grid', gridTemplateColumns: '1fr auto 1fr',
           alignItems: 'center', padding: '0 52px',
         }}>
           {/* Left — empty spacer */}
-          <div />
+          <div className="mobile-hide" />
 
           {/* Center — Brand */}
           <Link href="/" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
@@ -119,7 +119,7 @@ export default function LandingPage() {
             }}>
               SenseMates
             </div>
-            <div style={{
+            <div className="mobile-hide" style={{
               fontSize: 10, fontWeight: 300, letterSpacing: '0.38em', textTransform: 'uppercase',
               color: 'rgba(249,168,212,0.35)', fontStyle: 'normal',
             }}>
@@ -128,14 +128,14 @@ export default function LandingPage() {
           </Link>
 
           {/* Right — Nav actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end' }}>
-            <Link href="/login" style={{
+          <div className="mobile-nav-actions" style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end' }}>
+            <Link href="/login" className="mobile-hide" style={{
               color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: 14, fontWeight: 500, padding: '8px 20px',
               letterSpacing: '0.02em',
             }}>
               Log In
             </Link>
-            <Link href="/signup" style={{
+            <Link href="/signup" className="mobile-nav-cta" style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               padding: '11px 28px', fontSize: 14, fontWeight: 600, textDecoration: 'none',
               color: '#fff', borderRadius: 100,
@@ -153,7 +153,7 @@ export default function LandingPage() {
 
       <div style={{ position: 'relative', zIndex: 1 }}>
         {/* Hero */}
-        <section style={{
+        <section className="mobile-hero" style={{
           minHeight: '100vh', maxWidth: 1240, margin: '0 auto',
           padding: '130px 60px 60px',
           display: 'grid', gridTemplateColumns: '1fr 1fr',
@@ -161,7 +161,7 @@ export default function LandingPage() {
         }}>
           {/* Left: text */}
           <div>
-            <h1 style={{ fontSize: 58, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-2px', marginBottom: 28, color: '#fff' }}>
+            <h1 className="mobile-hero-title" style={{ fontSize: 58, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-2px', marginBottom: 28, color: '#fff' }}>
               Someone who listens.<br />
               <span style={{
                 background: 'linear-gradient(110deg, #f9a8d4 0%, #e91e8c 50%, #be185d 100%)',
@@ -189,7 +189,7 @@ export default function LandingPage() {
           </div>
 
           {/* Right: hero figure */}
-          <div style={{ position: 'relative', height: 860, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="mobile-hero-figure" style={{ position: 'relative', height: 860, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {/* Outer slow pulse — large blue/purple halo */}
             <div className="hero-glow-outer" style={{
               position: 'absolute', top: '50%', left: '50%',
@@ -231,12 +231,12 @@ export default function LandingPage() {
         </section>
 
         {/* Chat preview */}
-        <section style={{ padding: '20px 60px 80px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
+        <section className="mobile-section" style={{ padding: '20px 60px 80px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
           <ChatPreview />
         </section>
 
         {/* Choose Your Dynamic */}
-        <section style={{ padding: '60px 60px 80px', maxWidth: 1100, margin: '0 auto' }}>
+        <section className="mobile-section" style={{ padding: '60px 60px 80px', maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 48 }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
             <h2 style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-0.5px', color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap', margin: 0 }}>
@@ -248,7 +248,7 @@ export default function LandingPage() {
         </section>
 
         {/* It Evolves With You */}
-        <section style={{ padding: '40px 60px 80px', textAlign: 'center' }}>
+        <section className="mobile-section" style={{ padding: '40px 60px 80px', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 20, maxWidth: 700, margin: '0 auto 20px' }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
             <h2 style={{ fontSize: 26, fontWeight: 600, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap', margin: 0 }}>
@@ -262,12 +262,12 @@ export default function LandingPage() {
         </section>
 
         {/* Pricing — 3 plans */}
-        <section style={{ padding: '20px 60px 120px' }}>
+        <section className="mobile-section" style={{ padding: '20px 60px 120px' }}>
           <PricingCards />
         </section>
 
         {/* Footer */}
-        <footer style={{
+        <footer className="mobile-footer" style={{
           borderTop: '1px solid rgba(255,255,255,0.05)', padding: '28px 60px',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
         }}>

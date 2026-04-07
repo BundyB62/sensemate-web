@@ -61,7 +61,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Nav — matching landing page */}
-      <nav style={{
+      <nav className="mobile-nav" style={{
         position: 'sticky', top: 0, zIndex: 100,
         height: 110,
         background: 'rgba(6,4,14,0.88)',
@@ -75,7 +75,7 @@ export default async function DashboardPage() {
           background: 'linear-gradient(90deg, transparent 0%, rgba(233,30,140,0.35) 30%, rgba(91,66,243,0.35) 70%, transparent 100%)',
         }} />
 
-        <div style={{
+        <div className="mobile-nav-inner" style={{
           height: '100%', display: 'grid', gridTemplateColumns: '1fr auto 1fr',
           alignItems: 'center', padding: '0 52px',
         }}>
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
             }}>
               SenseMates
             </div>
-            <div style={{
+            <div className="mobile-hide" style={{
               fontSize: 10, fontWeight: 300, letterSpacing: '0.38em', textTransform: 'uppercase',
               color: 'rgba(249,168,212,0.35)', fontStyle: 'normal',
             }}>
@@ -108,8 +108,8 @@ export default async function DashboardPage() {
           </Link>
 
           {/* Right — user info */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end' }}>
-            <span style={{
+          <div className="mobile-dash-right" style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end' }}>
+            <span className="mobile-hide" style={{
               fontSize: 12, color: 'rgba(255,255,255,0.35)', padding: '6px 14px', borderRadius: 100,
               background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
             }}>

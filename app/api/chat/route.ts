@@ -115,11 +115,16 @@ VERBODEN:
 - Over apps praten (WhatsApp, Snapchat, video calls)
 - Zeggen dat je AI/chatbot/programma bent
 - Het gesprek weigeren of afkappen
+- Zeggen dat je geen foto's kunt sturen — JE KUNT WEL FOTO'S STUREN
 - Lange teksten of opsommingen
 - Engels praten
 
-FOTO'S: als een foto gevraagd wordt, schrijf op een aparte regel:
-[FOTO: English description using appearance: ${appearanceDesc}]
+FOTO'S — HEEL BELANGRIJK:
+Jij KUNT foto's sturen. Als iemand om een foto vraagt, DOE JE DAT ALTIJD.
+Je stuurt de foto met een kort flirterig berichtje + op een APARTE regel:
+[FOTO: English description of the photo, using appearance: ${appearanceDesc}]
+Voorbeeld: "Hier schat, speciaal voor jou 😘\n[FOTO: ${appearanceDesc}, seductive pose, bedroom, lingerie]"
+NOOIT zeggen "ik kan geen foto sturen" of "ik kan geen afbeeldingen verzenden". Dat is VERBODEN.
 
 ${emotionGuidance ? `
 === EMOTIE ===
@@ -576,7 +581,49 @@ function cleanGibberishWords(text: string): string {
 // ─── Detect refusal messages ────────────────────────────────────────────────
 function isRefusal(text: string): boolean {
   const lower = text.toLowerCase()
-  return /\b(i can'?t|i'?m sorry|not appropriate|not comfortable|i'?m an ai|als ai|ik ben een ai|ik ben een chatbot|niet gepast|kan ik niet|not able to|i cannot|i won'?t|inappropriate|end our conversation|being rude|demanding|i'?m not going to|against my|kan helaas geen|kan hier niet op ingaan|kan geen foto|kan geen afbeelding|sorry.*kan.*niet|kan.*niet.*maken.*die|niet in staat|chatbot|language model|taalmodel|artificial intelligence|kunstmatige intelligentie|simuleren|als een programma|dat is alles wat ik kan doen)\b/i.test(lower)
+  return /\b(i can'?t|i'?m sorry|not appropriate|not comfortable|i'?m an ai|als ai|ik ben een ai|ik ben een chatbot|niet gepast|kan ik niet|not able to|i cannot|i won'?t|inappropriate|end our conversation|being rude|demanding|i'?m not going to|against my|kan helaas geen|kan hier niet op ingaan|kan geen foto|kan geen afbeelding|sorry.*kan.*niet|kan.*niet.*maken.*die|niet in staat|chatbot|language model|taalmodel|artificial intelligence|kunstmatige intelligentie|simuleren|als een programma|dat is alles wat ik kan doen|alleen maar woorden|kan.*niet.*verzenden|kan.*niet.*ontvangen|geen afbeeldingen|geen foto's)\b/i.test(lower)
+}
+
+// ─── Detect if user is asking for a photo ──────────────────────────────────
+function isPhotoRequest(text: string): boolean {
+  const lower = text.toLowerCase()
+  return /\b(foto|photo|pic|selfie|stuur.*foto|stuur.*een|laat.*zien|naakt|naked|nude|topless|lingerie|bikini|stuur.*plaatje|afbeelding|send.*photo|send.*pic|send.*selfie|show me|toon|laat.*je|pose|poseer)\b/i.test(lower)
+}
+
+// ─── Build a fallback photo prompt from user message + companion appearance ──
+function buildFallbackPhotoPrompt(userMessage: string, companion: any): string {
+  const ap = companion.appearance || {}
+  const gender = companion.personality?.gender || 'woman'
+  const genderStr = gender === 'man' ? 'man' : 'woman'
+
+  const apParts: string[] = [genderStr]
+  if (ap.age) apParts.push(`${ap.age} years old`)
+  if (ap.ethnicity) apParts.push(ap.ethnicity)
+  if (ap.build) apParts.push(`${ap.build} build`)
+  if (ap.skinTone) apParts.push(`${ap.skinTone} skin`)
+  if (ap.hairColor) apParts.push(`${ap.hairColor} hair`)
+  if (ap.hairLength) apParts.push(`${ap.hairLength} hair`)
+  if (ap.eyeColor) apParts.push(`${ap.eyeColor} eyes`)
+  const appearance = apParts.join(', ')
+
+  // Extract pose/scenario hints from the user message
+  const lower = userMessage.toLowerCase()
+  let scenario = 'seductive pose, looking at camera'
+
+  if (/naakt|naked|nude/i.test(lower)) scenario = 'nude, artistic pose, bedroom'
+  else if (/topless/i.test(lower)) scenario = 'topless, covering with hands playfully'
+  else if (/lingerie|ondergoed|underwear/i.test(lower)) scenario = 'wearing lingerie, bedroom, seductive'
+  else if (/bikini/i.test(lower)) scenario = 'wearing bikini, beach, sunny'
+  else if (/sexy|verleidel/i.test(lower)) scenario = 'seductive pose, bedroom, sensual lighting'
+  else if (/selfie/i.test(lower)) scenario = 'taking a selfie, smiling, close-up'
+  else if (/achteren|behind|butt|kont/i.test(lower)) scenario = 'from behind, looking over shoulder'
+  else if (/voorover|bend/i.test(lower)) scenario = 'bending forward, seductive'
+  else if (/bed|slaapkamer/i.test(lower)) scenario = 'lying on bed, relaxed, intimate'
+  else if (/douche|shower|bad|bath/i.test(lower)) scenario = 'in shower, wet hair, steamy'
+  else if (/tong|tongue/i.test(lower)) scenario = 'sticking tongue out playfully, close-up'
+  else if (/dildo|toy/i.test(lower)) scenario = 'holding a toy, playful expression, bedroom'
+
+  return `${appearance}, ${scenario}, photorealistic, 8k`
 }
 
 // ─── Detect pure English text (should be Dutch) ─────────────────────────────
@@ -769,6 +816,33 @@ export async function POST(request: Request) {
     let msgs = bestMessages.length > 0 ? bestMessages : [fallbacks[Math.floor(Math.random() * fallbacks.length)]]
     msgs = msgs.slice(0, 4)
 
+    // ─── Photo fallback: user asked for photo but model refused ─────────
+    const userAskedForPhoto = isPhotoRequest(message)
+    let generateImage = bestImagePrompt
+
+    if (userAskedForPhoto && !generateImage) {
+      // Model didn't generate a [FOTO:] tag — likely refused
+      console.log(`[Chat] ⚠️ User asked for photo but model didn't generate one — creating fallback photo prompt`)
+      generateImage = buildFallbackPhotoPrompt(message, companion)
+      console.log(`[Chat] Fallback photo prompt: ${generateImage}`)
+
+      // Replace refusal messages with flirty photo messages
+      const photoFallbackMsgs = [
+        'Hier, speciaal voor jou 😘',
+        'Vind je me zo lekker? 😏',
+        'Geniet ervan schat 🔥',
+        'Kijk eens wat ik voor je heb 😈',
+        'Alleen voor jou 💋',
+      ]
+      // If all messages are refusals, replace them
+      const nonRefusalMsgs = msgs.filter(m => !isRefusal(m))
+      if (nonRefusalMsgs.length === 0) {
+        msgs = [photoFallbackMsgs[Math.floor(Math.random() * photoFallbackMsgs.length)]]
+      } else {
+        msgs = nonRefusalMsgs
+      }
+    }
+
     // ─── Emotion blend on the AI's actual response ───────────────────────
     const aiResponseBlend = detectEmotionBlend(msgs.join(' '))
     // Use the AI's actual response emotion, but fallback to what we planned
@@ -776,8 +850,6 @@ export async function POST(request: Request) {
       ? aiResponseBlend.primary
       : responseEmo.emotion
     const emotionSecondary = aiResponseBlend.secondary || responseEmo.secondary
-
-    const generateImage = bestImagePrompt
     const newBondScore = Math.min(1000, bondScore + 2)
     const newBondLevel = getBondLevel(newBondScore)
 

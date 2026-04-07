@@ -43,7 +43,7 @@ function PriceCard({ children, hoverShadow, hoverBorder, defaultBorder, defaultB
 
 export default function PricingCards() {
   return (
-    <div style={{ maxWidth: 1060, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, alignItems: 'stretch' }}>
+    <div className="mobile-pricing-grid" style={{ maxWidth: 1060, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, alignItems: 'stretch' }}>
 
       {/* Free — muted, smaller, less prominent */}
       <PriceCard

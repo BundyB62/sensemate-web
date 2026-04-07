@@ -85,6 +85,7 @@ export default function ChatPreview() {
 
   return (
     <div
+      className="mobile-chat-preview"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
