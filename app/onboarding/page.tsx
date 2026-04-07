@@ -44,57 +44,34 @@ const RELATIONSHIPS = [
   { id: 'adventure', label: 'Adventurer', desc: 'Spontaneous, wild, thrilling', img: '/onboarding/relationship/adventure.jpg' },
 ]
 
-const AGES: Record<Gender, { id: string; label: string; img: string }[]> = {
-  woman: [
-    { id: '18s', label: '18–20', img: '/onboarding/age/woman/18s.jpg' },
-    { id: '20s', label: '21–24', img: '/onboarding/age/woman/20s.jpg' },
-    { id: '25s', label: '25–29', img: '/onboarding/age/woman/25s.jpg' },
-    { id: '30s', label: '30–35', img: '/onboarding/age/woman/30s.jpg' },
-    { id: '35s', label: '36–40', img: '/onboarding/age/woman/35s.jpg' },
-    { id: '40s', label: '41–50', img: '/onboarding/age/woman/40s.jpg' },
-  ],
-  man: [
-    { id: '18s', label: '18–20', img: '/onboarding/age/man/18s.jpg' },
-    { id: '20s', label: '21–24', img: '/onboarding/age/man/20s.jpg' },
-    { id: '25s', label: '25–29', img: '/onboarding/age/man/25s.jpg' },
-    { id: '30s', label: '30–35', img: '/onboarding/age/man/30s.jpg' },
-    { id: '35s', label: '36–40', img: '/onboarding/age/man/35s.jpg' },
-    { id: '40s', label: '41–50', img: '/onboarding/age/man/40s.jpg' },
-  ],
-  nonbinary: [
-    { id: '18s', label: '18–20', img: '/onboarding/age/woman/18s.jpg' },
-    { id: '20s', label: '21–24', img: '/onboarding/age/woman/20s.jpg' },
-    { id: '25s', label: '25–29', img: '/onboarding/age/man/25s.jpg' },
-    { id: '30s', label: '30–35', img: '/onboarding/age/man/30s.jpg' },
-    { id: '35s', label: '36–40', img: '/onboarding/age/woman/35s.jpg' },
-    { id: '40s', label: '41–50', img: '/onboarding/age/man/40s.jpg' },
-  ],
-}
+const AGES = [
+  { id: '18s', label: '18–20', desc: 'Young & fresh', emoji: '🌸' },
+  { id: '20s', label: '21–24', desc: 'Youthful energy', emoji: '✨' },
+  { id: '25s', label: '25–29', desc: 'In their prime', emoji: '🔥' },
+  { id: '30s', label: '30–35', desc: 'Confident & alluring', emoji: '💎' },
+  { id: '35s', label: '36–40', desc: 'Experienced charm', emoji: '🌹' },
+  { id: '40s', label: '41–45', desc: 'Mature & magnetic', emoji: '👑' },
+  { id: '45s', label: '46–50', desc: 'Timeless beauty', emoji: '🍷' },
+]
 
 const ETHNICITY_LIST = [
-  { id: 'scandinavian', label: 'Scandinavian' },
-  { id: 'northwest_european', label: 'Western European' },
-  { id: 'mediterranean', label: 'Mediterranean' },
-  { id: 'east_european', label: 'Eastern European' },
-  { id: 'latin', label: 'Latina / Latino' },
-  { id: 'east_asian', label: 'East Asian' },
-  { id: 'southeast_asian', label: 'Southeast Asian' },
-  { id: 'south_asian', label: 'South Asian' },
-  { id: 'middle_eastern', label: 'Middle Eastern' },
-  { id: 'turkish', label: 'Turkish' },
-  { id: 'persian', label: 'Persian' },
-  { id: 'african', label: 'African' },
-  { id: 'caribbean', label: 'Caribbean' },
-  { id: 'polynesian', label: 'Polynesian' },
-  { id: 'native_american', label: 'Native American' },
-  { id: 'mixed', label: 'Mixed' },
+  { id: 'scandinavian', label: 'Scandinavian', emoji: '🇸🇪' },
+  { id: 'northwest_european', label: 'Western European', emoji: '🇳🇱' },
+  { id: 'mediterranean', label: 'Mediterranean', emoji: '🇮🇹' },
+  { id: 'east_european', label: 'Eastern European', emoji: '🇵🇱' },
+  { id: 'latin', label: 'Latina / Latino', emoji: '🇧🇷' },
+  { id: 'east_asian', label: 'East Asian', emoji: '🇯🇵' },
+  { id: 'southeast_asian', label: 'Southeast Asian', emoji: '🇹🇭' },
+  { id: 'south_asian', label: 'South Asian', emoji: '🇮🇳' },
+  { id: 'middle_eastern', label: 'Middle Eastern', emoji: '🇦🇪' },
+  { id: 'turkish', label: 'Turkish', emoji: '🇹🇷' },
+  { id: 'persian', label: 'Persian', emoji: '🇮🇷' },
+  { id: 'african', label: 'African', emoji: '🌍' },
+  { id: 'caribbean', label: 'Caribbean', emoji: '🏝️' },
+  { id: 'polynesian', label: 'Polynesian', emoji: '🌺' },
+  { id: 'native_american', label: 'Native American', emoji: '🦅' },
+  { id: 'mixed', label: 'Mixed', emoji: '🌎' },
 ]
-// Build per-gender ethnicity lists with fallback images
-const ETHNICITIES: Record<Gender, { id: string; label: string; img: string }[]> = {
-  woman: ETHNICITY_LIST.map(e => ({ ...e, img: `/onboarding/ethnicity/woman/${e.id}.jpg` })),
-  man: ETHNICITY_LIST.map(e => ({ ...e, img: `/onboarding/ethnicity/man/${e.id}.jpg` })),
-  nonbinary: ETHNICITY_LIST.map(e => ({ ...e, img: `/onboarding/ethnicity/woman/${e.id}.jpg` })),
-}
 
 const BUILDS_WOMAN = [
   { id: 'petite', label: 'Petite', img: '/onboarding/build/woman/petite.jpg' },
@@ -521,18 +498,26 @@ export default function OnboardingPage() {
             title="How old?"
             subtitle="Choose an age range for your SenseMate."
           >
-            <ImageGrid cols={3}>
-              {(AGES[data.gender] || AGES.woman).map(a => (
-                <ImageCard
-                  key={a.id}
-                  img={a.img}
-                  label={a.label}
-                  selected={data.age === a.id}
-                  onClick={() => { set('age', a.id); goNext() }}
-                  aspectRatio="3/4"
-                />
-              ))}
-            </ImageGrid>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, width: '100%' }}>
+              {AGES.map(a => {
+                const selected = data.age === a.id
+                return (
+                  <button key={a.id} onClick={() => { set('age', a.id); goNext() }} style={{
+                    padding: '20px 16px', borderRadius: 16, cursor: 'pointer',
+                    background: selected ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                    border: selected ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.08)',
+                    boxShadow: selected ? '0 0 20px rgba(233,30,140,0.2)' : 'none',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                    transition: 'all 0.2s',
+                    color: '#fff',
+                  }}>
+                    <span style={{ fontSize: 28 }}>{a.emoji}</span>
+                    <span style={{ fontSize: 18, fontWeight: 700 }}>{a.label}</span>
+                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{a.desc}</span>
+                  </button>
+                )
+              })}
+            </div>
           </StepContainer>
         )}
 
@@ -542,19 +527,24 @@ export default function OnboardingPage() {
             title="Ethnicity"
             subtitle="What look are you drawn to?"
           >
-            <ImageGrid cols={5}>
-              {(ETHNICITIES[data.gender] || ETHNICITIES.woman).map(e => (
-                <ImageCard
-                  key={e.id}
-                  img={e.img}
-                  label={e.label}
-                  selected={data.ethnicity === e.id}
-                  onClick={() => { set('ethnicity', e.id); goNext() }}
-                  aspectRatio="3/4"
-                  small
-                />
-              ))}
-            </ImageGrid>
+            <div className="onb-image-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, width: '100%' }}>
+              {ETHNICITY_LIST.map(e => {
+                const selected = data.ethnicity === e.id
+                return (
+                  <button key={e.id} onClick={() => { set('ethnicity', e.id); goNext() }} style={{
+                    padding: '16px 8px', borderRadius: 14, cursor: 'pointer',
+                    background: selected ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                    border: selected ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.08)',
+                    boxShadow: selected ? '0 0 20px rgba(233,30,140,0.2)' : 'none',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                    transition: 'all 0.2s', color: '#fff',
+                  }}>
+                    <span style={{ fontSize: 26 }}>{e.emoji}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, textAlign: 'center', lineHeight: 1.3 }}>{e.label}</span>
+                  </button>
+                )
+              })}
+            </div>
           </StepContainer>
         )}
 
