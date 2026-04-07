@@ -1,29 +1,30 @@
 // Builds a detailed fal.ai image prompt from an appearance profile
+// Uses emphasis weights (:1.3) for key distinguishing features
 
 const AGE_MAP: Record<string, string> = {
-  '18s': '18 year old young',
+  '18s': '18 year old',
   '20s': '22 year old',
   '25s': '26 year old',
   '30s': '32 year old',
   '35s': '37 year old',
-  '40s': '43 year old mature',
-  '45s': '47 year old mature',
+  '40s': '43 year old',
+  '45s': '47 year old',
 }
 
 const BUILD_MAP: Record<string, string> = {
-  petite: 'petite small frame',
-  slim: 'slim lean slender figure',
+  petite: 'petite small thin frame',
+  slim: 'slim lean slender thin figure',
   average: 'average body type',
-  athletic: 'athletic toned fit body',
-  curvy: 'curvy voluptuous body, wide hips',
-  hourglass: 'hourglass figure, cinched waist, wide hips',
-  thick: 'thick curvy body, wide hips, thick thighs',
-  muscular: 'muscular physique, defined muscles',
+  athletic: 'athletic toned fit muscular body',
+  curvy: 'curvy voluptuous body wide hips',
+  hourglass: 'hourglass figure cinched waist wide hips',
+  thick: 'thick curvy body wide hips thick thighs',
+  muscular: 'muscular physique defined muscles',
   plus_size: 'plus-size full-figured body',
-  lean: 'very lean slender body',
+  lean: 'very lean slender thin body',
   stocky: 'stocky compact body',
-  dadbod: 'average dad-bod build',
-  big: 'big broad body',
+  dadbod: 'average dad-bod build soft stomach',
+  big: 'big broad heavy body',
 }
 
 const BREAST_MAP: Record<string, string> = {
@@ -34,14 +35,14 @@ const BREAST_MAP: Record<string, string> = {
   'cup-d': 'large D-cup breasts',
   'cup-dd': 'very large DD-cup breasts',
   'cup-e': 'huge E-cup breasts',
-  'cup-f': 'massive F-cup breasts, very large chest',
+  'cup-f': 'massive F-cup breasts very large chest',
 }
 
 const ASS_MAP: Record<string, string> = {
   small: 'small tight butt',
   medium: 'medium round butt',
   large: 'large round thick butt',
-  xl: 'very large thick juicy butt, wide hips',
+  xl: 'very large thick juicy butt wide hips',
 }
 
 const DICK_MAP: Record<string, string> = {
@@ -53,122 +54,258 @@ const DICK_MAP: Record<string, string> = {
 
 const BEARD_MAP: Record<string, string> = {
   none: '',
-  clean: 'clean shaven smooth face',
-  stubble: 'light stubble shadow, 2-day beard growth',
-  short: 'short trimmed beard, well-groomed',
-  medium: 'medium length full beard, well-maintained',
-  long: 'long full thick beard',
-  goatee: 'goatee beard, chin beard with mustache',
-  mustache: 'thick mustache, no beard, clean shaven chin',
-  vandyke: 'Van Dyke beard, pointed goatee with separate mustache',
-  circle: 'circle beard, connected mustache and goatee',
-  designer: 'designer stubble, perfectly shaped jawline beard, faded edges',
+  clean: 'clean shaven smooth face no facial hair',
+  stubble: 'light stubble shadow 2-day beard growth',
+  short: 'short trimmed full beard well-groomed',
+  medium: 'medium length full beard well-maintained thick beard',
+  long: 'long full thick flowing beard',
+  goatee: 'goatee beard chin beard with mustache clean cheeks',
+  mustache: 'thick mustache no beard clean shaven chin',
+  vandyke: 'Van Dyke beard pointed goatee with separate mustache',
+  circle: 'circle beard connected mustache and round goatee',
+  designer: 'designer stubble perfectly shaped jawline beard faded edges',
 }
 
 const HAIR_LENGTH_MAP: Record<string, string> = {
-  pixie: 'pixie cut hair',
+  pixie: 'pixie cut very short hair',
   bob: 'bob cut hair at chin length',
   lob: 'lob cut hair just above shoulders',
-  short: 'short hair',
+  short: 'short cropped hair',
   medium: 'medium length hair',
-  long: 'long flowing hair',
+  long: 'long flowing hair past shoulders',
   very_long: 'very long hair reaching the waist',
-  braids: 'long braided hair',
-  curly: 'curly voluminous hair',
+  braids: 'long braided hair box braids',
+  curly: 'curly voluminous tight curls hair',
   wavy: 'wavy beach waves hair',
-  straight: 'straight sleek hair',
-  afro: 'natural afro hair',
+  straight: 'straight sleek smooth hair',
+  afro: 'natural afro hair big round shape',
   ponytail: 'high ponytail hairstyle',
   bun: 'elegant bun updo hairstyle',
-  bangs: 'straight bangs with long hair',
+  bangs: 'straight blunt bangs with long hair',
   curtain_bangs: 'curtain bangs framing face with long hair',
-  fade: 'fade cut hair',
+  fade: 'fade cut hair short on sides',
   textured: 'textured natural volume hair',
-  undercut: 'undercut with shaved sides',
-  buzz: 'buzzcut very short hair',
-  dreadlocks: 'long dreadlocks hair',
+  undercut: 'undercut with shaved sides longer on top',
+  buzz: 'buzzcut very short military hair',
+  dreadlocks: 'long dreadlocks hairstyle',
   cornrows: 'cornrow braids hairstyle',
   messy: 'messy tousled bedhead hair',
 }
 
 const HAIR_COLOR_MAP: Record<string, string> = {
-  platinum: 'platinum blonde',
-  blonde: 'blonde',
-  strawberry: 'strawberry blonde',
-  auburn: 'auburn',
+  platinum: 'platinum blonde white-blonde',
+  blonde: 'golden blonde',
+  strawberry: 'strawberry blonde reddish',
+  auburn: 'auburn reddish-brown',
   chestnut: 'chestnut brown',
-  brown: 'brown',
-  dark_brown: 'dark brown',
-  black: 'jet black',
-  red: 'vivid red',
-  ginger: 'natural ginger',
+  brown: 'medium brown',
+  dark_brown: 'dark brown nearly black',
+  black: 'jet black dark',
+  red: 'vivid bright red',
+  ginger: 'natural ginger orange-red',
   grey: 'silver grey',
-  white: 'white',
+  white: 'pure white snow white',
   pink: 'pastel pink',
-  purple: 'deep purple',
-  blue: 'dark blue',
-  ombre: 'ombre dark roots to light tips',
+  purple: 'deep purple violet',
+  blue: 'dark navy blue',
+  ombre: 'ombre dark roots to light blonde tips gradient',
 }
 
 const EYE_COLOR_MAP: Record<string, string> = {
-  blue: 'bright blue', green: 'vivid green', hazel: 'hazel', amber: 'amber',
-  brown: 'brown', dark_brown: 'dark brown', grey: 'grey', violet: 'violet',
+  blue: 'bright vivid blue',
+  green: 'vivid emerald green',
+  hazel: 'hazel green-brown',
+  amber: 'amber golden',
+  brown: 'warm brown',
+  dark_brown: 'deep dark brown',
+  grey: 'steel grey',
+  violet: 'violet purple',
 }
 
 const SKIN_MAP: Record<string, string> = {
-  porcelain: 'porcelain pale skin', fair: 'fair light skin', warm_beige: 'warm beige skin',
-  olive: 'olive skin', tan: 'tan golden-brown skin', brown: 'medium brown skin',
-  dark: 'deep dark skin',
+  porcelain: 'porcelain very pale white skin',
+  fair: 'fair light skin',
+  warm_beige: 'warm beige light-medium skin',
+  olive: 'olive medium skin',
+  tan: 'tan golden-brown skin',
+  brown: 'medium brown skin',
+  dark: 'deep dark brown skin',
 }
 
 const ETHNICITY_MAP: Record<string, string> = {
-  scandinavian: 'Scandinavian Nordic', northwest_european: 'Northwestern European Dutch',
-  mediterranean: 'Mediterranean Italian or Spanish', east_european: 'Eastern European Slavic',
-  latin: 'Latin American', latino: 'Latin American',
-  east_asian: 'East Asian Japanese or Korean', southeast_asian: 'Southeast Asian Thai or Filipino',
-  south_asian: 'South Asian Indian', middle_eastern: 'Middle Eastern Arabian',
-  african: 'African', caribbean: 'Caribbean',
-  polynesian: 'Polynesian Pacific Islander', native_american: 'Native American',
-  turkish: 'Turkish', persian: 'Persian Iranian',
-  european: 'European', mixed: 'mixed ethnicity',
+  // European
+  scandinavian: 'Scandinavian Nordic',
+  northwest_european: 'Northwestern European',
+  british: 'British English',
+  german: 'German Central European',
+  french: 'French',
+  mediterranean: 'Mediterranean Southern European',
+  east_european: 'Eastern European Slavic',
+  irish: 'Irish Celtic',
+  // Latin
+  latin: 'Latin American',
+  latino: 'Latin American',
+  brazilian: 'Brazilian',
+  mexican: 'Mexican',
+  colombian: 'Colombian',
+  argentinian: 'Argentinian',
+  // Asian
+  east_asian: 'East Asian',
+  japanese: 'Japanese',
+  korean: 'Korean',
+  chinese: 'Chinese',
+  southeast_asian: 'Southeast Asian',
+  thai: 'Thai',
+  filipino: 'Filipino',
+  vietnamese: 'Vietnamese',
+  indonesian: 'Indonesian',
+  south_asian: 'South Asian Indian',
+  // Middle Eastern
+  middle_eastern: 'Middle Eastern Arabian',
+  turkish: 'Turkish',
+  persian: 'Persian Iranian',
+  lebanese: 'Lebanese Levantine',
+  // African
+  african: 'African',
+  west_african: 'West African Nigerian',
+  east_african: 'East African Ethiopian Eritrean',
+  south_african: 'South African',
+  // Americas
+  caribbean: 'Caribbean',
+  native_american: 'Native American',
+  // Pacific
+  polynesian: 'Polynesian Pacific Islander',
+  // Mixed
+  european: 'European',
+  mixed: 'mixed ethnicity biracial',
 }
 
 const CLOTHING_MAP: Record<string, string> = {
-  casual: 'casual outfit, t-shirt and jeans',
-  streetwear: 'trendy streetwear outfit, hoodie and sneakers',
-  elegant: 'elegant classy outfit, cocktail dress',
-  sporty: 'sporty athletic outfit, sports bra and leggings',
-  athletic: 'sporty athletic outfit, sports bra and leggings',
-  alternative: 'alternative edgy outfit, leather and chains',
-  luxury: 'luxury designer outfit, high fashion',
-  minimal: 'minimal simple outfit, clean lines',
-  minimalist: 'minimal simple outfit, clean lines',
-  bohemian: 'bohemian flowy outfit, layered fabrics',
-  chic: 'chic fashionable outfit, trendy sophisticated look',
-  edgy: 'edgy punk outfit, leather jacket and boots',
-  gothic: 'gothic dark outfit, black lace and dark makeup',
-  vintage: 'vintage retro outfit, classic timeless style',
-  preppy: 'preppy outfit, polo and skirt',
-  grunge: 'grunge outfit, flannel and ripped jeans',
-  lingerie: 'lingerie, lace bra and panties',
+  casual: 'casual outfit t-shirt and jeans',
+  streetwear: 'trendy streetwear outfit hoodie and sneakers',
+  elegant: 'elegant classy outfit',
+  sporty: 'sporty athletic outfit',
+  athletic: 'sporty athletic outfit',
+  alternative: 'alternative edgy outfit leather and chains',
+  luxury: 'luxury designer outfit high fashion',
+  minimal: 'minimal simple outfit clean lines',
+  minimalist: 'minimal simple outfit clean lines',
+  bohemian: 'bohemian flowy outfit layered fabrics',
+  chic: 'chic fashionable outfit trendy sophisticated',
+  edgy: 'edgy punk outfit leather jacket',
+  gothic: 'gothic dark outfit black lace dark makeup',
+  vintage: 'vintage retro outfit classic timeless style',
+  preppy: 'preppy outfit polo and chinos',
+  grunge: 'grunge outfit flannel and ripped jeans',
+  lingerie: 'lingerie lace bra and panties',
   swimwear: 'bikini swimwear',
 }
 
 export const EMOTION_EXPRESSIONS: Record<string, string> = {
-  neutral: 'calm neutral expression, soft natural smile, direct eye contact',
-  happy: 'genuine smile showing teeth, eyes crinkled with joy, glowing',
-  excited: 'excited wide smile, sparkling eyes, eyebrows raised',
-  sad: 'sad expression, eyes glistening, slight pout',
-  angry: 'angry expression, furrowed brows, intense stare',
-  jealous: 'suspicious side-eye, pouty lips, arms crossed',
-  shy: 'blushing cheeks, bashful smile, eyes glancing away',
-  loving: 'dreamy adoring gaze, warm tender smile',
-  anxious: 'worried expression, biting lower lip, wide eyes',
-  hurt: 'hurt expression, tears, lip quivering',
-  flirty: 'flirtatious smirk, one eyebrow raised, seductive confident gaze',
-  playful: 'playful bright smile, mischievous eyes, laughing',
+  neutral: 'calm neutral expression soft natural smile direct eye contact',
+  happy: 'genuine smile showing teeth eyes crinkled with joy',
+  excited: 'excited wide smile sparkling eyes eyebrows raised',
+  sad: 'sad expression eyes glistening slight pout',
+  angry: 'angry expression furrowed brows intense stare',
+  jealous: 'suspicious side-eye pouty lips',
+  shy: 'blushing cheeks bashful smile eyes glancing away',
+  loving: 'dreamy adoring gaze warm tender smile',
+  anxious: 'worried expression biting lower lip wide eyes',
+  hurt: 'hurt expression tears lip quivering',
+  flirty: 'flirtatious smirk one eyebrow raised seductive gaze',
+  playful: 'playful bright smile mischievous eyes laughing',
 }
 
+// ─── Build a clean appearance description string (for chat photo prompts) ────
+// This gives a consistent, parseable appearance block without prompt engineering artifacts
+export function buildAppearanceDescription(profile: Record<string, any>, includeBody = true): string {
+  const gender = profile.gender === 'man' ? 'man' : 'woman'
+  const isMale = gender === 'man'
+
+  const age = AGE_MAP[profile.age] || '25 year old'
+  const ethnicity = ETHNICITY_MAP[profile.ethnicity] || 'European'
+  const skin = SKIN_MAP[profile.skinTone] || 'fair light skin'
+  const build = BUILD_MAP[profile.build] || 'slim lean body'
+  const hairLength = HAIR_LENGTH_MAP[profile.hairLength] || 'medium length hair'
+  const hairColor = HAIR_COLOR_MAP[profile.hairColor] || 'brown'
+  const eyeColor = EYE_COLOR_MAP[profile.eyeColor] || 'brown'
+
+  const parts: string[] = [
+    `${age} ${ethnicity} ${gender}`,
+    `${skin}`,
+    `${hairColor} ${hairLength}`,
+    `${eyeColor} eyes`,
+  ]
+
+  // Beard for men
+  if (isMale) {
+    const beardDesc = profile.beard && profile.beard !== 'none'
+      ? BEARD_MAP[profile.beard] || ''
+      : 'clean shaven'
+    if (beardDesc) parts.push(beardDesc)
+  }
+
+  // Body details
+  if (includeBody) {
+    parts.push(build)
+    if (!isMale && profile.breastSize) {
+      const breast = BREAST_MAP[profile.breastSize] || ''
+      if (breast) parts.push(breast)
+    }
+    if (profile.assSize) {
+      const ass = ASS_MAP[profile.assSize] || ''
+      if (ass) parts.push(ass)
+    }
+  }
+
+  // Clothing style — always include if available
+  if (profile.clothingStyle) {
+    const clothing = CLOTHING_MAP[profile.clothingStyle] || ''
+    if (clothing) parts.push(clothing)
+  }
+
+  return parts.join(', ')
+}
+
+// ─── Build negative prompt to prevent wrong features ──────────────────────
+export function buildNegativePrompt(profile: Record<string, any>): string {
+  const parts = [
+    'cartoon, anime, illustration, painting, drawing, sketch, 3d render, cgi',
+    'deformed, ugly, blurry, low quality, bad anatomy, bad proportions',
+    'extra fingers, mutated hands, poorly drawn face, disfigured',
+    'watermark, text, logo, signature',
+  ]
+
+  const isMale = profile.gender === 'man'
+
+  // Negative for beard — prevent wrong beard
+  if (isMale) {
+    const beard = profile.beard || 'none'
+    if (beard === 'none' || beard === 'clean') {
+      parts.push('beard, facial hair, stubble, mustache')
+    } else if (beard === 'stubble' || beard === 'designer') {
+      parts.push('long beard, full beard, thick beard, no facial hair')
+    } else if (beard === 'long') {
+      parts.push('clean shaven, smooth face, no beard, stubble, short beard')
+    } else if (beard === 'mustache') {
+      parts.push('beard, chin hair, goatee, full beard')
+    }
+  }
+
+  // Negative for build
+  const build = profile.build || 'slim'
+  if (build === 'slim' || build === 'lean' || build === 'petite') {
+    parts.push('muscular, fat, overweight, thick, stocky, heavy')
+  } else if (build === 'muscular' || build === 'athletic') {
+    parts.push('skinny, thin, fat, overweight, slim')
+  } else if (build === 'thick' || build === 'curvy' || build === 'plus_size') {
+    parts.push('skinny, thin, slim, lean, petite')
+  }
+
+  return parts.join(', ')
+}
+
+// ─── Main prompt builder ──────────────────────────────────────────────────
 export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutral', sfwMode = true): string {
   const gender = profile.gender === 'man' ? 'man' : 'woman'
   const isMale = gender === 'man'
@@ -182,14 +319,18 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
   const eyeColor = EYE_COLOR_MAP[profile.eyeColor] || 'brown'
   const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
 
-  // For profile avatar (SFW mode): always use casual/elegant clothing, skip explicit body parts
-  // For photo prompts: include everything
+  // Clothing — SFW swap for profile avatar
   let clothing = CLOTHING_MAP[profile.clothingStyle] || 'casual outfit'
   if (sfwMode && /lingerie|bikini|swimwear|nude|naked/i.test(clothing)) {
     clothing = 'elegant classy outfit'
   }
 
-  // Body details — skip explicit parts in SFW mode (profile avatar)
+  // Beard (men only)
+  const beardDesc = isMale && profile.beard && profile.beard !== 'none'
+    ? BEARD_MAP[profile.beard] || ''
+    : ''
+
+  // Body details — skip explicit parts in SFW mode
   const bodyParts: string[] = [build]
   if (!sfwMode) {
     if (!isMale && profile.breastSize) {
@@ -200,18 +341,49 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
       const ass = ASS_MAP[profile.assSize] || ''
       if (ass) bodyParts.push(ass)
     }
-    if (isMale && profile.dickSize) {
-      const dick = DICK_MAP[profile.dickSize] || ''
-      if (dick) bodyParts.push(dick)
-    }
   }
   const bodyDesc = bodyParts.join(', ')
 
-  const beardDesc = isMale && profile.beard && profile.beard !== 'none'
-    ? BEARD_MAP[profile.beard] || ''
-    : ''
-  const beard = beardDesc ? `, ${beardDesc}` : ''
+  // ─── Build structured prompt with emphasis weights ───────────────────
+  // Structure: Subject → Face (high priority) → Body → Clothing → Technical
+  // Front-load the most distinguishing features for better adherence
 
-  // Full body shot with all details
-  return `photorealistic full body shot from head to toe, ${age} ${ethnicity} ${gender}, ${skin}, ${bodyDesc}, ${hairColor} ${hairLength}, ${eyeColor} eyes${beard}, ${clothing}, ${expression}, standing pose, natural proportions, beautiful detailed face, shot in a modern studio with soft warm lighting, shallow depth of field, shot on Sony A7R IV 35mm lens, professional fashion photography, ultra-detailed, 8k, realistic anatomy, correct body proportions`
+  const faceParts: string[] = []
+  // Eye color with emphasis
+  faceParts.push(`(${eyeColor} eyes:1.3)`)
+  // Hair with emphasis
+  faceParts.push(`(${hairColor} ${hairLength}:1.2)`)
+  // Skin
+  faceParts.push(skin)
+  // Beard with HIGH emphasis (most commonly missed)
+  if (beardDesc) {
+    faceParts.push(`(${beardDesc}:1.4)`)
+  } else if (isMale) {
+    faceParts.push('(clean shaven smooth face:1.2)')
+  }
+
+  const faceBlock = faceParts.join(', ')
+
+  // Build the prompt — upper body portrait for better face/feature detail
+  const prompt = [
+    // Subject identity (most important — first tokens get highest weight)
+    `photorealistic upper body portrait`,
+    `${age} ${ethnicity} ${gender}`,
+    // Face details (second highest priority)
+    faceBlock,
+    // Body
+    `(${bodyDesc}:1.2)`,
+    // Clothing
+    clothing,
+    // Expression
+    expression,
+    // Technical quality
+    'looking at camera, sharp focus on face',
+    'professional studio portrait, soft warm directional lighting, shallow depth of field',
+    'shot on Sony A7R IV 85mm lens, 8k, ultra-detailed, photorealistic skin texture',
+    // Reinforcement of key features (repeat for emphasis)
+    `BREAK ${eyeColor} eyes, ${hairColor} hair${beardDesc ? `, ${beardDesc}` : ''}, ${build}`,
+  ].join(', ')
+
+  return prompt
 }

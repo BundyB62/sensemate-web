@@ -56,21 +56,43 @@ const AGES = [
 ]
 
 const ETHNICITY_LIST = [
+  // Europe
   { id: 'scandinavian', label: 'Scandinavian', emoji: '🇸🇪' },
   { id: 'northwest_european', label: 'Western European', emoji: '🇳🇱' },
+  { id: 'british', label: 'British', emoji: '🇬🇧' },
+  { id: 'german', label: 'German', emoji: '🇩🇪' },
+  { id: 'french', label: 'French', emoji: '🇫🇷' },
+  { id: 'irish', label: 'Irish', emoji: '🇮🇪' },
   { id: 'mediterranean', label: 'Mediterranean', emoji: '🇮🇹' },
   { id: 'east_european', label: 'Eastern European', emoji: '🇵🇱' },
+  // Latin America
   { id: 'latin', label: 'Latina / Latino', emoji: '🇧🇷' },
-  { id: 'east_asian', label: 'East Asian', emoji: '🇯🇵' },
-  { id: 'southeast_asian', label: 'Southeast Asian', emoji: '🇹🇭' },
+  { id: 'mexican', label: 'Mexican', emoji: '🇲🇽' },
+  { id: 'colombian', label: 'Colombian', emoji: '🇨🇴' },
+  { id: 'argentinian', label: 'Argentinian', emoji: '🇦🇷' },
+  // Asia
+  { id: 'japanese', label: 'Japanese', emoji: '🇯🇵' },
+  { id: 'korean', label: 'Korean', emoji: '🇰🇷' },
+  { id: 'chinese', label: 'Chinese', emoji: '🇨🇳' },
+  { id: 'thai', label: 'Thai', emoji: '🇹🇭' },
+  { id: 'filipino', label: 'Filipino', emoji: '🇵🇭' },
+  { id: 'vietnamese', label: 'Vietnamese', emoji: '🇻🇳' },
+  { id: 'indonesian', label: 'Indonesian', emoji: '🇮🇩' },
   { id: 'south_asian', label: 'South Asian', emoji: '🇮🇳' },
+  // Middle East
   { id: 'middle_eastern', label: 'Middle Eastern', emoji: '🇦🇪' },
   { id: 'turkish', label: 'Turkish', emoji: '🇹🇷' },
   { id: 'persian', label: 'Persian', emoji: '🇮🇷' },
-  { id: 'african', label: 'African', emoji: '🌍' },
+  { id: 'lebanese', label: 'Lebanese', emoji: '🇱🇧' },
+  // Africa
+  { id: 'west_african', label: 'West African', emoji: '🇳🇬' },
+  { id: 'east_african', label: 'East African', emoji: '🇪🇹' },
+  { id: 'south_african', label: 'South African', emoji: '🇿🇦' },
+  // Americas / Pacific
   { id: 'caribbean', label: 'Caribbean', emoji: '🏝️' },
-  { id: 'polynesian', label: 'Polynesian', emoji: '🌺' },
   { id: 'native_american', label: 'Native American', emoji: '🦅' },
+  { id: 'polynesian', label: 'Polynesian', emoji: '🌺' },
+  // Mixed
   { id: 'mixed', label: 'Mixed', emoji: '🌎' },
 ]
 
@@ -203,37 +225,37 @@ const HAIR_COLORS = [
 ]
 
 const HAIR_STYLES_WOMAN = [
-  { id: 'long', label: 'Long Straight', emoji: '💇‍♀️' },
-  { id: 'wavy', label: 'Wavy', emoji: '🌊' },
-  { id: 'curly', label: 'Curly', emoji: '🌀' },
-  { id: 'very_long', label: 'Very Long', emoji: '👸' },
-  { id: 'bob', label: 'Bob', emoji: '✂️' },
-  { id: 'lob', label: 'Lob', emoji: '💁‍♀️' },
-  { id: 'pixie', label: 'Pixie Cut', emoji: '✨' },
-  { id: 'bangs', label: 'Bangs', emoji: '🎀' },
-  { id: 'curtain_bangs', label: 'Curtain Bangs', emoji: '🌸' },
-  { id: 'ponytail', label: 'Ponytail', emoji: '🎗️' },
-  { id: 'bun', label: 'Bun / Updo', emoji: '💫' },
-  { id: 'braids', label: 'Braids', emoji: '🪢' },
-  { id: 'afro', label: 'Afro', emoji: '🌟' },
-  { id: 'messy', label: 'Messy', emoji: '😏' },
-  { id: 'dreadlocks', label: 'Dreadlocks', emoji: '🦁' },
+  { id: 'long', label: 'Long Straight', img: '/onboarding/hair/woman/long.jpg' },
+  { id: 'wavy', label: 'Wavy', img: '/onboarding/hair/woman/wavy.jpg' },
+  { id: 'curly', label: 'Curly', img: '/onboarding/hair/woman/curly.jpg' },
+  { id: 'very_long', label: 'Very Long', img: '/onboarding/hair/woman/very_long.jpg' },
+  { id: 'bob', label: 'Bob', img: '/onboarding/hair/woman/bob.jpg' },
+  { id: 'lob', label: 'Lob', img: '/onboarding/hair/woman/lob.jpg' },
+  { id: 'pixie', label: 'Pixie Cut', img: '/onboarding/hair/woman/pixie.jpg' },
+  { id: 'bangs', label: 'Bangs', img: '/onboarding/hair/woman/bangs.jpg' },
+  { id: 'curtain_bangs', label: 'Curtain Bangs', img: '/onboarding/hair/woman/curtain_bangs.jpg' },
+  { id: 'ponytail', label: 'Ponytail', img: '/onboarding/hair/woman/ponytail.jpg' },
+  { id: 'bun', label: 'Bun / Updo', img: '/onboarding/hair/woman/bun.jpg' },
+  { id: 'braids', label: 'Braids', img: '/onboarding/hair/woman/braids.jpg' },
+  { id: 'afro', label: 'Afro', img: '/onboarding/hair/woman/afro.jpg' },
+  { id: 'messy', label: 'Messy', img: '/onboarding/hair/woman/messy.jpg' },
+  { id: 'dreadlocks', label: 'Dreadlocks', img: '/onboarding/hair/woman/dreadlocks.jpg' },
 ]
 const HAIR_STYLES_MAN = [
-  { id: 'short', label: 'Short', emoji: '💇‍♂️' },
-  { id: 'medium', label: 'Medium', emoji: '👤' },
-  { id: 'long', label: 'Long', emoji: '🧔' },
-  { id: 'fade', label: 'Fade', emoji: '✂️' },
-  { id: 'undercut', label: 'Undercut', emoji: '⚡' },
-  { id: 'buzz', label: 'Buzz Cut', emoji: '🪒' },
-  { id: 'curly', label: 'Curly', emoji: '🌀' },
-  { id: 'wavy', label: 'Wavy', emoji: '🌊' },
-  { id: 'textured', label: 'Textured', emoji: '🔥' },
-  { id: 'cornrows', label: 'Cornrows', emoji: '🪢' },
-  { id: 'dreadlocks', label: 'Dreadlocks', emoji: '🦁' },
-  { id: 'messy', label: 'Messy', emoji: '😏' },
-  { id: 'ponytail', label: 'Man Bun', emoji: '💫' },
-  { id: 'afro', label: 'Afro', emoji: '🌟' },
+  { id: 'short', label: 'Short', img: '/onboarding/hair/man/short.jpg' },
+  { id: 'medium', label: 'Medium', img: '/onboarding/hair/man/medium.jpg' },
+  { id: 'long', label: 'Long', img: '/onboarding/hair/man/long.jpg' },
+  { id: 'fade', label: 'Fade', img: '/onboarding/hair/man/fade.jpg' },
+  { id: 'undercut', label: 'Undercut', img: '/onboarding/hair/man/undercut.jpg' },
+  { id: 'buzz', label: 'Buzz Cut', img: '/onboarding/hair/man/buzz.jpg' },
+  { id: 'curly', label: 'Curly', img: '/onboarding/hair/man/curly.jpg' },
+  { id: 'wavy', label: 'Wavy', img: '/onboarding/hair/man/wavy.jpg' },
+  { id: 'textured', label: 'Textured', img: '/onboarding/hair/man/textured.jpg' },
+  { id: 'cornrows', label: 'Cornrows', img: '/onboarding/hair/man/cornrows.jpg' },
+  { id: 'dreadlocks', label: 'Dreadlocks', img: '/onboarding/hair/man/dreadlocks.jpg' },
+  { id: 'messy', label: 'Messy', img: '/onboarding/hair/man/messy.jpg' },
+  { id: 'ponytail', label: 'Man Bun', img: '/onboarding/hair/man/ponytail.jpg' },
+  { id: 'afro', label: 'Afro', img: '/onboarding/hair/man/afro.jpg' },
 ]
 
 const EYE_COLORS = [
@@ -272,11 +294,11 @@ export default function OnboardingPage() {
   const [regenerating, setRegenerating] = useState(false)
 
   const [data, setData] = useState<FormData>({
-    name: '', gender: 'woman', relationshipStyle: 'lover',
-    personality: [], age: '25s', ethnicity: 'northwest_european',
-    build: 'slim', skinTone: 'fair', hairColor: 'brown',
-    hairLength: 'long', eyeColor: 'brown', clothingStyle: 'casual',
-    vibe: 'sweet', breastSize: 'cup-c', assSize: 'medium', dickSize: 'average',
+    name: '', gender: '' as Gender, relationshipStyle: 'lover',
+    personality: [], age: '', ethnicity: '',
+    build: '', skinTone: '', hairColor: '',
+    hairLength: '', eyeColor: '', clothingStyle: '',
+    vibe: '', breastSize: '', assSize: '', dickSize: '',
     beard: 'none',
   })
 
@@ -294,7 +316,7 @@ export default function OnboardingPage() {
   }
 
   // Steps: gender-specific flow
-  const totalSteps = 9
+  const totalSteps = 8
   const goNext = () => { setAnimDir('forward'); setStep(s => Math.min(s + 1, totalSteps)) }
   const goBack = () => { setAnimDir('back'); setStep(s => Math.max(s - 1, 1)) }
 
@@ -352,7 +374,7 @@ export default function OnboardingPage() {
     setGenerating(false)
     setLoading(false)
     setAnimDir('forward')
-    setStep(9)
+    setStep(8)
   }
 
   async function handleRegenerateAvatar() {
@@ -417,7 +439,7 @@ export default function OnboardingPage() {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative' }}>
 
       {/* ── Top bar ── (hidden on preview step) */}
-      {step < 9 && (
+      {step < 8 && (
         <div style={{
           position: 'sticky', top: 0, zIndex: 50,
           padding: '16px 24px',
@@ -443,15 +465,15 @@ export default function OnboardingPage() {
           </div>
 
           <div style={{ fontSize: 13, color: 'var(--muted-fg)', fontWeight: 600, minWidth: 60, textAlign: 'right' }}>
-            {step} / 8
+            {step} / 7
           </div>
         </div>
       )}
 
       {/* ── Progress bar ── (hidden on preview step) */}
-      {step < 9 && (
+      {step < 8 && (
         <div style={{ display: 'flex', gap: 3, padding: '0 24px', marginTop: -1 }}>
-          {Array.from({ length: 8 }).map((_, i) => (
+          {Array.from({ length: 7 }).map((_, i) => (
             <div key={i} style={{
               height: 3, flex: 1, borderRadius: 2,
               background: i < step
@@ -491,30 +513,8 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 2 — Relationship */}
+        {/* STEP 2 — Age */}
         {step === 2 && (
-          <StepContainer
-            title="What's the vibe?"
-            subtitle="What kind of connection are you looking for?"
-          >
-            <ImageGrid cols={3}>
-              {RELATIONSHIPS.map(r => (
-                <ImageCard
-                  key={r.id}
-                  img={r.img}
-                  label={r.label}
-                  sublabel={r.desc}
-                  selected={data.relationshipStyle === r.id}
-                  onClick={() => { set('relationshipStyle', r.id); goNext() }}
-                  aspectRatio="3/4"
-                />
-              ))}
-            </ImageGrid>
-          </StepContainer>
-        )}
-
-        {/* STEP 3 — Age */}
-        {step === 3 && (
           <StepContainer
             title="How old?"
             subtitle="Choose an age range for your SenseMate."
@@ -542,8 +542,8 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 4 — Ethnicity */}
-        {step === 4 && (
+        {/* STEP 3 — Ethnicity */}
+        {step === 3 && (
           <StepContainer
             title="Ethnicity"
             subtitle="What look are you drawn to?"
@@ -567,8 +567,8 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 5 — Build + Body */}
-        {step === 5 && (
+        {/* STEP 4 — Build + Body */}
+        {step === 4 && (
           <StepContainer
             title="Body type"
             subtitle="Choose the physique you prefer."
@@ -671,8 +671,8 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 6 — Features (skin, hair, eyes) */}
-        {step === 6 && (
+        {/* STEP 5 — Features (skin, hair, eyes) */}
+        {step === 5 && (
           <StepContainer
             title="Features"
             subtitle="Fine-tune the details."
@@ -713,13 +713,19 @@ export default function OnboardingPage() {
               {/* Hairstyle */}
               <div>
                 <SectionTitle>Hairstyle</SectionTitle>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <ImageGrid cols={5}>
                   {(data.gender === 'man' ? HAIR_STYLES_MAN : HAIR_STYLES_WOMAN).map(h => (
-                    <ChipButton key={h.id} selected={data.hairLength === h.id} onClick={() => set('hairLength', h.id)}>
-                      {h.emoji} {h.label}
-                    </ChipButton>
+                    <ImageCard
+                      key={h.id}
+                      img={h.img}
+                      label={h.label}
+                      selected={data.hairLength === h.id}
+                      onClick={() => set('hairLength', h.id)}
+                      aspectRatio="3/4"
+                      small
+                    />
                   ))}
-                </div>
+                </ImageGrid>
               </div>
 
               {/* Eye color */}
@@ -745,52 +751,32 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 7 — Style & Vibe */}
-        {step === 7 && (
+        {/* STEP 6 — Clothing Style */}
+        {step === 6 && (
           <StepContainer
-            title="Style & Vibe"
-            subtitle="How does your SenseMate dress and act?"
+            title="Clothing Style"
+            subtitle="How does your SenseMate dress?"
           >
-            <div style={{ marginBottom: 32 }}>
-              <SectionTitle>Clothing Style</SectionTitle>
-              <ImageGrid cols={4}>
-                {(data.gender === 'man' ? CLOTHING_MAN : CLOTHING_WOMAN).map(c => (
-                  <ImageCard
-                    key={c.id}
-                    img={c.img}
-                    label={c.label}
-                    selected={data.clothingStyle === c.id}
-                    onClick={() => set('clothingStyle', c.id)}
-                    aspectRatio="3/4"
-                    small
-                  />
-                ))}
-              </ImageGrid>
-            </div>
-
-            <div style={{ marginBottom: 32 }}>
-              <SectionTitle>Vibe</SectionTitle>
-              <ImageGrid cols={3}>
-                {VIBES.map(v => (
-                  <ImageCard
-                    key={v.id}
-                    img={v.img}
-                    label={v.label}
-                    selected={data.vibe === v.id}
-                    onClick={() => set('vibe', v.id)}
-                    aspectRatio="3/4"
-                    small
-                  />
-                ))}
-              </ImageGrid>
-            </div>
+            <ImageGrid cols={4}>
+              {(data.gender === 'man' ? CLOTHING_MAN : CLOTHING_WOMAN).map(c => (
+                <ImageCard
+                  key={c.id}
+                  img={c.img}
+                  label={c.label}
+                  selected={data.clothingStyle === c.id}
+                  onClick={() => set('clothingStyle', c.id)}
+                  aspectRatio="3/4"
+                  small
+                />
+              ))}
+            </ImageGrid>
 
             <NavButton onClick={goNext} label="Almost done →" />
           </StepContainer>
         )}
 
-        {/* STEP 8 — Name & Personality */}
-        {step === 8 && (
+        {/* STEP 7 — Name & Personality + Preview */}
+        {step === 7 && (
           <StepContainer
             title="Final touches"
             subtitle="Give your SenseMate a name and personality."
@@ -874,8 +860,8 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* ─── Step 9: Preview ─────────────────────────────────────────── */}
-        {step === 9 && (
+        {/* ─── Step 8: Preview ─────────────────────────────────────────── */}
+        {step === 8 && (
           <StepContainer
             title={`Meet ${data.name}`}
             subtitle="Here's your SenseMate! Like what you see?"
@@ -948,13 +934,6 @@ export default function OnboardingPage() {
                     {trait}
                   </span>
                 ))}
-                <span style={{
-                  padding: '6px 16px', borderRadius: 100, fontSize: 13, fontWeight: 500,
-                  background: 'rgba(91,66,243,0.1)', border: '1px solid rgba(91,66,243,0.2)',
-                  color: '#8b7cf7',
-                }}>
-                  {RELATIONSHIPS.find(r => r.id === data.relationshipStyle)?.label || data.relationshipStyle}
-                </span>
               </div>
 
               {/* Action buttons */}

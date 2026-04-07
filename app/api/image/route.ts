@@ -11,7 +11,7 @@ const FAL_URL = 'https://fal.run/fal-ai/flux/dev'
 
 // ─── Check if prompt needs NSFW model ──────────────────────────────────────
 function isExplicitPrompt(prompt: string): boolean {
-  return /\b(naked|nude|topless|lingerie|underwear|bra\b|panties|bikini|sexy|seductiv|sensual|erotic|bed\b|bedroom|shower|bath\b|intimate|provocat|revealing|sheer|lace\b|stockings|garter|cleavage|undress|strip|tease|bare\s*skin|thong|nightgown|negligee|corset|bodysuit|spiernaakt|naakt|geile?|stout|verleidel|ass\b|butt|boobs?|breast|nipple)/i.test(prompt)
+  return /\b(naked|nude|topless|lingerie|underwear|bra\b|panties|bikini|sexy|seductiv|sensual|erotic|bed\b|bedroom|shower|bath\b|intimate|provocat|revealing|sheer|lace\b|stockings|garter|cleavage|undress|strip|tease|bare\s*skin|thong|nightgown|negligee|corset|bodysuit|spiernaakt|naakt|geile?|stout|verleidel|ass\b|butt|boobs?|breast|nipple|pussy|vagina|penis|dick|cock|spread|legs\s*open|orgasm|moan|cum|wet\b|horny|aroused|pleasure|masturbat|finger|dildo|toy|bondage|tied|handcuff|whip|spank|choking|throat|blowjob|oral|anal|penetrat|riding|doggy|missionary|bent\s*over|on\s*knees|submissiv|dominat|fetish|feet|toes|armpit|sweat|pee|squirt|cream|load|facial|deep\s*throat|gagg|suck|lick|grind|hump|mount|straddle|lap\s*dance|pole\s*dance|kut|pik|lul|tieten|kontje|behaarde?|kutje|neuk|pijp|aftrek|klaarkom|spuit|zuig|lik)/i.test(prompt)
 }
 
 // ─── Generate with Novita.ai (NSFW allowed) ────────────────────────────────
