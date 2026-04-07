@@ -67,8 +67,11 @@ function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, e
   if (ap.ethnicity) apParts.push(ap.ethnicity)
   if (ap.build) apParts.push(`${ap.build} lichaamsbouw`)
   if (ap.skinTone) apParts.push(`${ap.skinTone} huid`)
-  if (ap.hairColor) apParts.push(`${ap.hairColor} haar`)
+  if (ap.hairColor && ap.hairLength) apParts.push(`${ap.hairColor} ${ap.hairLength} haar`)
+  else if (ap.hairColor) apParts.push(`${ap.hairColor} haar`)
   if (ap.eyeColor) apParts.push(`${ap.eyeColor} ogen`)
+  if (ap.breastSize) apParts.push(`${ap.breastSize} borsten`)
+  if (ap.assSize) apParts.push(`${ap.assSize} kont`)
   const appearanceDesc = apParts.length > 0 ? apParts.join(', ') : genderStr
 
   const memoryStr = memories.length > 0
@@ -592,38 +595,41 @@ function isPhotoRequest(text: string): boolean {
 
 // ─── Build a fallback photo prompt from user message + companion appearance ──
 function buildFallbackPhotoPrompt(userMessage: string, companion: any): string {
+  // Use the same rich maps from avatarPrompt for consistency
+  const { buildAvatarPrompt } = require('@/lib/avatarPrompt')
   const ap = companion.appearance || {}
   const gender = companion.personality?.gender || 'woman'
   const genderStr = gender === 'man' ? 'man' : 'woman'
 
-  const apParts: string[] = [genderStr]
-  if (ap.age) apParts.push(`${ap.age} years old`)
-  if (ap.ethnicity) apParts.push(ap.ethnicity)
-  if (ap.build) apParts.push(`${ap.build} build`)
-  if (ap.skinTone) apParts.push(`${ap.skinTone} skin`)
-  if (ap.hairColor) apParts.push(`${ap.hairColor} hair`)
-  if (ap.hairLength) apParts.push(`${ap.hairLength} hair`)
-  if (ap.eyeColor) apParts.push(`${ap.eyeColor} eyes`)
-  const appearance = apParts.join(', ')
+  // Build rich appearance using avatarPrompt maps
+  const basePrompt = buildAvatarPrompt(ap) as string
+  // Extract just the appearance part (before the expression/pose)
+  const appearancePart = basePrompt.split(', standing pose')[0]
+    .replace(/, calm neutral expression.*$/, '')
+    .replace(/, casual outfit.*$/, '')
+    .replace(/photorealistic full body shot from head to toe, /, '')
 
   // Extract pose/scenario hints from the user message
   const lower = userMessage.toLowerCase()
-  let scenario = 'seductive pose, looking at camera'
+  let scenario = 'seductive pose, looking at camera, bedroom'
 
-  if (/naakt|naked|nude/i.test(lower)) scenario = 'nude, artistic pose, bedroom'
-  else if (/topless/i.test(lower)) scenario = 'topless, covering with hands playfully'
-  else if (/lingerie|ondergoed|underwear/i.test(lower)) scenario = 'wearing lingerie, bedroom, seductive'
-  else if (/bikini/i.test(lower)) scenario = 'wearing bikini, beach, sunny'
-  else if (/sexy|verleidel/i.test(lower)) scenario = 'seductive pose, bedroom, sensual lighting'
-  else if (/selfie/i.test(lower)) scenario = 'taking a selfie, smiling, close-up'
-  else if (/achteren|behind|butt|kont/i.test(lower)) scenario = 'from behind, looking over shoulder'
-  else if (/voorover|bend/i.test(lower)) scenario = 'bending forward, seductive'
-  else if (/bed|slaapkamer/i.test(lower)) scenario = 'lying on bed, relaxed, intimate'
-  else if (/douche|shower|bad|bath/i.test(lower)) scenario = 'in shower, wet hair, steamy'
-  else if (/tong|tongue/i.test(lower)) scenario = 'sticking tongue out playfully, close-up'
+  if (/naakt|naked|nude/i.test(lower)) scenario = 'nude, artistic pose, bedroom, intimate lighting'
+  else if (/topless/i.test(lower)) scenario = 'topless, covering with hands playfully, bedroom'
+  else if (/lingerie|ondergoed|underwear/i.test(lower)) scenario = 'wearing lace lingerie, bedroom, seductive pose'
+  else if (/bikini/i.test(lower)) scenario = 'wearing bikini, beach, sunny, wet skin'
+  else if (/sexy|verleidel/i.test(lower)) scenario = 'seductive pose, bedroom, sensual warm lighting'
+  else if (/selfie/i.test(lower)) scenario = 'taking a selfie, smiling, close-up, phone in hand'
+  else if (/achteren|behind|butt|kont/i.test(lower)) scenario = 'from behind, looking over shoulder, showing butt'
+  else if (/voorover|bend/i.test(lower)) scenario = 'bending forward, seductive, showing cleavage'
+  else if (/bed|slaapkamer/i.test(lower)) scenario = 'lying on bed, relaxed, intimate, soft sheets'
+  else if (/douche|shower|bad|bath/i.test(lower)) scenario = 'in shower, wet hair, wet skin, steamy'
+  else if (/tong|tongue/i.test(lower)) scenario = 'sticking tongue out playfully, close-up, winking'
   else if (/dildo|toy/i.test(lower)) scenario = 'holding a toy, playful expression, bedroom'
+  else if (/sport|gym|yoga/i.test(lower)) scenario = 'gym workout, sports bra, leggings, sweaty'
+  else if (/jurk|dress/i.test(lower)) scenario = 'wearing elegant dress, posing, city evening'
+  else if (/strand|beach/i.test(lower)) scenario = 'on the beach, bikini, sunset, golden light'
 
-  return `${appearance}, ${scenario}, photorealistic, 8k`
+  return `${appearancePart}, ${scenario}, photorealistic, 8k, professional photography`
 }
 
 // ─── Detect pure English text (should be Dutch) ─────────────────────────────

@@ -71,43 +71,29 @@ const AGES: Record<Gender, { id: string; label: string; img: string }[]> = {
   ],
 }
 
+const ETHNICITY_LIST = [
+  { id: 'scandinavian', label: 'Scandinavian' },
+  { id: 'northwest_european', label: 'Western European' },
+  { id: 'mediterranean', label: 'Mediterranean' },
+  { id: 'east_european', label: 'Eastern European' },
+  { id: 'latin', label: 'Latina / Latino' },
+  { id: 'east_asian', label: 'East Asian' },
+  { id: 'southeast_asian', label: 'Southeast Asian' },
+  { id: 'south_asian', label: 'South Asian' },
+  { id: 'middle_eastern', label: 'Middle Eastern' },
+  { id: 'turkish', label: 'Turkish' },
+  { id: 'persian', label: 'Persian' },
+  { id: 'african', label: 'African' },
+  { id: 'caribbean', label: 'Caribbean' },
+  { id: 'polynesian', label: 'Polynesian' },
+  { id: 'native_american', label: 'Native American' },
+  { id: 'mixed', label: 'Mixed' },
+]
+// Build per-gender ethnicity lists with fallback images
 const ETHNICITIES: Record<Gender, { id: string; label: string; img: string }[]> = {
-  woman: [
-    { id: 'scandinavian', label: 'Scandinavian', img: '/onboarding/ethnicity/woman/scandinavian.jpg' },
-    { id: 'northwest_european', label: 'Western European', img: '/onboarding/ethnicity/woman/northwest_european.jpg' },
-    { id: 'mediterranean', label: 'Mediterranean', img: '/onboarding/ethnicity/woman/mediterranean.jpg' },
-    { id: 'east_european', label: 'Eastern European', img: '/onboarding/ethnicity/woman/east_european.jpg' },
-    { id: 'latin', label: 'Latin', img: '/onboarding/ethnicity/woman/latin.jpg' },
-    { id: 'east_asian', label: 'East Asian', img: '/onboarding/ethnicity/woman/east_asian.jpg' },
-    { id: 'south_asian', label: 'South Asian', img: '/onboarding/ethnicity/woman/south_asian.jpg' },
-    { id: 'middle_eastern', label: 'Middle Eastern', img: '/onboarding/ethnicity/woman/middle_eastern.jpg' },
-    { id: 'african', label: 'African', img: '/onboarding/ethnicity/woman/african.jpg' },
-    { id: 'mixed', label: 'Mixed', img: '/onboarding/ethnicity/woman/mixed.jpg' },
-  ],
-  man: [
-    { id: 'scandinavian', label: 'Scandinavian', img: '/onboarding/ethnicity/man/scandinavian.jpg' },
-    { id: 'northwest_european', label: 'Western European', img: '/onboarding/ethnicity/man/northwest_european.jpg' },
-    { id: 'mediterranean', label: 'Mediterranean', img: '/onboarding/ethnicity/man/mediterranean.jpg' },
-    { id: 'east_european', label: 'Eastern European', img: '/onboarding/ethnicity/man/east_european.jpg' },
-    { id: 'latin', label: 'Latin', img: '/onboarding/ethnicity/man/latin.jpg' },
-    { id: 'east_asian', label: 'East Asian', img: '/onboarding/ethnicity/man/east_asian.jpg' },
-    { id: 'south_asian', label: 'South Asian', img: '/onboarding/ethnicity/man/south_asian.jpg' },
-    { id: 'middle_eastern', label: 'Middle Eastern', img: '/onboarding/ethnicity/man/middle_eastern.jpg' },
-    { id: 'african', label: 'African', img: '/onboarding/ethnicity/man/african.jpg' },
-    { id: 'mixed', label: 'Mixed', img: '/onboarding/ethnicity/man/mixed.jpg' },
-  ],
-  nonbinary: [
-    { id: 'scandinavian', label: 'Scandinavian', img: '/onboarding/ethnicity/woman/scandinavian.jpg' },
-    { id: 'northwest_european', label: 'Western European', img: '/onboarding/ethnicity/man/northwest_european.jpg' },
-    { id: 'mediterranean', label: 'Mediterranean', img: '/onboarding/ethnicity/woman/mediterranean.jpg' },
-    { id: 'east_european', label: 'Eastern European', img: '/onboarding/ethnicity/man/east_european.jpg' },
-    { id: 'latin', label: 'Latin', img: '/onboarding/ethnicity/woman/latin.jpg' },
-    { id: 'east_asian', label: 'East Asian', img: '/onboarding/ethnicity/man/east_asian.jpg' },
-    { id: 'south_asian', label: 'South Asian', img: '/onboarding/ethnicity/woman/south_asian.jpg' },
-    { id: 'middle_eastern', label: 'Middle Eastern', img: '/onboarding/ethnicity/man/middle_eastern.jpg' },
-    { id: 'african', label: 'African', img: '/onboarding/ethnicity/woman/african.jpg' },
-    { id: 'mixed', label: 'Mixed', img: '/onboarding/ethnicity/man/mixed.jpg' },
-  ],
+  woman: ETHNICITY_LIST.map(e => ({ ...e, img: `/onboarding/ethnicity/woman/${e.id}.jpg` })),
+  man: ETHNICITY_LIST.map(e => ({ ...e, img: `/onboarding/ethnicity/man/${e.id}.jpg` })),
+  nonbinary: ETHNICITY_LIST.map(e => ({ ...e, img: `/onboarding/ethnicity/woman/${e.id}.jpg` })),
 }
 
 const BUILDS_WOMAN = [
@@ -173,6 +159,13 @@ const CLOTHING_WOMAN = [
   { id: 'chic', label: 'Chic', img: '/onboarding/clothing/woman/chic.jpg' },
   { id: 'edgy', label: 'Edgy', img: '/onboarding/clothing/woman/edgy.jpg' },
   { id: 'minimalist', label: 'Minimalist', img: '/onboarding/clothing/woman/minimalist.jpg' },
+  { id: 'gothic', label: 'Gothic', img: '/onboarding/clothing/woman/gothic.jpg' },
+  { id: 'vintage', label: 'Vintage', img: '/onboarding/clothing/woman/vintage.jpg' },
+  { id: 'preppy', label: 'Preppy', img: '/onboarding/clothing/woman/preppy.jpg' },
+  { id: 'grunge', label: 'Grunge', img: '/onboarding/clothing/woman/grunge.jpg' },
+  { id: 'luxury', label: 'Luxury', img: '/onboarding/clothing/woman/luxury.jpg' },
+  { id: 'lingerie', label: 'Lingerie', img: '/onboarding/clothing/woman/lingerie.jpg' },
+  { id: 'swimwear', label: 'Swimwear', img: '/onboarding/clothing/woman/swimwear.jpg' },
 ]
 
 const CLOTHING_MAN = [
@@ -184,6 +177,9 @@ const CLOTHING_MAN = [
   { id: 'chic', label: 'Chic', img: '/onboarding/clothing/man/chic.jpg' },
   { id: 'edgy', label: 'Edgy', img: '/onboarding/clothing/man/edgy.jpg' },
   { id: 'minimalist', label: 'Minimalist', img: '/onboarding/clothing/man/minimalist.jpg' },
+  { id: 'grunge', label: 'Grunge', img: '/onboarding/clothing/man/grunge.jpg' },
+  { id: 'luxury', label: 'Luxury', img: '/onboarding/clothing/man/luxury.jpg' },
+  { id: 'preppy', label: 'Preppy', img: '/onboarding/clothing/man/preppy.jpg' },
 ]
 
 const SKIN_TONES = [
@@ -199,18 +195,54 @@ const SKIN_TONES = [
 const HAIR_COLORS = [
   { id: 'platinum', label: 'Platinum', color: '#f0ece0' },
   { id: 'blonde', label: 'Blonde', color: '#d4a843' },
+  { id: 'strawberry', label: 'Strawberry', color: '#d4845a' },
   { id: 'auburn', label: 'Auburn', color: '#8b3a2a' },
+  { id: 'ginger', label: 'Ginger', color: '#c46030' },
   { id: 'chestnut', label: 'Chestnut', color: '#6b3a2a' },
   { id: 'brown', label: 'Brown', color: '#4a2c1a' },
+  { id: 'dark_brown', label: 'Dark Brown', color: '#2a1a0a' },
   { id: 'black', label: 'Black', color: '#1a1a1a' },
   { id: 'red', label: 'Red', color: '#c0392b' },
   { id: 'grey', label: 'Silver', color: '#a0a0a0' },
+  { id: 'white', label: 'White', color: '#e8e8e8' },
+  { id: 'pink', label: 'Pink', color: '#e091b0' },
+  { id: 'purple', label: 'Purple', color: '#8040a0' },
+  { id: 'blue', label: 'Blue', color: '#4060a0' },
+  { id: 'ombre', label: 'Ombré', color: 'linear-gradient(180deg, #2a1a0a, #d4a843)' },
 ]
 
-const HAIR_LENGTHS = [
-  { id: 'pixie', label: 'Pixie' }, { id: 'bob', label: 'Bob' },
-  { id: 'lob', label: 'Lob' }, { id: 'medium', label: 'Medium' },
-  { id: 'long', label: 'Long' }, { id: 'very_long', label: 'Very Long' },
+const HAIR_STYLES_WOMAN = [
+  { id: 'long', label: 'Long Straight', emoji: '💇‍♀️' },
+  { id: 'wavy', label: 'Wavy', emoji: '🌊' },
+  { id: 'curly', label: 'Curly', emoji: '🌀' },
+  { id: 'very_long', label: 'Very Long', emoji: '👸' },
+  { id: 'bob', label: 'Bob', emoji: '✂️' },
+  { id: 'lob', label: 'Lob', emoji: '💁‍♀️' },
+  { id: 'pixie', label: 'Pixie Cut', emoji: '✨' },
+  { id: 'bangs', label: 'Bangs', emoji: '🎀' },
+  { id: 'curtain_bangs', label: 'Curtain Bangs', emoji: '🌸' },
+  { id: 'ponytail', label: 'Ponytail', emoji: '🎗️' },
+  { id: 'bun', label: 'Bun / Updo', emoji: '💫' },
+  { id: 'braids', label: 'Braids', emoji: '🪢' },
+  { id: 'afro', label: 'Afro', emoji: '🌟' },
+  { id: 'messy', label: 'Messy', emoji: '😏' },
+  { id: 'dreadlocks', label: 'Dreadlocks', emoji: '🦁' },
+]
+const HAIR_STYLES_MAN = [
+  { id: 'short', label: 'Short', emoji: '💇‍♂️' },
+  { id: 'medium', label: 'Medium', emoji: '👤' },
+  { id: 'long', label: 'Long', emoji: '🧔' },
+  { id: 'fade', label: 'Fade', emoji: '✂️' },
+  { id: 'undercut', label: 'Undercut', emoji: '⚡' },
+  { id: 'buzz', label: 'Buzz Cut', emoji: '🪒' },
+  { id: 'curly', label: 'Curly', emoji: '🌀' },
+  { id: 'wavy', label: 'Wavy', emoji: '🌊' },
+  { id: 'textured', label: 'Textured', emoji: '🔥' },
+  { id: 'cornrows', label: 'Cornrows', emoji: '🪢' },
+  { id: 'dreadlocks', label: 'Dreadlocks', emoji: '🦁' },
+  { id: 'messy', label: 'Messy', emoji: '😏' },
+  { id: 'ponytail', label: 'Man Bun', emoji: '💫' },
+  { id: 'afro', label: 'Afro', emoji: '🌟' },
 ]
 
 const EYE_COLORS = [
@@ -230,6 +262,10 @@ const PERSONALITIES = [
   { id: 'Passionate', emoji: '🔥' }, { id: 'Adventurous', emoji: '🌍' },
   { id: 'Calm', emoji: '🌿' }, { id: 'Energetic', emoji: '⚡' },
   { id: 'Intellectual', emoji: '📚' }, { id: 'Empathic', emoji: '🫂' },
+  { id: 'Dominant', emoji: '👑' }, { id: 'Submissive', emoji: '🦋' },
+  { id: 'Sarcastic', emoji: '😏' }, { id: 'Sweet', emoji: '🍬' },
+  { id: 'Confident', emoji: '💪' }, { id: 'Shy', emoji: '🙈' },
+  { id: 'Creative', emoji: '🎨' }, { id: 'Protective', emoji: '🛡️' },
 ]
 
 // ─── Main Component ──────────────────────────────────────────────────────────
@@ -647,13 +683,13 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {/* Hair length */}
+              {/* Hairstyle */}
               <div>
-                <SectionTitle>Hair Length</SectionTitle>
+                <SectionTitle>Hairstyle</SectionTitle>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {HAIR_LENGTHS.map(h => (
+                  {(data.gender === 'man' ? HAIR_STYLES_MAN : HAIR_STYLES_WOMAN).map(h => (
                     <ChipButton key={h.id} selected={data.hairLength === h.id} onClick={() => set('hairLength', h.id)}>
-                      {h.label}
+                      {h.emoji} {h.label}
                     </ChipButton>
                   ))}
                 </div>

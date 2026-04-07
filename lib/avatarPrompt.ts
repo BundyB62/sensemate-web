@@ -2,11 +2,12 @@
 
 const AGE_MAP: Record<string, string> = {
   '18s': '18 year old young',
-  '20s': '22 year old young',
+  '20s': '22 year old',
   '25s': '26 year old',
-  '30s': '31 year old',
-  '35s': '36 year old',
-  '40s': '41 year old',
+  '30s': '32 year old',
+  '35s': '37 year old',
+  '40s': '43 year old mature',
+  '45s': '47 year old mature',
 }
 
 const BUILD_MAP: Record<string, string> = {
@@ -16,10 +17,13 @@ const BUILD_MAP: Record<string, string> = {
   athletic: 'athletic toned fit body',
   curvy: 'curvy voluptuous body, wide hips',
   hourglass: 'hourglass figure, cinched waist, wide hips',
+  thick: 'thick curvy body, wide hips, thick thighs',
   muscular: 'muscular physique, defined muscles',
   plus_size: 'plus-size full-figured body',
   lean: 'very lean slender body',
   stocky: 'stocky compact body',
+  dadbod: 'average dad-bod build',
+  big: 'big broad body',
 }
 
 const BREAST_MAP: Record<string, string> = {
@@ -30,6 +34,7 @@ const BREAST_MAP: Record<string, string> = {
   'cup-d': 'large D-cup breasts',
   'cup-dd': 'very large DD-cup breasts',
   'cup-e': 'huge E-cup breasts',
+  'cup-f': 'massive F-cup breasts, very large chest',
 }
 
 const ASS_MAP: Record<string, string> = {
@@ -54,22 +59,41 @@ const HAIR_LENGTH_MAP: Record<string, string> = {
   medium: 'medium length hair',
   long: 'long flowing hair',
   very_long: 'very long hair reaching the waist',
-  braids: 'braided hair',
+  braids: 'long braided hair',
+  curly: 'curly voluminous hair',
+  wavy: 'wavy beach waves hair',
+  straight: 'straight sleek hair',
+  afro: 'natural afro hair',
+  ponytail: 'high ponytail hairstyle',
+  bun: 'elegant bun updo hairstyle',
+  bangs: 'straight bangs with long hair',
+  curtain_bangs: 'curtain bangs framing face with long hair',
   fade: 'fade cut hair',
   textured: 'textured natural volume hair',
   undercut: 'undercut with shaved sides',
+  buzz: 'buzzcut very short hair',
+  dreadlocks: 'long dreadlocks hair',
+  cornrows: 'cornrow braids hairstyle',
+  messy: 'messy tousled bedhead hair',
 }
 
 const HAIR_COLOR_MAP: Record<string, string> = {
   platinum: 'platinum blonde',
   blonde: 'blonde',
+  strawberry: 'strawberry blonde',
   auburn: 'auburn',
   chestnut: 'chestnut brown',
   brown: 'brown',
   dark_brown: 'dark brown',
   black: 'jet black',
   red: 'vivid red',
+  ginger: 'natural ginger',
   grey: 'silver grey',
+  white: 'white',
+  pink: 'pastel pink',
+  purple: 'deep purple',
+  blue: 'dark blue',
+  ombre: 'ombre dark roots to light tips',
 }
 
 const EYE_COLOR_MAP: Record<string, string> = {
@@ -87,20 +111,31 @@ const ETHNICITY_MAP: Record<string, string> = {
   scandinavian: 'Scandinavian Nordic', northwest_european: 'Northwestern European Dutch',
   mediterranean: 'Mediterranean Italian or Spanish', east_european: 'Eastern European Slavic',
   latin: 'Latin American', latino: 'Latin American',
-  east_asian: 'East Asian', south_asian: 'South Asian Indian',
-  middle_eastern: 'Middle Eastern', african: 'African',
+  east_asian: 'East Asian Japanese or Korean', southeast_asian: 'Southeast Asian Thai or Filipino',
+  south_asian: 'South Asian Indian', middle_eastern: 'Middle Eastern Arabian',
+  african: 'African', caribbean: 'Caribbean',
+  polynesian: 'Polynesian Pacific Islander', native_american: 'Native American',
+  turkish: 'Turkish', persian: 'Persian Iranian',
   european: 'European', mixed: 'mixed ethnicity',
 }
 
 const CLOTHING_MAP: Record<string, string> = {
   casual: 'casual outfit, t-shirt and jeans',
-  streetwear: 'trendy streetwear outfit',
-  elegant: 'elegant classy outfit',
+  streetwear: 'trendy streetwear outfit, hoodie and sneakers',
+  elegant: 'elegant classy outfit, cocktail dress',
   sporty: 'sporty athletic outfit, sports bra and leggings',
-  alternative: 'alternative edgy outfit',
-  luxury: 'luxury designer outfit',
-  minimal: 'minimal simple outfit',
-  bohemian: 'bohemian flowy outfit',
+  athletic: 'sporty athletic outfit, sports bra and leggings',
+  alternative: 'alternative edgy outfit, leather and chains',
+  luxury: 'luxury designer outfit, high fashion',
+  minimal: 'minimal simple outfit, clean lines',
+  minimalist: 'minimal simple outfit, clean lines',
+  bohemian: 'bohemian flowy outfit, layered fabrics',
+  chic: 'chic fashionable outfit, trendy sophisticated look',
+  edgy: 'edgy punk outfit, leather jacket and boots',
+  gothic: 'gothic dark outfit, black lace and dark makeup',
+  vintage: 'vintage retro outfit, classic timeless style',
+  preppy: 'preppy outfit, polo and skirt',
+  grunge: 'grunge outfit, flannel and ripped jeans',
   lingerie: 'lingerie, lace bra and panties',
   swimwear: 'bikini swimwear',
 }
