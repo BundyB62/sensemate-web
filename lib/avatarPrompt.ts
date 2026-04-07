@@ -155,7 +155,7 @@ export const EMOTION_EXPRESSIONS: Record<string, string> = {
   playful: 'playful bright smile, mischievous eyes, laughing',
 }
 
-export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutral'): string {
+export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutral', sfwMode = true): string {
   const gender = profile.gender === 'man' ? 'man' : 'woman'
   const isMale = gender === 'man'
 
@@ -167,21 +167,29 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
   const hairColor = HAIR_COLOR_MAP[profile.hairColor] || 'brown'
   const eyeColor = EYE_COLOR_MAP[profile.eyeColor] || 'brown'
   const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
-  const clothing = CLOTHING_MAP[profile.clothingStyle] || 'casual outfit'
 
-  // Body details
+  // For profile avatar (SFW mode): always use casual/elegant clothing, skip explicit body parts
+  // For photo prompts: include everything
+  let clothing = CLOTHING_MAP[profile.clothingStyle] || 'casual outfit'
+  if (sfwMode && /lingerie|bikini|swimwear|nude|naked/i.test(clothing)) {
+    clothing = 'elegant classy outfit'
+  }
+
+  // Body details — skip explicit parts in SFW mode (profile avatar)
   const bodyParts: string[] = [build]
-  if (!isMale && profile.breastSize) {
-    const breast = BREAST_MAP[profile.breastSize] || ''
-    if (breast) bodyParts.push(breast)
-  }
-  if (profile.assSize) {
-    const ass = ASS_MAP[profile.assSize] || ''
-    if (ass) bodyParts.push(ass)
-  }
-  if (isMale && profile.dickSize) {
-    const dick = DICK_MAP[profile.dickSize] || ''
-    if (dick) bodyParts.push(dick)
+  if (!sfwMode) {
+    if (!isMale && profile.breastSize) {
+      const breast = BREAST_MAP[profile.breastSize] || ''
+      if (breast) bodyParts.push(breast)
+    }
+    if (profile.assSize) {
+      const ass = ASS_MAP[profile.assSize] || ''
+      if (ass) bodyParts.push(ass)
+    }
+    if (isMale && profile.dickSize) {
+      const dick = DICK_MAP[profile.dickSize] || ''
+      if (dick) bodyParts.push(dick)
+    }
   }
   const bodyDesc = bodyParts.join(', ')
 

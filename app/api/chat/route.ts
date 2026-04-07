@@ -611,8 +611,8 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any): string {
   const gender = companion.personality?.gender || 'woman'
   const genderStr = gender === 'man' ? 'man' : 'woman'
 
-  // Build rich appearance using avatarPrompt maps
-  const basePrompt = buildAvatarPrompt(ap) as string
+  // Build rich appearance using avatarPrompt maps (NSFW mode for photo prompts)
+  const basePrompt = buildAvatarPrompt(ap, 'neutral', false) as string
   // Extract just the appearance part (before the expression/pose)
   const appearancePart = basePrompt.split(', standing pose')[0]
     .replace(/, calm neutral expression.*$/, '')
@@ -703,8 +703,8 @@ function enrichImagePromptWithAppearance(imagePrompt: string, companion: any): s
   const { buildAvatarPrompt } = require('@/lib/avatarPrompt')
   const ap = companion.appearance || {}
 
-  // Build the full appearance description from avatarPrompt maps
-  const basePrompt = buildAvatarPrompt(ap) as string
+  // Build the full appearance description from avatarPrompt maps (NSFW mode for photo prompts)
+  const basePrompt = buildAvatarPrompt(ap, 'neutral', false) as string
   // Extract just the appearance part (age, ethnicity, body, hair, eyes, skin)
   const appearancePart = basePrompt
     .replace(/photorealistic full body shot from head to toe, /, '')
