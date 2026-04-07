@@ -653,30 +653,18 @@ body {
     display: flex !important;
   }
 
-  /* ─── Chat header ───────────────────────────────────────────────────── */
+  /* ─── Chat header — back button becomes ← on mobile ─────────────────── */
   .chat-header {
-    padding: 10px 14px !important;
+    padding: 8px 12px !important;
   }
-
-  /* ─── Chat messages area ────────────────────────────────────────────── */
-  .chat-messages {
-    padding: 12px 14px !important;
-  }
-
-  /* ─── Chat input bar ────────────────────────────────────────────────── */
-  .chat-input-bar {
-    padding: 10px 14px 16px !important;
-  }
-
-  /* ─── Chat reply bar ────────────────────────────────────────────────── */
-  .chat-reply-bar {
-    padding: 8px 14px !important;
+  .chat-header-back {
+    font-size: 22px !important;
   }
 
   /* ─── Chat emoji picker ─────────────────────────────────────────────── */
   .chat-emoji-picker {
-    left: 14px !important;
-    right: 14px !important;
+    left: 8px !important;
+    right: 8px !important;
     width: auto !important;
   }
 

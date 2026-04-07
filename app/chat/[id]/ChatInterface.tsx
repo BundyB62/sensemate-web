@@ -44,6 +44,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
   const [generating, setGenerating] = useState(false)
   const [batching, setBatching] = useState(false)
   const [showEmojis, setShowEmojis] = useState(false)
+  const [showGallery, setShowGallery] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -205,28 +206,22 @@ export default function ChatInterface({ companion, initialMessages }: { companio
 
   // ─── Render ──────────────────────────────────────────────────────────
   return (
-    <div style={{ display: 'flex', height: '100dvh', background: '#060514', color: 'rgba(255,255,255,0.92)', overflow: 'hidden', position: 'relative', fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif" }}>
+    <div style={{ display: 'flex', height: '100dvh', background: '#0a0a14', color: 'rgba(255,255,255,0.92)', overflow: 'hidden', position: 'relative', fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif" }}>
 
-      {/* ─── Dynamic ambient glow — reacts to emotion ───────────────────── */}
-      <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', transition: 'all 2s ease' }}>
-        <div style={{
-          position: 'absolute', top: '-15%', right: '5%', width: 700, height: 700, borderRadius: '50%',
-          background: `radial-gradient(circle, ${accent}14 0%, transparent 70%)`,
-          filter: 'blur(100px)', transition: 'background 2s ease',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-10%', left: '15%', width: 500, height: 500, borderRadius: '50%',
-          background: `radial-gradient(circle, ${PURPLE}10 0%, transparent 70%)`,
-          filter: 'blur(80px)',
-        }} />
-        {/* Emotion-reactive center glow — follows the heartbeat */}
-        <div className="emotion-ambient" style={{
-          position: 'absolute', top: '30%', left: '55%', width: 400, height: 400, borderRadius: '50%',
-          background: `radial-gradient(circle, ${accent}0a 0%, transparent 70%)`,
-          filter: 'blur(60px)', transition: 'background 2s ease',
-          animation: `ambient-breathe ${hbSpeed * 1.5}s ease-in-out infinite`,
-        }} />
-      </div>
+      {/* ─── Heartbeat mood border — pulses around entire screen ────────── */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        boxShadow: `inset 0 0 80px ${accent}12, inset 0 0 200px ${accent}06`,
+        animation: `mood-border-pulse ${hbSpeed}s ease-in-out infinite`,
+        transition: 'box-shadow 2s ease',
+      }} />
+      {/* Top edge glow line */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, height: 2, zIndex: 100, pointerEvents: 'none',
+        background: `linear-gradient(90deg, transparent, ${accent}50, ${accent}80, ${accent}50, transparent)`,
+        opacity: 0.6, animation: `mood-line-pulse ${hbSpeed}s ease-in-out infinite`,
+        transition: 'background 2s ease',
+      }} />
 
       {/* ─── Sidebar ──────────────────────────────────────────────────────── */}
       {showSidebar && (
@@ -354,25 +349,23 @@ export default function ChatInterface({ companion, initialMessages }: { companio
             </div>
           </div>
 
-          {/* Gallery */}
+          {/* Gallery button */}
           {gallery.length > 0 && (
             <div style={{ padding: '0 24px 16px' }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: 1.2, marginBottom: 10 }}>
-                Galerij
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
-                {gallery.slice(0, 9).map((url, i) => (
-                  <div key={i} onClick={() => setLightboxImg(url)} style={{
-                    borderRadius: 10, overflow: 'hidden', cursor: 'pointer', aspectRatio: '1',
-                    border: '1px solid rgba(255,255,255,0.05)', transition: 'all 0.25s cubic-bezier(0.34,1.2,0.64,1)',
-                  }}
-                    onMouseEnter={ev => { ev.currentTarget.style.transform = 'scale(1.06)'; ev.currentTarget.style.borderColor = `${accent}50`; ev.currentTarget.style.boxShadow = `0 0 16px ${accent}20` }}
-                    onMouseLeave={ev => { ev.currentTarget.style.transform = 'scale(1)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; ev.currentTarget.style.boxShadow = 'none' }}
-                  >
-                    <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-                  </div>
-                ))}
-              </div>
+              <button onClick={() => setShowGallery(true)} style={{
+                width: '100%', padding: '14px 18px', borderRadius: 14,
+                background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)',
+                color: 'rgba(255,255,255,0.7)', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: 12,
+                transition: 'all 0.2s', fontSize: 14, fontWeight: 600,
+              }}
+                onMouseEnter={ev => { ev.currentTarget.style.background = `${accent}10`; ev.currentTarget.style.borderColor = `${accent}25` }}
+                onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.025)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
+              >
+                <span style={{ fontSize: 20 }}>📸</span>
+                <span>Galerij</span>
+                <span style={{ marginLeft: 'auto', fontSize: 13, color: accent, fontWeight: 700 }}>{gallery.length}</span>
+              </button>
             </div>
           )}
 
@@ -406,27 +399,25 @@ export default function ChatInterface({ companion, initialMessages }: { companio
       {/* ─── Chat Area ────────────────────────────────────────────────────── */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', zIndex: 1 }}>
 
-        {/* Header — cleaner, with heartbeat avatar */}
+        {/* Header — WhatsApp-style */}
         <header className="chat-header" style={{
-          display: 'flex', alignItems: 'center', gap: 16, padding: '14px 48px',
+          display: 'flex', alignItems: 'center', gap: 12, padding: '10px 16px',
           borderBottom: `1px solid ${accent}10`,
-          background: 'rgba(6,4,14,0.92)', backdropFilter: 'blur(40px) saturate(180%)', flexShrink: 0,
+          background: 'rgba(8,6,18,0.95)', backdropFilter: 'blur(40px) saturate(180%)', flexShrink: 0,
           transition: 'border-color 1s ease',
         }}>
-          <button onClick={() => setShowSidebar(s => !s)} style={{
-            width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', cursor: 'pointer',
-            fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            transition: 'all 0.2s',
-          }}
-            onMouseEnter={ev => { ev.currentTarget.style.background = `${accent}10`; ev.currentTarget.style.borderColor = `${accent}25` }}
-            onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.03)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
-          >
-            {showSidebar ? '◂' : '▸'}
+          {/* Back / sidebar toggle */}
+          <button className="chat-header-back" onClick={() => setShowSidebar(s => !s)} style={{
+            width: 32, height: 32, borderRadius: 8, background: 'none',
+            border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer',
+            fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 0,
+          }}>
+            ‹
           </button>
 
-          {/* Avatar with mini heartbeat */}
-          <div style={{ position: 'relative' }}>
+          {/* Avatar with mini heartbeat — clickable */}
+          <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => companion.avatar_url && setLightboxImg(companion.avatar_url)}>
             <div style={{
               position: 'absolute', inset: -4, borderRadius: '50%',
               border: `1.5px solid ${accent}35`,
@@ -434,27 +425,27 @@ export default function ChatInterface({ companion, initialMessages }: { companio
               transition: 'border-color 1s ease',
             }} />
             <div style={{
-              width: 46, height: 46, borderRadius: 23, overflow: 'hidden',
+              width: 42, height: 42, borderRadius: 21, overflow: 'hidden',
               border: `1.5px solid ${accent}40`,
               boxShadow: `0 0 14px ${accent}25`,
               transition: 'border-color 1s ease, box-shadow 1s ease',
             }}>
               {companion.avatar_url
                 ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-                : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{e.emoji}</div>
+                : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>{e.emoji}</div>
               }
             </div>
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontSize: 18, color: 'rgba(255,255,255,0.92)', letterSpacing: '-0.3px' }}>{name}</div>
-            <div style={{ fontSize: 13, color: accent, display: 'flex', alignItems: 'center', gap: 5, transition: 'color 1s ease' }}>
+            <div style={{ fontWeight: 700, fontSize: 16, color: 'rgba(255,255,255,0.92)', letterSpacing: '-0.2px' }}>{name}</div>
+            <div style={{ fontSize: 12, color: accent, display: 'flex', alignItems: 'center', gap: 4, transition: 'color 1s ease' }}>
               {batching ? <span style={{ color: 'rgba(255,255,255,0.35)' }}>leest je berichten...</span>
                 : loading ? (
-                  <span style={{ color: 'rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                    aan het typen
-                    <span style={{ display: 'flex', gap: 3 }}>
-                      {[0,1,2].map(i => <span key={i} style={{ width: 4, height: 4, borderRadius: '50%', background: accent, animation: `typing-dot 1.2s ${i * 0.15}s infinite`, transition: 'background 1s ease' }} />)}
+                  <span style={{ color: 'rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    typt
+                    <span style={{ display: 'flex', gap: 2 }}>
+                      {[0,1,2].map(i => <span key={i} style={{ width: 3, height: 3, borderRadius: '50%', background: accent, animation: `typing-dot 1.2s ${i * 0.15}s infinite`, transition: 'background 1s ease' }} />)}
                     </span>
                   </span>
                 )
@@ -463,19 +454,27 @@ export default function ChatInterface({ companion, initialMessages }: { companio
             </div>
           </div>
 
-          <div style={{
-            fontSize: 12, padding: '6px 14px', borderRadius: 100,
-            background: `${accent}12`, border: `1px solid ${accent}20`,
-            color: accent, fontWeight: 700, letterSpacing: 0.3,
-            transition: 'all 1s ease',
-          }}>
-            {bondLevel.emoji} Lvl {bondLevelNum}
-          </div>
+          {/* Gallery shortcut in header */}
+          {gallery.length > 0 && (
+            <button onClick={() => setShowGallery(true)} style={{
+              width: 34, height: 34, borderRadius: 10, background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
+              color: 'rgba(255,255,255,0.5)', position: 'relative',
+            }}>
+              📸
+              <span style={{
+                position: 'absolute', top: -4, right: -4, fontSize: 9, fontWeight: 800,
+                background: accent, color: '#fff', borderRadius: 100, padding: '1px 5px',
+                minWidth: 16, textAlign: 'center',
+              }}>{gallery.length}</span>
+            </button>
+          )}
         </header>
 
         {/* Messages */}
         <div className="chat-messages" style={{
-          flex: 1, overflowY: 'auto', padding: '28px 48px', display: 'flex', flexDirection: 'column', gap: 4,
+          flex: 1, overflowY: 'auto', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: 2,
         }}>
           {/* Empty state */}
           {messages.length === 0 && (
@@ -543,89 +542,84 @@ export default function ChatInterface({ companion, initialMessages }: { companio
         {/* Reply bar */}
         {replyTo && (
           <div className="chat-reply-bar" style={{
-            padding: '10px 48px', background: 'rgba(6,4,14,0.7)', borderTop: '1px solid rgba(255,255,255,0.05)',
-            display: 'flex', alignItems: 'center', gap: 10, backdropFilter: 'blur(20px)',
+            padding: '8px 16px', background: 'rgba(8,6,18,0.8)', borderTop: '1px solid rgba(255,255,255,0.05)',
+            display: 'flex', alignItems: 'center', gap: 8, backdropFilter: 'blur(20px)',
           }}>
-            <div style={{ width: 3, height: 28, borderRadius: 2, background: `linear-gradient(180deg, ${PURPLE}, ${accent})`, flexShrink: 0 }} />
+            <div style={{ width: 3, height: 24, borderRadius: 2, background: accent, flexShrink: 0 }} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: accent }}>{replyTo.role === 'assistant' ? name : 'Jij'}</div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: accent }}>{replyTo.role === 'assistant' ? name : 'Jij'}</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {replyTo.type === 'image' ? '📷 Foto' : replyTo.content}
               </div>
             </div>
-            <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', fontSize: 18, padding: 4 }}>×</button>
+            <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', fontSize: 16, padding: 4 }}>×</button>
           </div>
         )}
 
-        {/* Input bar */}
+        {/* Input bar — WhatsApp style */}
         <div className="chat-input-bar" style={{
-          padding: '16px 48px 24px', borderTop: `1px solid ${accent}08`,
-          background: 'rgba(6,4,14,0.92)', backdropFilter: 'blur(40px) saturate(180%)', flexShrink: 0,
+          padding: '8px 12px 12px', borderTop: `1px solid ${accent}08`,
+          background: 'rgba(8,6,18,0.95)', backdropFilter: 'blur(40px) saturate(180%)', flexShrink: 0,
           position: 'relative', transition: 'border-color 1s ease',
         }}>
           {/* Emoji Picker Popup */}
           {showEmojis && (
             <div ref={emojiRef} className="chat-emoji-picker" style={{
-              position: 'absolute', bottom: '100%', left: 48, marginBottom: 8,
-              width: 380, maxHeight: 360, overflowY: 'auto',
+              position: 'absolute', bottom: '100%', left: 12, marginBottom: 6,
+              width: 340, maxHeight: 320, overflowY: 'auto',
               background: 'rgba(12,8,28,0.97)', backdropFilter: 'blur(40px) saturate(180%)',
-              border: `1px solid ${accent}18`, borderRadius: 18,
+              border: `1px solid ${accent}18`, borderRadius: 16,
               boxShadow: `0 -8px 40px rgba(0,0,0,0.5), 0 0 20px ${accent}08`,
-              padding: '12px 14px', zIndex: 50,
+              padding: '10px 12px', zIndex: 50,
               animation: 'emojiSlideUp 0.2s cubic-bezier(0.34,1.2,0.64,1)',
             }}>
               <EmojiPicker onSelect={(emoji) => { insertEmoji(emoji); setShowEmojis(false) }} />
             </div>
           )}
 
-          <form onSubmit={sendMessage} style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+          <form onSubmit={sendMessage} style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+            {/* Emoji button */}
+            <button type="button" onClick={() => setShowEmojis(s => !s)} style={{
+              width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
+              background: 'none', border: 'none',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 22, opacity: showEmojis ? 1 : 0.5, transition: 'opacity 0.2s',
+            }}>
+              😊
+            </button>
+
             <textarea
               ref={inputRef}
               value={input}
               onChange={onInputChange}
               onKeyDown={onKeyDown}
-              placeholder={`Bericht aan ${name}...`}
+              placeholder={`Bericht...`}
               rows={1}
               style={{
-                flex: 1, padding: '14px 22px', borderRadius: 24, resize: 'none',
-                background: 'rgba(255,255,255,0.035)', border: '1px solid rgba(255,255,255,0.07)',
-                color: 'rgba(255,255,255,0.92)', outline: 'none', fontSize: 16, lineHeight: 1.5,
-                transition: 'border-color 0.3s, box-shadow 0.3s, background 0.3s',
-                maxHeight: 120, fontFamily: 'inherit',
+                flex: 1, padding: '10px 16px', borderRadius: 22, resize: 'none',
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+                color: 'rgba(255,255,255,0.92)', outline: 'none', fontSize: 15, lineHeight: 1.45,
+                transition: 'border-color 0.3s, box-shadow 0.3s',
+                maxHeight: 100, fontFamily: 'inherit',
               }}
-              onFocus={ev => { ev.target.style.borderColor = `${accent}40`; ev.target.style.boxShadow = `0 0 0 3px ${accent}08`; ev.target.style.background = 'rgba(255,255,255,0.05)' }}
-              onBlur={ev => { ev.target.style.borderColor = 'rgba(255,255,255,0.07)'; ev.target.style.boxShadow = 'none'; ev.target.style.background = 'rgba(255,255,255,0.035)' }}
+              onFocus={ev => { ev.target.style.borderColor = `${accent}35`; ev.target.style.boxShadow = `0 0 0 2px ${accent}08` }}
+              onBlur={ev => { ev.target.style.borderColor = 'rgba(255,255,255,0.08)'; ev.target.style.boxShadow = 'none' }}
             />
-
-            {/* Emoji button */}
-            <button type="button" onClick={() => setShowEmojis(s => !s)} style={{
-              width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-              background: showEmojis ? `${accent}15` : 'rgba(255,255,255,0.035)',
-              border: showEmojis ? `1px solid ${accent}30` : '1px solid rgba(255,255,255,0.06)',
-              cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 20, transition: 'all 0.2s',
-            }}
-              onMouseEnter={ev => { if (!showEmojis) { ev.currentTarget.style.background = `${accent}0a`; ev.currentTarget.style.borderColor = `${accent}20` } }}
-              onMouseLeave={ev => { if (!showEmojis) { ev.currentTarget.style.background = 'rgba(255,255,255,0.035)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' } }}
-            >
-              😊
-            </button>
 
             {/* Send button */}
             <button type="submit" disabled={!input.trim() || loading} style={{
-              width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
-              background: input.trim() && !loading ? `linear-gradient(135deg, ${PURPLE}, ${accent})` : 'rgba(255,255,255,0.035)',
-              border: input.trim() && !loading ? 'none' : '1px solid rgba(255,255,255,0.05)',
+              width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
+              background: input.trim() && !loading ? accent : 'rgba(255,255,255,0.06)',
+              border: 'none',
               cursor: input.trim() && !loading ? 'pointer' : 'default',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'all 0.3s cubic-bezier(0.34,1.2,0.64,1)',
-              boxShadow: input.trim() && !loading ? `0 4px 20px ${accent}35, 0 0 30px ${PURPLE}15` : 'none',
-              transform: input.trim() && !loading ? 'scale(1)' : 'scale(0.9)',
-              opacity: input.trim() && !loading ? 1 : 0.35,
+              transition: 'all 0.2s ease',
+              boxShadow: input.trim() && !loading ? `0 2px 12px ${accent}40` : 'none',
+              opacity: input.trim() && !loading ? 1 : 0.3,
             }}>
               {loading
-                ? <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)', borderTopColor: 'white', animation: 'animate-spin-slow 0.7s linear infinite' }} />
-                : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                ? <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)', borderTopColor: 'white', animation: 'animate-spin-slow 0.7s linear infinite' }} />
+                : <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
               }
             </button>
           </form>
@@ -647,9 +641,70 @@ export default function ChatInterface({ companion, initialMessages }: { companio
               0%, 100% { opacity: 0.4; transform: scale(1); }
               50% { opacity: 0.8; transform: scale(1.15); }
             }
+            @keyframes mood-border-pulse {
+              0%, 100% { opacity: 0.3; }
+              14% { opacity: 0.8; }
+              28% { opacity: 0.35; }
+              42% { opacity: 0.65; }
+              56% { opacity: 0.3; }
+            }
+            @keyframes mood-line-pulse {
+              0%, 100% { opacity: 0.3; }
+              14% { opacity: 1; }
+              28% { opacity: 0.4; }
+              42% { opacity: 0.8; }
+              56% { opacity: 0.3; }
+            }
           `}</style>
         </div>
       </div>
+
+      {/* Fullscreen Gallery */}
+      {showGallery && gallery.length > 0 && createPortal(
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 200,
+          background: 'rgba(4,2,10,0.97)', backdropFilter: 'blur(30px)',
+          display: 'flex', flexDirection: 'column', overflow: 'hidden',
+          animation: 'fadeIn 0.2s ease',
+        }}>
+          {/* Gallery header */}
+          <div style={{
+            padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 20 }}>📸</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.85)' }}>Galerij</span>
+              <span style={{ fontSize: 13, color: accent, fontWeight: 600 }}>{gallery.length} foto&apos;s</span>
+            </div>
+            <button onClick={() => setShowGallery(false)} style={{
+              width: 38, height: 38, borderRadius: '50%',
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.6)', fontSize: 20, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>×</button>
+          </div>
+          {/* Gallery grid */}
+          <div style={{
+            flex: 1, overflowY: 'auto', padding: 12,
+            display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4,
+            alignContent: 'start',
+          }}>
+            {gallery.map((url, i) => (
+              <div key={i} onClick={() => { setLightboxImg(url); setShowGallery(false) }} style={{
+                aspectRatio: '1', borderRadius: 6, overflow: 'hidden', cursor: 'pointer',
+                transition: 'opacity 0.15s',
+              }}
+                onMouseEnter={ev => { ev.currentTarget.style.opacity = '0.8' }}
+                onMouseLeave={ev => { ev.currentTarget.style.opacity = '1' }}
+              >
+                <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+              </div>
+            ))}
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Lightbox */}
       <Lightbox src={lightboxImg} onClose={() => setLightboxImg(null)} gallery={gallery} onNavigate={setLightboxImg} />
