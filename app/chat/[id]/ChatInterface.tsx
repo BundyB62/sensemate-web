@@ -963,26 +963,6 @@ export default function ChatInterface({ companion, initialMessages }: { companio
               </div>
             </div>
 
-            {/* Gallery preview */}
-            {gallery.length > 0 && (
-              <div style={{ padding: '10px 14px', borderTop: '1px solid rgba(255,255,255,0.04)', flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.5)' }}>📷 Recente foto&apos;s</span>
-                  <button onClick={() => setShowGallery(true)} style={{
-                    background: 'none', border: 'none', color: accent, fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                  }}>Alles ({gallery.length})</button>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
-                  {gallery.slice(0, 6).map((url, i) => (
-                    <div key={i} onClick={() => setLightboxImg(url)} style={{
-                      aspectRatio: '1', borderRadius: 8, overflow: 'hidden', cursor: 'pointer',
-                    }}>
-                      <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
