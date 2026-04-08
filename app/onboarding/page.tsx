@@ -397,6 +397,21 @@ export default function OnboardingPage() {
     }
 
     setCreatedCompanionId(companion.id)
+
+    // Insert welcome message from companion
+    const welcomeMessages = [
+      `Hey! 😊 Ik ben ${data.name}. Leuk je te ontmoeten! Vertel eens, hoe heet jij?`,
+      `Hoi! 💕 Ik ben ${data.name}. Wat fijn dat je er bent. Zullen we lekker kletsen?`,
+      `Hey daar 😏 Ik ben ${data.name}. Ik ben benieuwd naar jou... vertel eens iets over jezelf?`,
+    ]
+    await supabase.from('messages').insert({
+      companion_id: companion.id,
+      user_id: user.id,
+      role: 'assistant',
+      content: welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
+      emotion: 'happy',
+    })
+
     setGenerating(true)
     try {
       console.log('[Onboarding] Generating avatar...', { companionId: companion.id, appearance })

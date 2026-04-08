@@ -190,18 +190,35 @@ export default function LandingPage() {
           <ChatPreview />
         </section>
 
-        {/* It Evolves With You */}
-        <section className="mobile-section" style={{ padding: '40px 60px 80px', textAlign: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 20, maxWidth: 700, margin: '0 auto 20px' }}>
+        {/* What You Get */}
+        <section className="mobile-section" style={{ padding: '40px 60px 80px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 40, maxWidth: 700, margin: '0 auto 40px' }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
             <h2 style={{ fontSize: 26, fontWeight: 600, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap', margin: 0 }}>
-              It Evolves With You
+              What You Get
             </h2>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
           </div>
-          <p style={{ color: 'rgba(255,255,255,0.38)', fontSize: 17, lineHeight: 1.8, maxWidth: 480, margin: '0 auto' }}>
-            Learns your memories. Adapts to who you are. Grows closer every day.
-          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 900, margin: '0 auto' }} className="mobile-pricing-grid">
+            {[
+              { icon: '🎨', title: 'Full Character Creator', desc: 'Design every detail — ethnicity, body type, hair, eyes, clothing. Over 6,000 combinations.' },
+              { icon: '📸', title: 'AI Photo Generation', desc: 'Request photos in any pose, outfit, or scenario. Generated in seconds with your character.' },
+              { icon: '🎭', title: '12 Roleplay Scenarios', desc: 'Hotel maid, nurse, secretary, police officer — one click to start a fantasy.' },
+              { icon: '💬', title: 'Natural Conversations', desc: 'Chat in Dutch or English. The AI remembers your name, preferences, and history.' },
+              { icon: '🔞', title: 'No Content Limits', desc: 'Full mature content. No filters, no judgment. Everything is between you and your companion.' },
+              { icon: '🔒', title: 'Private & Encrypted', desc: 'Your conversations are yours. No data sharing, no tracking, no ads. Ever.' },
+            ].map(f => (
+              <div key={f.title} style={{
+                padding: '28px 24px', borderRadius: 20,
+                background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+                textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 32, marginBottom: 14 }}>{f.icon}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 8 }}>{f.title}</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>{f.desc}</div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Pricing — 3 plans */}
@@ -251,9 +268,9 @@ export default function LandingPage() {
         }}>
           <div style={{ color: 'rgba(255,255,255,0.2)', fontSize: 13 }}>© 2026 SenseMates · 18+ only · All rights reserved</div>
           <div style={{ display: 'flex', gap: 24 }}>
-            {['Privacy', 'Terms', 'Contact'].map(l => (
-              <Link key={l} href="/" style={{ color: 'rgba(255,255,255,0.25)', textDecoration: 'none', fontSize: 13 }}>{l}</Link>
-            ))}
+            <Link href="/privacy" style={{ color: 'rgba(255,255,255,0.25)', textDecoration: 'none', fontSize: 13 }}>Privacy</Link>
+            <Link href="/terms" style={{ color: 'rgba(255,255,255,0.25)', textDecoration: 'none', fontSize: 13 }}>Terms</Link>
+            <Link href="mailto:support@sensemates.com" style={{ color: 'rgba(255,255,255,0.25)', textDecoration: 'none', fontSize: 13 }}>Contact</Link>
           </div>
         </footer>
       </div>
