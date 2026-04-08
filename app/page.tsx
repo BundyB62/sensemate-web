@@ -1,55 +1,10 @@
 import Link from 'next/link'
 import Logo from '@/components/Logo'
 import LogoHero from '@/components/LogoHero'
-import DynamicCards from '@/components/DynamicCards'
+
 import PricingCards from '@/components/PricingCards'
 import ChatPreview from '@/components/ChatPreview'
 
-const DYNAMICS = [
-  {
-    name: 'Advisor', desc: 'Guidance & Insight',
-    rgb: '80,120,255',
-    border: 'rgba(80,120,255,0.2)',
-    bg: 'linear-gradient(160deg, rgba(30,50,160,0.22) 0%, rgba(10,10,40,0.04) 100%)',
-    svgColor: 'rgba(110,155,255,0.95)',
-    svg: `<circle cx="16" cy="13" r="6" stroke-width="1.4"/>
-          <path d="M10 19 Q16 24 22 19" stroke-width="1.4"/>
-          <path d="M13 23 L13 28 M19 23 L19 28 M11 28 L21 28" stroke-width="1.3"/>
-          <circle cx="16" cy="9" r="1.2" fill="currentColor" stroke="none"/>`,
-    vb: '0 0 32 32',
-  },
-  {
-    name: 'Companion', desc: 'Comfort & Connection',
-    rgb: '233,60,160',
-    border: 'rgba(233,60,160,0.2)',
-    bg: 'linear-gradient(160deg, rgba(140,20,90,0.22) 0%, rgba(50,5,30,0.04) 100%)',
-    svgColor: 'rgba(250,90,185,0.95)',
-    svg: `<path d="M16 26 C16 26 5 19 5 12A6 6 0 0 1 16 9.5A6 6 0 0 1 27 12C27 19 16 26 16 26Z" stroke-width="1.4"/>`,
-    vb: '0 0 32 32',
-  },
-  {
-    name: 'Lover', desc: 'Passion & Desire',
-    rgb: '255,80,60',
-    border: 'rgba(255,80,60,0.2)',
-    bg: 'linear-gradient(160deg, rgba(160,30,15,0.22) 0%, rgba(50,8,5,0.04) 100%)',
-    svgColor: 'rgba(255,110,80,0.95)',
-    svg: `<path d="M16 27 C15 23 8 18 8 12.5A5.5 5.5 0 0 1 16 8A5.5 5.5 0 0 1 24 12.5C24 18 17 23 16 27Z" stroke-width="1.4"/>
-          <path d="M16 8 C16 6 14.5 4 16 3C17.5 4 16 6 16 8" stroke-width="1.2" opacity="0.7"/>`,
-    vb: '0 0 32 32',
-  },
-  {
-    name: 'Coach', desc: 'Motivation & Focus',
-    rgb: '20,210,170',
-    border: 'rgba(20,210,170,0.2)',
-    bg: 'linear-gradient(160deg, rgba(8,110,90,0.22) 0%, rgba(3,35,30,0.04) 100%)',
-    svgColor: 'rgba(40,230,185,0.95)',
-    svg: `<circle cx="16" cy="16" r="11" stroke-width="1.4"/>
-          <circle cx="16" cy="16" r="7" stroke-width="1.3"/>
-          <circle cx="16" cy="16" r="3" stroke-width="1.2"/>
-          <circle cx="16" cy="16" r="1.2" fill="currentColor" stroke="none"/>`,
-    vb: '0 0 32 32',
-  },
-]
 
 export default function LandingPage() {
   return (
@@ -235,18 +190,6 @@ export default function LandingPage() {
           <ChatPreview />
         </section>
 
-        {/* Choose Your Dynamic */}
-        <section className="mobile-section" style={{ padding: '60px 60px 80px', maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 48 }}>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-            <h2 style={{ fontSize: 26, fontWeight: 600, letterSpacing: '-0.5px', color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap', margin: 0 }}>
-              Choose Your Dynamic
-            </h2>
-            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-          </div>
-          <DynamicCards />
-        </section>
-
         {/* It Evolves With You */}
         <section className="mobile-section" style={{ padding: '40px 60px 80px', textAlign: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 20, maxWidth: 700, margin: '0 auto 20px' }}>
@@ -264,6 +207,41 @@ export default function LandingPage() {
         {/* Pricing — 3 plans */}
         <section className="mobile-section" style={{ padding: '20px 60px 120px' }}>
           <PricingCards />
+
+          {/* Comparison table */}
+          <div style={{ maxWidth: 700, margin: '60px auto 0', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                  <th style={{ padding: '16px 20px', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Feature</th>
+                  <th style={{ padding: '16px 16px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: 12 }}>Free</th>
+                  <th style={{ padding: '16px 16px', textAlign: 'center', color: '#a78bfa', fontWeight: 700, fontSize: 12 }}>Pro</th>
+                  <th style={{ padding: '16px 16px', textAlign: 'center', fontWeight: 700, fontSize: 12, background: 'linear-gradient(135deg, #ffe0a0, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Premium</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { feature: 'Companions', free: '1', pro: '3', premium: '∞' },
+                  { feature: 'Messages / day', free: '50', pro: '∞', premium: '∞' },
+                  { feature: 'Photo generation / day', free: '5', pro: '50', premium: '∞' },
+                  { feature: 'Roleplay scenarios', free: '3', pro: 'All', premium: 'All' },
+                  { feature: 'Advanced memory', free: '—', pro: '✓', premium: '✓' },
+                  { feature: 'AI photo generation', free: '—', pro: '✓', premium: '✓' },
+                  { feature: 'Mature content', free: '—', pro: '✓', premium: '✓' },
+                  { feature: 'Priority generation', free: '—', pro: '—', premium: '✓' },
+                  { feature: 'Exclusive personas', free: '—', pro: '—', premium: '✓' },
+                  { feature: 'VIP support', free: '—', pro: '—', premium: '✓' },
+                ].map((row, i) => (
+                  <tr key={row.feature} style={{ borderBottom: i < 9 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                    <td style={{ padding: '12px 20px', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>{row.feature}</td>
+                    <td style={{ padding: '12px 16px', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>{row.free}</td>
+                    <td style={{ padding: '12px 16px', textAlign: 'center', color: row.pro === '✓' || row.pro === 'All' || row.pro === '∞' ? '#a78bfa' : 'rgba(255,255,255,0.3)' }}>{row.pro}</td>
+                    <td style={{ padding: '12px 16px', textAlign: 'center', color: row.premium === '✓' || row.premium === 'All' || row.premium === '∞' ? '#f59e0b' : 'rgba(255,255,255,0.3)' }}>{row.premium}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
 
         {/* Footer */}

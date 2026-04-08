@@ -312,9 +312,9 @@ export default async function DashboardPage() {
             {/* Stats */}
             <div className="mobile-stats-grid" style={{ marginTop: 56, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
               {[
-                { icon: '💬', label: 'SenseMates', value: String(companions.length) },
-                { icon: '❤️', label: 'Avg. Bond Level', value: companions.length > 0 ? String(Math.round(companions.reduce((s: number, c: any) => s + (c.bond_level || 1), 0) / companions.length * 10) / 10) : '0' },
-                { icon: '⭐', label: 'Plan', value: plan.charAt(0).toUpperCase() + plan.slice(1) },
+                { icon: '💬', label: 'SenseMates', value: `${companions.length} / ${maxCompanions >= 999 ? '∞' : maxCompanions}` },
+                { icon: '📸', label: 'Total Photos', value: String(companions.reduce((s: number, c: any) => s + (c.photo_count || 0), 0)) },
+                { icon: '⭐', label: 'Plan', value: plan === 'premium' ? '✨ Premium' : plan === 'pro' ? '⚡ Pro' : 'Free' },
               ].map(stat => (
                 <div key={stat.label} style={{
                   borderRadius: 20, padding: '22px 26px',

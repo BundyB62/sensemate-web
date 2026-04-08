@@ -335,6 +335,7 @@ export default function OnboardingPage() {
   const [createdCompanionId, setCreatedCompanionId] = useState<string | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [regenerating, setRegenerating] = useState(false)
+  const [showBodyDetails, setShowBodyDetails] = useState(false)
 
   const [data, setData] = useState<FormData>({
     name: '', gender: '' as Gender, relationshipStyle: 'lover',
@@ -668,80 +669,102 @@ export default function OnboardingPage() {
               </ImageGrid>
             </div>
 
-            {/* Breast size (woman/nonbinary) */}
-            {(data.gender === 'woman' || data.gender === 'nonbinary') && (
+            {/* Advanced body details — collapsible */}
+            <button onClick={() => setShowBodyDetails(s => !s)} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              width: '100%', padding: '12px', borderRadius: 12, marginBottom: showBodyDetails ? 24 : 0,
+              background: showBodyDetails ? 'rgba(233,30,140,0.08)' : 'rgba(255,255,255,0.03)',
+              border: `1px solid ${showBodyDetails ? 'rgba(233,30,140,0.2)' : 'rgba(255,255,255,0.06)'}`,
+              color: showBodyDetails ? '#e91e8c' : 'rgba(255,255,255,0.4)',
+              fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              transition: 'all 0.2s',
+            }}>
+              <span style={{ transform: showBodyDetails ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>▼</span>
+              {showBodyDetails ? 'Hide advanced body options' : 'Advanced body options (optional)'}
+            </button>
+
+            {showBodyDetails && (
               <>
-                <div style={{ marginBottom: 32 }}>
-                  <SectionTitle>Breast Size</SectionTitle>
-                  <ImageGrid cols={6}>
-                    {BREAST_SIZES.map(b => (
-                      <ImageCard
-                        key={b.id}
-                        img={b.img}
-                        label={b.label}
-                        selected={data.breastSize === b.id}
-                        onClick={() => set('breastSize', b.id)}
-                        aspectRatio="3/4"
-                        small
-                      />
-                    ))}
-                  </ImageGrid>
-                </div>
-                <div style={{ marginBottom: 32 }}>
-                  <SectionTitle>Butt Size</SectionTitle>
-                  <ImageGrid cols={4}>
-                    {ASS_SIZES.map(a => (
-                      <ImageCard
-                        key={a.id}
-                        img={a.img}
-                        label={a.label}
-                        selected={data.assSize === a.id}
-                        onClick={() => set('assSize', a.id)}
-                        aspectRatio="3/4"
-                        small
-                      />
-                    ))}
-                  </ImageGrid>
-                </div>
+                {/* Breast size (woman/nonbinary) */}
+                {(data.gender === 'woman' || data.gender === 'nonbinary') && (
+                  <>
+                    <div style={{ marginBottom: 32 }}>
+                      <SectionTitle>Breast Size</SectionTitle>
+                      <ImageGrid cols={6}>
+                        {BREAST_SIZES.map(b => (
+                          <ImageCard
+                            key={b.id}
+                            img={b.img}
+                            label={b.label}
+                            selected={data.breastSize === b.id}
+                            onClick={() => set('breastSize', b.id)}
+                            aspectRatio="3/4"
+                            small
+                          />
+                        ))}
+                      </ImageGrid>
+                    </div>
+                    <div style={{ marginBottom: 32 }}>
+                      <SectionTitle>Butt Size</SectionTitle>
+                      <ImageGrid cols={4}>
+                        {ASS_SIZES.map(a => (
+                          <ImageCard
+                            key={a.id}
+                            img={a.img}
+                            label={a.label}
+                            selected={data.assSize === a.id}
+                            onClick={() => set('assSize', a.id)}
+                            aspectRatio="3/4"
+                            small
+                          />
+                        ))}
+                      </ImageGrid>
+                    </div>
+                  </>
+                )}
+
+                {/* Dick size + beard (man) */}
+                {data.gender === 'man' && (
+                  <>
+                    <div style={{ marginBottom: 32 }}>
+                      <SectionTitle>Size</SectionTitle>
+                      <ImageGrid cols={3}>
+                        {DICK_SIZES.map(d => (
+                          <ImageCard
+                            key={d.id}
+                            img={d.img}
+                            label={d.label}
+                            selected={data.dickSize === d.id}
+                            onClick={() => set('dickSize', d.id)}
+                            aspectRatio="3/4"
+                            small
+                          />
+                        ))}
+                      </ImageGrid>
+                    </div>
+                  </>
+                )}
               </>
             )}
 
-            {/* Dick size (man) */}
+            {/* Facial Hair — always visible for men (not explicit) */}
             {data.gender === 'man' && (
-              <>
-                <div style={{ marginBottom: 32 }}>
-                  <SectionTitle>Size</SectionTitle>
-                  <ImageGrid cols={3}>
-                    {DICK_SIZES.map(d => (
-                      <ImageCard
-                        key={d.id}
-                        img={d.img}
-                        label={d.label}
-                        selected={data.dickSize === d.id}
-                        onClick={() => set('dickSize', d.id)}
-                        aspectRatio="3/4"
-                        small
-                      />
-                    ))}
-                  </ImageGrid>
-                </div>
-                <div style={{ marginBottom: 32 }}>
-                  <SectionTitle>Facial Hair</SectionTitle>
-                  <ImageGrid cols={5}>
-                    {BEARD_STYLES.map(b => (
-                      <ImageCard
-                        key={b.id}
-                        img={b.img}
-                        label={b.label}
-                        selected={data.beard === b.id}
-                        onClick={() => set('beard', b.id)}
-                        aspectRatio="3/4"
-                        small
-                      />
-                    ))}
-                  </ImageGrid>
-                </div>
-              </>
+              <div style={{ marginBottom: 32 }}>
+                <SectionTitle>Facial Hair</SectionTitle>
+                <ImageGrid cols={5}>
+                  {BEARD_STYLES.map(b => (
+                    <ImageCard
+                      key={b.id}
+                      img={b.img}
+                      label={b.label}
+                      selected={data.beard === b.id}
+                      onClick={() => set('beard', b.id)}
+                      aspectRatio="3/4"
+                      small
+                    />
+                  ))}
+                </ImageGrid>
+              </div>
             )}
 
             <NavButton onClick={goNext} label="Continue →" />
