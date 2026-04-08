@@ -75,6 +75,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
   const [showScrollBtn, setShowScrollBtn] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [activeScenario, setActiveScenario] = useState<string>('none')
+  const activeScenarioRef = useRef(activeScenario)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -85,6 +86,9 @@ export default function ChatInterface({ companion, initialMessages }: { companio
   const messagesRef = useRef(messages)
   const isNearBottom = useRef(true)
   messagesRef.current = messages
+
+  // Keep scenario ref in sync with state (avoids stale closures in useCallback)
+  useEffect(() => { activeScenarioRef.current = activeScenario }, [activeScenario])
 
   const e = EMOTIONS[emotion] || EMOTIONS.neutral
   const scenario = getScenario(activeScenario)
@@ -170,7 +174,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
     try {
       const res = await fetch('/api/chat', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companionId: companion.id, message: combined, history: messagesRef.current.filter(m => m.type !== 'typing').slice(-14), scenarioId: activeScenario !== 'none' ? activeScenario : undefined }),
+        body: JSON.stringify({ companionId: companion.id, message: combined, history: messagesRef.current.filter(m => m.type !== 'typing').slice(-14), scenarioId: activeScenarioRef.current !== 'none' ? activeScenarioRef.current : undefined }),
       })
       const data = await res.json()
       const aiEmotion = data.emotion || 'neutral'
