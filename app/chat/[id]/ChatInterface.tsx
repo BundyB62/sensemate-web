@@ -202,7 +202,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
         const lid = `imgload_${Date.now()}`
         setMessages(prev => [...prev, { id: lid, role: 'assistant', content: '📸', emotion: aiEmotion, type: 'image_loading', created_at: new Date().toISOString() }])
         try {
-          const ir = await fetch('/api/image', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: data.generateImage, avatarUrl: companion.avatar_url, bodyNegative: data.bodyNegative, appearance: companion.appearance }) })
+          const ir = await fetch('/api/image', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: data.generateImage, avatarUrl: companion.avatar_url, bodyNegative: data.bodyNegative, appearance: companion.appearance, poseId: data.poseId }) })
           const id = await ir.json()
           if (id.url && !id.error) {
             setMessages(prev => prev.map(m => m.id === lid ? { ...m, content: id.url, type: 'image' } : m))

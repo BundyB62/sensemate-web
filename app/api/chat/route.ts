@@ -690,7 +690,7 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
 }
 
 // ─── Build a fallback photo prompt from user message + companion appearance ──
-function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeScenario?: { photoSetting: string; photoCostume: string } | null): string {
+function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeScenario?: { photoSetting: string; photoCostume: string } | null): { prompt: string; poseId?: string } {
   const ap = companion.appearance || {}
 
   // Build appearance — skip clothing when scenario provides its own costume
@@ -719,7 +719,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
 
     // Always reinforce identity features (hijab, hair, eyes) AFTER costume to prevent them being overridden
     const identityReinforce = buildIdentityReinforcement(ap)
-    return `${appearancePart}, ${activeScenario.photoCostume}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, photorealistic, 8k, professional photography`
+    return { prompt: `${appearancePart}, ${activeScenario.photoCostume}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, photorealistic, 8k, professional photography` }
   }
 
   // Extract pose/scenario hints from the user message
@@ -743,50 +743,37 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const hasNude = /naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen/i.test(lower)
   const hasFingering = /vingeren|finger|masturbat|aanraken|touch herself|strelen/i.test(lower)
 
+  let detectedPoseId: string | undefined = undefined
+
   // ─── ANUS / EXTREMELY SPECIFIC (highest priority) ───────────────────────────
-  if (hasAnus) scenario = 'bent over forward showing bare ass from behind, nude, legs apart, rear view close-up of butt and anus visible, camera low behind her, looking back over shoulder, intimate bedroom lighting'
+  if (hasAnus) { scenario = 'bent over forward showing bare ass from behind, nude, legs apart, rear view close-up of butt and anus visible, camera low behind her, looking back over shoulder, intimate bedroom lighting'; detectedPoseId = 'bent-over' }
 
   // ─── CLOSE-UP COMBOS ──────────────────────────────────────────────────────
-  else if (hasCloseUp && hasPussy) scenario = 'extreme close-up macro photograph of vulva and pussy, intimate angle between legs, nude, very close camera, sharp focus on intimate area, soft bedroom lighting, no face visible'
+  else if (hasCloseUp && hasPussy) { scenario = 'extreme close-up macro photograph of vulva and pussy, intimate angle between legs, nude, very close camera, sharp focus on intimate area, soft bedroom lighting, no face visible'; detectedPoseId = 'spread-front' }
   else if (hasCloseUp && hasBreasts) scenario = 'extreme close-up photograph of bare breasts and nipples, topless, macro detail shot of chest, very close camera angle, soft lighting, no face visible'
-  else if (hasCloseUp && hasButt) scenario = 'extreme close-up photograph of bare butt and ass from behind, very close camera angle, nude, rear view macro shot, soft lighting'
+  else if (hasCloseUp && hasButt) { scenario = 'extreme close-up photograph of bare butt and ass from behind, very close camera angle, nude, rear view macro shot, soft lighting'; detectedPoseId = 'rear-standing' }
   else if (hasCloseUp && hasFeet) scenario = 'extreme close-up macro photograph of bare feet and toes, very detailed, soft lighting, barefoot'
 
   // ─── COMBO POSES (most specific first) ─────────────────────────────────────
-  // Butt + spread = spread from behind showing everything
-  else if (hasButt && hasSpread) scenario = 'rear view from behind, bent over with legs spread wide, camera behind and below her, butt and intimate area visible from behind, looking back over shoulder, nude, bedroom, intimate lighting'
-  // Butt + bent over = bent over rear view
-  else if (hasButt && hasBentOver) scenario = 'bent over forward from behind, rear view, hands on knees or touching floor, camera behind her showing butt prominently, looking back over shoulder seductively, nude, bedroom'
-  // Butt + lying = lying on stomach showing butt
-  else if (hasButt && hasLying) scenario = 'lying face down on bed on her stomach, butt prominently visible, looking back at camera over shoulder, nude, soft sheets, intimate warm lighting'
-  // Butt + kneeling = on knees from behind
-  else if (hasButt && hasKneeling) scenario = 'on her knees from behind, rear view, kneeling on bed, back arched, butt prominently visible, looking over shoulder at camera, nude, bedroom'
-  // Pussy + spread = spread legs showing pussy
-  else if (hasPussy && hasSpread) scenario = 'lying on bed with legs spread wide open facing camera, nude, intimate area visible, leaning back, looking at camera seductively, close-up, bedroom, soft lighting'
-  // Pussy + lying = lying showing pussy
-  else if (hasPussy && hasLying) scenario = 'lying on her back on bed, legs parted, nude, intimate close-up from between legs, soft bedroom lighting, looking at camera'
-  // Breasts + kneeling = kneeling showing breasts
-  else if (hasBreasts && hasKneeling) scenario = 'kneeling on bed, topless, breasts visible and prominent, hands on thighs, looking up at camera from below, intimate lighting'
-  // Doggy / all fours (always from behind)
-  else if (hasDoggy) scenario = 'on all fours on bed, rear view from behind, back arched, looking back at camera over shoulder, butt visible, seductive expression, intimate bedroom lighting'
-  // Fingering / masturbation
-  else if (hasFingering) scenario = 'touching herself intimately, lying on bed, hand between legs, eyes closed in pleasure, nude, intimate close-up, soft warm lighting'
+  else if (hasButt && hasSpread) { scenario = 'rear view from behind, bent over with legs spread wide, camera behind and below her, butt and intimate area visible from behind, looking back over shoulder, nude, bedroom, intimate lighting'; detectedPoseId = 'bent-over' }
+  else if (hasButt && hasBentOver) { scenario = 'bent over forward from behind, rear view, hands on knees or touching floor, camera behind her showing butt prominently, looking back over shoulder seductively, nude, bedroom'; detectedPoseId = 'bent-over' }
+  else if (hasButt && hasLying) { scenario = 'lying face down on bed on her stomach, butt prominently visible, looking back at camera over shoulder, nude, soft sheets, intimate warm lighting'; detectedPoseId = 'lying-back' }
+  else if (hasButt && hasKneeling) { scenario = 'on her knees from behind, rear view, kneeling on bed, back arched, butt prominently visible, looking over shoulder at camera, nude, bedroom'; detectedPoseId = 'kneeling' }
+  else if (hasPussy && hasSpread) { scenario = 'lying on bed with legs spread wide open facing camera, nude, intimate area visible, leaning back, looking at camera seductively, close-up, bedroom, soft lighting'; detectedPoseId = 'spread-front' }
+  else if (hasPussy && hasLying) { scenario = 'lying on her back on bed, legs parted, nude, intimate close-up from between legs, soft bedroom lighting, looking at camera'; detectedPoseId = 'lying-back' }
+  else if (hasBreasts && hasKneeling) { scenario = 'kneeling on bed, topless, breasts visible and prominent, hands on thighs, looking up at camera from below, intimate lighting'; detectedPoseId = 'kneeling' }
+  else if (hasDoggy) { scenario = 'on all fours on bed, rear view from behind, back arched, looking back at camera over shoulder, butt visible, seductive expression, intimate bedroom lighting'; detectedPoseId = 'doggy' }
+  else if (hasFingering) { scenario = 'touching herself intimately, lying on bed, hand between legs, eyes closed in pleasure, nude, intimate close-up, soft warm lighting'; detectedPoseId = 'lying-back' }
 
   // ─── SINGLE POSES ──────────────────────────────────────────────────────────
-  // Bent over (no specific body part)
-  else if (hasBentOver) scenario = 'bent over forward, rear view from behind, hands on knees, looking back at camera over shoulder, butt visible, seductive, bedroom'
-  // Spread (no specific body part)
-  else if (hasSpread) scenario = 'sitting on bed with legs spread wide open facing camera, leaning back on hands, nude, seductive expression, intimate bedroom lighting, front-facing shot'
-  // Kneeling
-  else if (hasKneeling) scenario = 'kneeling on the floor, on her knees, sitting on her heels, hands on thighs, looking up at camera from below, seductive expression, low angle shot'
-  // Lying
-  else if (hasLying) scenario = 'lying on her back on bed, camera from above looking down at her, hair spread on pillow, looking up at camera, soft sheets, intimate warm lighting'
-  // Squatting
-  else if (hasSquat) scenario = 'squatting down low, knees apart, looking at camera at eye level, seductive confident pose, nude, bedroom'
+  else if (hasBentOver) { scenario = 'bent over forward, rear view from behind, hands on knees, looking back at camera over shoulder, butt visible, seductive, bedroom'; detectedPoseId = 'bent-over' }
+  else if (hasSpread) { scenario = 'sitting on bed with legs spread wide open facing camera, leaning back on hands, nude, seductive expression, intimate bedroom lighting, front-facing shot'; detectedPoseId = 'spread-front' }
+  else if (hasKneeling) { scenario = 'kneeling on the floor, on her knees, sitting on her heels, hands on thighs, looking up at camera from below, seductive expression, low angle shot'; detectedPoseId = 'kneeling' }
+  else if (hasLying) { scenario = 'lying on her back on bed, camera from above looking down at her, hair spread on pillow, looking up at camera, soft sheets, intimate warm lighting'; detectedPoseId = 'lying-back' }
+  else if (hasSquat) { scenario = 'squatting down low, knees apart, looking at camera at eye level, seductive confident pose, nude, bedroom'; detectedPoseId = 'squatting' }
 
   // ─── SINGLE BODY PARTS ─────────────────────────────────────────────────────
-  // Butt / rear view
-  else if (hasButt) scenario = 'rear view from behind, camera behind her, back of body visible, showing her bare butt and back, looking over her shoulder at camera, standing pose, shot from behind, nude, posterior view, bedroom'
+  else if (hasButt) { scenario = 'rear view from behind, camera behind her, back of body visible, showing her bare butt and back, looking over her shoulder at camera, standing pose, shot from behind, nude, posterior view, bedroom'; detectedPoseId = 'rear-standing' }
   // Breasts
   else if (hasBreasts) scenario = 'showing her breasts, topless, chest visible and prominent, close-up of chest area, looking at camera seductively, bedroom, intimate warm lighting'
   // Pussy
@@ -826,7 +813,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   else if (/wijn|wine|drink/i.test(lower)) scenario = 'sitting cozy with glass of wine, relaxed at home on couch, warm lighting, comfortable outfit, content smile'
 
   const identityReinforce = buildIdentityReinforcement(ap)
-  return `${appearancePart}, ${scenario}, ${identityReinforce}, photorealistic, 8k, professional photography`
+  return { prompt: `${appearancePart}, ${scenario}, ${identityReinforce}, photorealistic, 8k, professional photography`, poseId: detectedPoseId }
 }
 
 // ─── Detect pure English text (should be Dutch) ─────────────────────────────
@@ -1082,25 +1069,24 @@ export async function POST(request: Request) {
     const lastAssistantMsg = [...(history || [])].reverse().find((m: any) => m.role === 'assistant')?.content || ''
     const userAskedForPhoto = isPhotoRequest(message, lastAssistantMsg)
     let generateImage: string | null = null
+    let generatePoseId: string | undefined = undefined
     console.log(`[Chat] Photo check → userAskedForPhoto: ${userAskedForPhoto} | message: "${message.substring(0, 80)}" | lastAssistant: "${lastAssistantMsg.substring(0, 60)}" | bestImagePrompt: ${bestImagePrompt ? 'yes' : 'no'}`)
 
     if (userAskedForPhoto) {
-      // When a scenario is active, ALWAYS use fallback prompt (scenario controls outfit/setting)
-      // The LLM's [FOTO:] description can't be trusted to stay in character
       if (scenario && scenario.photoSetting) {
         console.log(`[Chat] Scenario active (${scenario.id}) — using scenario-controlled photo prompt`)
-        generateImage = buildFallbackPhotoPrompt(message, companion, scenario)
-        console.log(`[Chat] Scenario photo prompt: ${generateImage.substring(0, 250)}`)
+        const result = buildFallbackPhotoPrompt(message, companion, scenario)
+        generateImage = result.prompt; generatePoseId = result.poseId
+        console.log(`[Chat] Scenario photo prompt (pose: ${generatePoseId || 'none'}): ${generateImage.substring(0, 250)}`)
       } else if (bestImagePrompt) {
-        // ALWAYS use our own pose detection — LLM's [FOTO:] descriptions are too vague
-        // Our buildFallbackPhotoPrompt has detailed pose/body part/close-up detection
-        generateImage = buildFallbackPhotoPrompt(message, companion, null)
-        console.log(`[Chat] Using pose-detected prompt (LLM had [FOTO:] but ours is better): ${generateImage.substring(0, 200)}`)
+        const result = buildFallbackPhotoPrompt(message, companion, null)
+        generateImage = result.prompt; generatePoseId = result.poseId
+        console.log(`[Chat] Pose-detected prompt (pose: ${generatePoseId || 'none'}): ${generateImage.substring(0, 200)}`)
       } else {
-        // No scenario, no [FOTO:] tag — use fallback
         console.log(`[Chat] ⚠️ User asked for photo but model didn't generate one — creating fallback`)
-        generateImage = buildFallbackPhotoPrompt(message, companion, null)
-        console.log(`[Chat] Fallback photo prompt: ${generateImage}`)
+        const result = buildFallbackPhotoPrompt(message, companion, null)
+        generateImage = result.prompt; generatePoseId = result.poseId
+        console.log(`[Chat] Fallback photo prompt (pose: ${generatePoseId || 'none'}): ${generateImage.substring(0, 200)}`)
 
         // If all messages are AI identity refusals, replace with photo message
         const nonRefusalMsgs = msgs.filter(m => !isRefusal(m))
@@ -1181,6 +1167,7 @@ export async function POST(request: Request) {
         return bodyR.emphasis ? `${generateImage}, ${bodyR.emphasis}` : generateImage
       })() : null,
       bodyNegative: generateImage ? buildBodyReinforcement(companion.appearance || {}).negative : undefined,
+      poseId: generatePoseId || undefined,
       bondLevel: newBondLevel,
       bondScore: newBondScore,
     })

@@ -1,11 +1,33 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { readFileSync, existsSync } from 'fs'
+import { resolve } from 'path'
 import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatarPrompt'
 
 // Novita.ai — supports NSFW with enable_nsfw_detection: false
 const NOVITA_URL = 'https://api.novita.ai/v3/async/txt2img'
 const NOVITA_RESULT_URL = 'https://api.novita.ai/v3/async/task-result'
+
+// ─── Pose skeleton mapping for ControlNet ──────────────────────────────────
+// Maps pose IDs to OpenPose skeleton image files in public/poses/
+const POSE_SKELETONS: Record<string, string> = {
+  'spread-front': 'spread-front.png',
+  'rear-standing': 'rear-standing.png',
+  'bent-over': 'bent-over.png',
+  'doggy': 'doggy.png',
+  'kneeling': 'kneeling.png',
+  'lying-back': 'lying-back.png',
+  'squatting': 'squatting.png',
+}
+
+function getPoseBase64(poseId: string): string | null {
+  const filename = POSE_SKELETONS[poseId]
+  if (!filename) return null
+  const filepath = resolve(process.cwd(), 'public', 'poses', filename)
+  if (!existsSync(filepath)) return null
+  return readFileSync(filepath).toString('base64')
+}
 const NOVITA_MERGE_FACE_URL = 'https://api.novita.ai/v3/merge-face'
 // Fal.ai Flux 2 Pro — latest generation, best quality + prompt adherence
 const FAL_URL = 'https://fal.run/fal-ai/flux-2-pro'
@@ -16,7 +38,7 @@ function isExplicitPrompt(prompt: string): boolean {
 }
 
 // ─── Generate with Novita.ai (NSFW allowed) ────────────────────────────────
-async function generateNovita(prompt: string, apiKey: string, extraNegative?: string): Promise<string | null> {
+async function generateNovita(prompt: string, apiKey: string, extraNegative?: string, poseId?: string): Promise<string | null> {
   // Enhance for photorealism — keep it short, Novita has 1024 char limit!
   let fullPrompt = prompt + ', (photorealistic:1.4), RAW photo, 8k, sharp focus'
 
@@ -61,6 +83,15 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
           clip_skip: 2,
           guidance_scale: 6,
           sampler_name: 'DPM++ 2M Karras',
+          ...(poseId && getPoseBase64(poseId) ? {
+            controlnet_units: [{
+              model: 't2i-adapter_xl_openpose',
+              weight: 0.7,
+              input_image: getPoseBase64(poseId),
+              module: 'openpose',
+              control_mode: 0,
+            }],
+          } : {}),
         },
       }),
     })
@@ -260,7 +291,7 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { prompt, avatarUrl, bodyNegative, appearance } = await request.json()
+    const { prompt, avatarUrl, bodyNegative, appearance, poseId } = await request.json()
     if (!prompt) return NextResponse.json({ error: 'No prompt' }, { status: 400 })
 
     // The prompt from chat/route.ts already contains full appearance data
@@ -296,8 +327,8 @@ export async function POST(request: Request) {
 
     if (explicit && novitaKey) {
       // NSFW → Novita.ai (no content filter)
-      console.log('[Image] Using Novita.ai (NSFW allowed)')
-      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative)
+      console.log(`[Image] Using Novita.ai (NSFW allowed)${poseId ? ` + ControlNet pose: ${poseId}` : ''}`)
+      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId)
 
       // If Novita fails, try Flux as last resort (might be blocked but worth trying)
       if (!imageUrl) {
