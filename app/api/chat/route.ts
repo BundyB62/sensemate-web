@@ -994,19 +994,20 @@ export async function POST(request: Request) {
     console.log(`[Chat] Photo check → userAskedForPhoto: ${userAskedForPhoto} | message: "${message.substring(0, 80)}" | lastAssistant: "${lastAssistantMsg.substring(0, 60)}" | bestImagePrompt: ${bestImagePrompt ? 'yes' : 'no'}`)
 
     if (userAskedForPhoto) {
-      // User explicitly asked for a photo
-      if (bestImagePrompt) {
-        // LLM generated a [FOTO:] tag — enrich with appearance
-        generateImage = enrichImagePromptWithAppearance(bestImagePrompt, companion, scenario)
-        // Add scenario setting/costume to photo prompt
-        if (scenario && scenario.photoSetting) {
-          generateImage += `, ${scenario.photoSetting}, ${scenario.photoCostume}`
-        }
+      // When a scenario is active, ALWAYS use fallback prompt (scenario controls outfit/setting)
+      // The LLM's [FOTO:] description can't be trusted to stay in character
+      if (scenario && scenario.photoSetting) {
+        console.log(`[Chat] Scenario active (${scenario.id}) — using scenario-controlled photo prompt`)
+        generateImage = buildFallbackPhotoPrompt(message, companion, scenario)
+        console.log(`[Chat] Scenario photo prompt: ${generateImage.substring(0, 250)}`)
+      } else if (bestImagePrompt) {
+        // No scenario — use LLM's [FOTO:] tag enriched with appearance
+        generateImage = enrichImagePromptWithAppearance(bestImagePrompt, companion, null)
         console.log(`[Chat] Enriched image prompt: ${generateImage.substring(0, 200)}`)
       } else {
-        // LLM didn't generate a photo tag — use fallback
+        // No scenario, no [FOTO:] tag — use fallback
         console.log(`[Chat] ⚠️ User asked for photo but model didn't generate one — creating fallback`)
-        generateImage = buildFallbackPhotoPrompt(message, companion, scenario)
+        generateImage = buildFallbackPhotoPrompt(message, companion, null)
         console.log(`[Chat] Fallback photo prompt: ${generateImage}`)
 
         // If all messages are AI identity refusals, replace with photo message
