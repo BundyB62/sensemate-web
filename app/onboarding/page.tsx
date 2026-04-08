@@ -378,47 +378,70 @@ export default function OnboardingPage() {
       ...(data.gender === 'man' ? { dickSize: data.dickSize, beard: data.beard } : {}),
     }
 
-    const { data: companion, error } = await supabase
-      .from('companions')
-      .insert({
+    let companionId = createdCompanionId
+
+    if (companionId) {
+      // UPDATE existing companion (user came back from preview to edit)
+      const { error } = await supabase
+        .from('companions')
+        .update({
+          name: data.name,
+          relationship_style: data.relationshipStyle,
+          personality: { traits: data.personality, gender: data.gender, vibe: data.vibe },
+          appearance,
+        })
+        .eq('id', companionId)
+
+      if (error) {
+        console.error(error)
+        setLoading(false)
+        return
+      }
+    } else {
+      // CREATE new companion
+      const { data: companion, error } = await supabase
+        .from('companions')
+        .insert({
+          user_id: user.id,
+          name: data.name,
+          relationship_style: data.relationshipStyle,
+          personality: { traits: data.personality, gender: data.gender, vibe: data.vibe },
+          appearance,
+        })
+        .select()
+        .single()
+
+      if (error || !companion) {
+        console.error(error)
+        setLoading(false)
+        return
+      }
+
+      companionId = companion.id
+      setCreatedCompanionId(companion.id)
+
+      // Insert welcome message (only for new companions)
+      const welcomeMessages = [
+        `Hey! 😊 I'm ${data.name}. Nice to meet you! What's your name?`,
+        `Hi there! 💕 I'm ${data.name}. So glad you're here. Let's chat!`,
+        `Hey 😏 I'm ${data.name}. I'm curious about you... tell me something about yourself?`,
+      ]
+      await supabase.from('messages').insert({
+        companion_id: companion.id,
         user_id: user.id,
-        name: data.name,
-        relationship_style: data.relationshipStyle,
-        personality: { traits: data.personality, gender: data.gender, vibe: data.vibe },
-        appearance,
+        role: 'assistant',
+        content: welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
+        emotion: 'happy',
       })
-      .select()
-      .single()
-
-    if (error || !companion) {
-      console.error(error)
-      setLoading(false)
-      return
     }
-
-    setCreatedCompanionId(companion.id)
-
-    // Insert welcome message from companion
-    const welcomeMessages = [
-      `Hey! 😊 Ik ben ${data.name}. Leuk je te ontmoeten! Vertel eens, hoe heet jij?`,
-      `Hoi! 💕 Ik ben ${data.name}. Wat fijn dat je er bent. Zullen we lekker kletsen?`,
-      `Hey daar 😏 Ik ben ${data.name}. Ik ben benieuwd naar jou... vertel eens iets over jezelf?`,
-    ]
-    await supabase.from('messages').insert({
-      companion_id: companion.id,
-      user_id: user.id,
-      role: 'assistant',
-      content: welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)],
-      emotion: 'happy',
-    })
 
     setGenerating(true)
     try {
-      console.log('[Onboarding] Generating avatar...', { companionId: companion.id, appearance })
+      console.log('[Onboarding] Generating avatar...', { companionId, appearance })
       const res = await fetch('/api/avatar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companionId: companion.id, appearance, emotion: 'neutral' }),
+        body: JSON.stringify({ companionId, appearance, emotion: 'neutral' }),
       })
       const result = await res.json()
       console.log('[Onboarding] Avatar result:', result)
@@ -1088,6 +1111,23 @@ export default function OnboardingPage() {
                   onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.04)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
                 >
                   {regenerating ? 'Generating...' : 'Generate new photo 📸'}
+                </button>
+
+                {/* Edit appearance — go back to step 1 */}
+                <button
+                  onClick={() => { setAnimDir('back'); setStep(1) }}
+                  style={{
+                    width: '100%', padding: '14px', fontSize: 14, fontWeight: 500,
+                    borderRadius: 16, cursor: 'pointer',
+                    background: 'none',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    color: 'rgba(255,255,255,0.35)',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={ev => { ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
+                  onMouseLeave={ev => { ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.35)' }}
+                >
+                  ← Edit appearance
                 </button>
               </div>
             </div>
