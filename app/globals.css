@@ -363,6 +363,12 @@ body {
   50%       { opacity: 1;   transform: translate(-50%, -50%) scale(1.35); }
 }
 
+@keyframes cta-glow-pulse {
+  0%, 100% { box-shadow: 0 6px 36px rgba(233,30,140,0.35), 0 0 80px rgba(91,66,243,0.15); }
+  50%       { box-shadow: 0 6px 44px rgba(233,30,140,0.5), 0 0 100px rgba(91,66,243,0.25); }
+}
+.hero-cta-pulse { animation: cta-glow-pulse 3s ease-in-out infinite; }
+
 .hero-glow-outer { animation: glow-pulse-outer 4s ease-in-out infinite; }
 .hero-glow-mid   { animation: glow-pulse-mid   3s ease-in-out infinite; animation-delay: 0.4s; }
 .hero-glow-pink  { animation: glow-pulse-pink  3.5s ease-in-out infinite; animation-delay: 0.8s; }
@@ -519,6 +525,11 @@ body {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
+
+  /* ─── Hide side characters on mobile ─────────────────────────────────── */
+  .side-characters-wrapper {
+    display: none !important;
+  }
 
   /* ─── Disable hover transforms on touch ──────────────────────────────── */
   .companion-card:hover {

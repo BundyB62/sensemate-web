@@ -1,13 +1,14 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatarPrompt'
 
 // Novita.ai — supports NSFW with enable_nsfw_detection: false
 const NOVITA_URL = 'https://api.novita.ai/v3/async/txt2img'
 const NOVITA_RESULT_URL = 'https://api.novita.ai/v3/async/task-result'
 const NOVITA_MERGE_FACE_URL = 'https://api.novita.ai/v3/merge-face'
-// Fal.ai Flux Dev — fast, high quality, but SFW only
-const FAL_URL = 'https://fal.run/fal-ai/flux/dev'
+// Fal.ai Flux Pro 1.1 — best quality, excellent prompt adherence
+const FAL_URL = 'https://fal.run/fal-ai/flux-pro/v1.1'
 
 // ─── Check if prompt needs NSFW model ──────────────────────────────────────
 function isExplicitPrompt(prompt: string): boolean {
@@ -44,15 +45,15 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
           enable_nsfw_detection: false,
         },
         request: {
-          model_name: 'epicrealism_naturalSinRC1VAE_106430.safetensors',
+          model_name: 'juggernautXL_juggXIByRundiffusion_695423.safetensors',
           prompt: fullPrompt,
           negative_prompt: negativePrompt,
-          width: 768,
-          height: 1024,
+          width: 1024,
+          height: 1536,
           image_num: 1,
-          steps: 30,
+          steps: 35,
           clip_skip: 2,
-          guidance_scale: 7,
+          guidance_scale: 6,
           sampler_name: 'DPM++ 2M Karras',
         },
       }),
@@ -128,11 +129,12 @@ async function generateFlux(prompt: string, apiKey: string): Promise<string | nu
       },
       body: JSON.stringify({
         prompt: prompt + ', photorealistic, 8k, ultra detailed, professional photography, natural lighting',
-        image_size: 'portrait_4_3',
-        num_inference_steps: 30,
+        image_size: { width: 1024, height: 1536 },
+        num_inference_steps: 35,
         num_images: 1,
         enable_safety_checker: false,
-        guidance_scale: 3.5,
+        guidance_scale: 7.5,
+        safety_tolerance: 6,
       }),
       signal: controller.signal,
     })
@@ -253,40 +255,58 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { prompt, avatarUrl, bodyNegative } = await request.json()
+    const { prompt, avatarUrl, bodyNegative, appearance } = await request.json()
     if (!prompt) return NextResponse.json({ error: 'No prompt' }, { status: 400 })
 
-    const explicit = isExplicitPrompt(prompt)
+    // Build appearance-enriched prompt if appearance data is available
+    let enrichedPrompt = prompt
+    let extraNegativeFromAppearance = ''
+
+    if (appearance) {
+      const appearanceDesc = buildAppearanceDescription(appearance, true, false) // body yes, clothing no (prompt has it)
+      const bodyReinforce = buildBodyReinforcement(appearance)
+
+      // Prepend appearance to the prompt so the AI generates the right person
+      enrichedPrompt = `${appearanceDesc}, ${bodyReinforce.emphasis}, ${prompt}`
+      extraNegativeFromAppearance = bodyReinforce.negative
+
+      console.log(`[Image] Appearance enriched: ${appearanceDesc.substring(0, 120)}`)
+    }
+
+    const explicit = isExplicitPrompt(enrichedPrompt)
     const novitaKey = process.env.NOVITA_API_KEY
     const falKey = process.env.FAL_API_KEY!
 
-    console.log(`[Image] ${explicit ? '🔞 NSFW' : '✅ SFW'} | Prompt: ${prompt.substring(0, 150)}`)
+    // Combine all negative prompts
+    const combinedNegative = [bodyNegative, extraNegativeFromAppearance].filter(Boolean).join(', ')
+
+    console.log(`[Image] ${explicit ? '🔞 NSFW' : '✅ SFW'} | Prompt: ${enrichedPrompt.substring(0, 200)}`)
 
     let imageUrl: string | null = null
 
     if (explicit && novitaKey) {
       // NSFW → Novita.ai (no content filter)
       console.log('[Image] Using Novita.ai (NSFW allowed)')
-      imageUrl = await generateNovita(prompt, novitaKey, bodyNegative)
+      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative)
 
       // If Novita fails, try Flux as last resort (might be blocked but worth trying)
       if (!imageUrl) {
         console.log('[Image] Novita failed, trying Flux Dev as fallback')
-        imageUrl = await generateFlux(prompt, falKey)
+        imageUrl = await generateFlux(enrichedPrompt, falKey)
       }
     } else if (explicit && !novitaKey) {
       // NSFW but no Novita key — try Flux anyway
       console.warn('[Image] ⚠️ NSFW prompt but no NOVITA_API_KEY set! Trying Flux (may be blocked)')
-      imageUrl = await generateFlux(prompt, falKey)
+      imageUrl = await generateFlux(enrichedPrompt, falKey)
     } else {
       // SFW → Flux Dev (best quality)
       console.log('[Image] Using Flux Dev (SFW)')
-      imageUrl = await generateFlux(prompt, falKey)
+      imageUrl = await generateFlux(enrichedPrompt, falKey)
 
       // Flux failed → try Novita as fallback
       if (!imageUrl && novitaKey) {
         console.log('[Image] Flux failed, falling back to Novita')
-        imageUrl = await generateNovita(prompt, novitaKey, bodyNegative)
+        imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative)
       }
     }
 

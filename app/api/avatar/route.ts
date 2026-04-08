@@ -40,7 +40,7 @@ async function generateFal(prompt: string, apiKey: string, useProModel: boolean)
       },
       body: JSON.stringify({
         prompt,
-        image_size: 'portrait_4_3',
+        image_size: { width: 768, height: 1152 },
         num_inference_steps: useProModel ? 35 : 30,
         num_images: 1,
         enable_safety_checker: false,

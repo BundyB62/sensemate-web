@@ -235,11 +235,17 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
   const hairColor = HAIR_COLOR_MAP[profile.hairColor] || 'brown'
   const eyeColor = EYE_COLOR_MAP[profile.eyeColor] || 'brown'
 
+  // Hijab special handling — always include color consistency
+  const isHijab = profile.hairLength === 'hijab'
+  const hairDesc = isHijab
+    ? `(wearing ${hairColor} colored hijab headscarf:1.4)`
+    : `(${hairColor} ${hairLength}:1.3)`
+
   const parts: string[] = [
-    `${age} ${ethnicity} ${gender}`,
-    `${skin}`,
-    `${hairColor} ${hairLength}`,
-    `${eyeColor} eyes`,
+    `(${age} ${ethnicity} ${gender}:1.2)`,
+    `(${skin}:1.1)`,
+    hairDesc,
+    `(${eyeColor} eyes:1.3)`,
   ]
 
   // Beard for men
@@ -247,19 +253,19 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
     const beardDesc = profile.beard && profile.beard !== 'none'
       ? BEARD_MAP[profile.beard] || ''
       : 'clean shaven'
-    if (beardDesc) parts.push(beardDesc)
+    if (beardDesc) parts.push(`(${beardDesc}:1.3)`)
   }
 
-  // Body details
+  // Body details with strong emphasis for consistency
   if (includeBody) {
-    parts.push(build)
+    parts.push(`(${build}:1.3)`)
     if (!isMale && profile.breastSize) {
       const breast = BREAST_MAP[profile.breastSize] || ''
-      if (breast) parts.push(breast)
+      if (breast) parts.push(`(${breast}:1.3)`)
     }
     if (profile.assSize) {
       const ass = ASS_MAP[profile.assSize] || ''
-      if (ass) parts.push(ass)
+      if (ass) parts.push(`(${ass}:1.2)`)
     }
   }
 
@@ -269,10 +275,44 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
     if (clothing) parts.push(clothing)
   }
 
+  // Same person reinforcement
+  parts.push('consistent appearance, same person throughout')
+
   return parts.join(', ')
 }
 
 // ─── Build body-type reinforcement for photo prompts ──────────────────────
+// ─── Identity reinforcement — core features that must NEVER change ──────────
+// Repeated at the END of prompts to ensure hijab, hair color, eye color, body type persist
+export function buildIdentityReinforcement(profile: Record<string, any>): string {
+  const parts: string[] = []
+
+  // Hijab is the #1 identity feature — must always be present
+  const isHijab = profile.hairLength === 'hijab'
+  if (isHijab) {
+    const hijabColor = HAIR_COLOR_MAP[profile.hairColor] || 'dark'
+    parts.push(`(MUST be wearing ${hijabColor} hijab headscarf on head at all times:1.5)`)
+  } else {
+    const hairColor = HAIR_COLOR_MAP[profile.hairColor] || 'brown'
+    const hairLength = HAIR_LENGTH_MAP[profile.hairLength] || 'medium length'
+    parts.push(`(${hairColor} ${hairLength} hair:1.3)`)
+  }
+
+  // Eye color
+  const eyeColor = EYE_COLOR_MAP[profile.eyeColor] || 'brown'
+  parts.push(`(${eyeColor} eyes:1.3)`)
+
+  // Body type
+  const build = BUILD_MAP[profile.build] || 'slim'
+  parts.push(`(${build}:1.2)`)
+
+  // Ethnicity
+  const ethnicity = ETHNICITY_MAP[profile.ethnicity] || 'European'
+  parts.push(`${ethnicity}`)
+
+  return parts.join(', ')
+}
+
 // Adds extra emphasis AND negative hints so the AI follows body type closely
 export function buildBodyReinforcement(profile: Record<string, any>): { emphasis: string; negative: string } {
   const emphasis: string[] = []
@@ -327,6 +367,7 @@ export function buildNegativePrompt(profile: Record<string, any>): string {
     'deformed, ugly, blurry, low quality, bad anatomy, bad proportions',
     'extra fingers, mutated hands, poorly drawn face, disfigured',
     'watermark, text, logo, signature',
+    'close-up, headshot, bust shot, cropped body, cut off legs, cut off feet',
   ]
 
   const isMale = profile.gender === 'man'
@@ -404,8 +445,13 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
   const faceParts: string[] = []
   // Eye color with emphasis
   faceParts.push(`(${eyeColor} eyes:1.3)`)
-  // Hair with emphasis
-  faceParts.push(`(${hairColor} ${hairLength}:1.2)`)
+  // Hair/hijab with emphasis
+  const isHijab = profile.hairLength === 'hijab'
+  if (isHijab) {
+    faceParts.push(`(wearing ${hairColor} colored hijab headscarf covering hair:1.5)`)
+  } else {
+    faceParts.push(`(${hairColor} ${hairLength}:1.3)`)
+  }
   // Skin
   faceParts.push(skin)
   // Beard with HIGH emphasis (most commonly missed)
@@ -417,25 +463,25 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
 
   const faceBlock = faceParts.join(', ')
 
-  // Build the prompt — upper body portrait for better face/feature detail
+  // Build the prompt — full body portrait from head to toe
   const prompt = [
     // Subject identity (most important — first tokens get highest weight)
-    `photorealistic upper body portrait`,
+    `photorealistic full body portrait from head to toe, showing entire body including feet`,
     `${age} ${ethnicity} ${gender}`,
     // Face details (second highest priority)
     faceBlock,
-    // Body
-    `(${bodyDesc}:1.2)`,
+    // Body (higher emphasis for full body)
+    `(${bodyDesc}:1.3)`,
     // Clothing
     clothing,
     // Expression
     expression,
     // Technical quality
-    'looking at camera, sharp focus on face',
-    'professional studio portrait, soft warm directional lighting, shallow depth of field',
-    'shot on Sony A7R IV 85mm lens, 8k, ultra-detailed, photorealistic skin texture',
+    'looking at camera, standing pose, full length shot',
+    'professional studio photography, soft warm directional lighting, neutral dark background',
+    'shot on Sony A7R IV 35mm wide lens, 8k, ultra-detailed, photorealistic skin texture',
     // Reinforcement of key features (repeat for emphasis)
-    `BREAK ${eyeColor} eyes, ${hairColor} hair${beardDesc ? `, ${beardDesc}` : ''}, ${build}`,
+    `BREAK full body head to toe, ${eyeColor} eyes, ${isHijab ? `${hairColor} hijab headscarf` : `${hairColor} hair`}${beardDesc ? `, ${beardDesc}` : ''}, ${build}`,
   ].join(', ')
 
   return prompt

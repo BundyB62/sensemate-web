@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatarPrompt'
+import { buildAppearanceDescription, buildBodyReinforcement, buildIdentityReinforcement } from '@/lib/avatarPrompt'
 import { getScenario } from '@/lib/scenarios'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
@@ -631,9 +631,13 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   // "maak een foto/selfie"
   if (/(maak|neem).{0,15}(foto|selfie)/i.test(lower)) return true
   // Direct NSFW requests always count as photo requests
-  if (/\b(naakt|naked|nude|topless|bikini|lingerie|ondergoed|underwear|bloot|blote)\b/i.test(lower)) return true
-  // Body part mentions = photo request
-  if (/(blote|naakte?).{0,10}(reet|kont|billen|tieten|borsten|butt|ass\b)/i.test(lower)) return true
+  if (/\b(naakt|naked|nude|topless|bikini|lingerie|ondergoed|underwear|bloot|blote|spiernaakt|uitkleden|strippen)\b/i.test(lower)) return true
+  // Body part mentions = photo request (NL + EN, slang included)
+  if (/\b(tieten|tiet|borsten|borst|boobs?|breast|boezem|decolleté|decollete|tepel|tepels|nipple)/i.test(lower)) return true
+  if (/\b(kont|kontje|billen|bil|reet|achterwerk|achterste|butt|ass\b|booty|arse|bips|gat)\b/i.test(lower)) return true
+  if (/\b(kutje|kut|vagina|pussy|poesje|poes|gleuf|spleetje|schaamlippen|clit|clitoris)\b/i.test(lower)) return true
+  if (/\b(piemel|pik|lul|penis|dick|cock|eikel|ballen|balls)\b/i.test(lower)) return true
+  if (/\b(benen|dijen|thighs|legs|voeten|feet|toes|tenen)\b/i.test(lower)) return true
   // "wil...zien" / "kan ik...zien" / "laat...zien"
   if (/(wil|kan|mag|laat).{0,30}zien/i.test(lower)) return true
   // English patterns
@@ -685,37 +689,96 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
     // Still detect pose from user message
     const lower = userMessage.toLowerCase()
     let pose = ''
-    if (/knie[eë]n|knees|kneeling|op.*knie/i.test(lower)) pose = 'kneeling on the floor on her knees, looking up at camera from below, low angle shot'
+    if (/achteren|behind|butt|kont|kontje|rear|back\s*view|reet|billen|bil\b|ass\b|booty|arse|bips|achterwerk|achterste/i.test(lower)) pose = 'rear view from behind, camera behind her, back of body visible, showing bare butt, looking over shoulder at camera, posterior view'
+    else if (/tieten|tiet\b|borsten|borst\b|boobs?|breast|boezem|decolleté|tepel|nipple|cleavage/i.test(lower)) pose = 'showing breasts, chest visible, looking at camera seductively, close-up of chest'
+    else if (/kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen/i.test(lower)) pose = 'lying back, legs slightly parted, nude, intimate angle, looking at camera'
+    else if (/voeten|voet\b|feet|foot|toes|tenen|zolen/i.test(lower)) pose = 'feet visible and prominent, barefoot, close-up of feet'
+    else if (/knie[eë]n|knees|kneeling|op.*knie/i.test(lower)) pose = 'kneeling on the floor on her knees, looking up at camera from below, low angle shot'
     else if (/lig|ligg|liggen|lying/i.test(lower)) pose = 'lying on her back, camera from above looking down, hair spread on pillow'
-    else if (/achteren|behind|kont|rear|back\s*view|reet|billen|ass\b/i.test(lower)) pose = 'rear view from behind, camera behind her, back of body visible, showing bare butt, looking over shoulder at camera, posterior view'
-    else if (/spreid|spread|benen.*open|legs.*open/i.test(lower)) pose = 'sitting with legs spread wide open facing camera, leaning back'
-    else if (/buig|bukken|voorover|bent\s*over/i.test(lower)) pose = 'bent over forward, looking back at camera over shoulder'
-    else if (/naakt|naked|nude/i.test(lower)) pose = 'nude, artistic pose, full body visible'
+    else if (/spreid|spread|benen.*open|legs.*open|wijd/i.test(lower)) pose = 'sitting with legs spread wide open facing camera, leaning back'
+    else if (/voorover|buig|bukken|bent\s*over/i.test(lower)) pose = 'bent over forward, looking back at camera over shoulder'
+    else if (/op.*vier|doggy|handen.*knie|kruip/i.test(lower)) pose = 'on all fours, looking back at camera over shoulder, arched back'
+    else if (/hurk|squat/i.test(lower)) pose = 'squatting down low, knees apart, looking at camera'
+    else if (/naakt|spiernaakt|naked|nude|bloot/i.test(lower)) pose = 'nude, artistic pose, full body visible'
     else if (/topless/i.test(lower)) pose = 'topless, hands at sides'
+    else if (/vingeren|finger|masturbat|aanraken|strelen/i.test(lower)) pose = 'touching herself, eyes closed in pleasure, intimate'
     else pose = 'seductive confident pose, looking at camera, medium shot'
 
-    return `${appearancePart}, ${activeScenario.photoCostume}, ${pose}, ${activeScenario.photoSetting}, photorealistic, 8k, professional photography`
+    // Always reinforce identity features (hijab, hair, eyes) AFTER costume to prevent them being overridden
+    const identityReinforce = buildIdentityReinforcement(ap)
+    return `${appearancePart}, ${activeScenario.photoCostume}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, photorealistic, 8k, professional photography`
   }
 
   // Extract pose/scenario hints from the user message
   const lower = userMessage.toLowerCase()
   let scenario = 'sitting on couch, cozy home setting, casual outfit, relaxed natural pose, warm lighting'
 
-  // Explicit/NSFW scenarios
-  if (/naakt|naked|nude/i.test(lower)) scenario = 'nude, artistic pose, bedroom, intimate lighting'
-  else if (/topless/i.test(lower)) scenario = 'topless, covering with hands playfully, bedroom'
-  else if (/lingerie|ondergoed|underwear/i.test(lower)) scenario = 'wearing lace lingerie, bedroom, seductive pose'
-  else if (/bikini/i.test(lower)) scenario = 'wearing bikini, beach, sunny, wet skin'
-  else if (/achteren|behind|butt|kont(?!je)|rear|back\s*view|reet|billen|ass\b/i.test(lower)) scenario = 'rear view from behind, camera behind her, back of body visible, showing her bare butt and back, looking over her shoulder at camera, standing pose, shot from behind, posterior view'
-  else if (/voorover|bend|buig|bukken|bent\s*over/i.test(lower)) scenario = 'bent over forward, hands on knees, looking back at camera over shoulder, showing cleavage from above angle, seductive'
-  else if (/knie[eë]n|knees|kneeling|op.*knie/i.test(lower)) scenario = 'kneeling on the floor, on her knees, sitting on her heels, hands on thighs, looking up at camera from below, seductive expression, eye level low angle shot'
-  else if (/spreid|spread|benen.*open|legs.*open/i.test(lower)) scenario = 'sitting on bed with legs spread wide open facing camera, leaning back on hands, seductive expression, intimate bedroom lighting, front-facing shot'
-  else if (/lig|ligg|liggen|lying|lay/i.test(lower)) scenario = 'lying on her back on bed, camera from above looking down at her, hair spread on pillow, looking up at camera, soft sheets, intimate warm lighting'
-  else if (/hurk|squat/i.test(lower)) scenario = 'squatting down low, knees apart, looking at camera at eye level, seductive confident pose'
-  else if (/sta|staan|standing/i.test(lower)) scenario = 'standing full body shot head to toe, confident pose with hand on hip, looking at camera, well-lit room'
-  else if (/zit|zitten|sitting/i.test(lower)) scenario = 'sitting in chair or on couch, legs crossed, relaxed confident pose, looking at camera, cozy setting'
-  else if (/dildo|toy|speeltje/i.test(lower)) scenario = 'holding a toy, playful expression, bedroom'
-  else if (/sexy|verleidel|geil|hot|heet/i.test(lower)) scenario = 'seductive pose, bedroom, sensual warm lighting, looking at camera with desire'
+  // ─── NSFW / body part / pose scenarios ──────────────────────────────────────
+  // Helper: detect body parts and poses present in message
+  const hasButt = /achteren|behind|butt|kont|kontje|rear|reet|billen|bil\b|ass\b|booty|bips|achterwerk|achterste/i.test(lower)
+  const hasBreasts = /tieten|tiet\b|borsten|borst\b|boobs?|breast|boezem|decolleté|tepel|nipple|cleavage/i.test(lower)
+  const hasPussy = /kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit/i.test(lower)
+  const hasFeet = /voeten|voet\b|feet|foot|toes|tenen|zolen|soles/i.test(lower)
+  const hasBentOver = /voorover|bend|buig|bukken|bent\s*over/i.test(lower)
+  const hasSpread = /spreid|spread|open|wijd/i.test(lower)
+  const hasKneeling = /knie[eë]n|knees|kneeling|op.*knie/i.test(lower)
+  const hasLying = /lig|ligg|liggen|lying|lay/i.test(lower)
+  const hasDoggy = /op.*vier|doggy|handen.*knie|crawl|kruip/i.test(lower)
+  const hasSquat = /hurk|squat/i.test(lower)
+  const hasNude = /naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen/i.test(lower)
+  const hasFingering = /vingeren|finger|masturbat|aanraken|touch herself|strelen/i.test(lower)
+
+  // ─── COMBO POSES (most specific first) ─────────────────────────────────────
+  // Butt + spread = spread from behind showing everything
+  if (hasButt && hasSpread) scenario = 'rear view from behind, bent over with legs spread wide, camera behind and below her, butt and intimate area visible from behind, looking back over shoulder, nude, bedroom, intimate lighting'
+  // Butt + bent over = bent over rear view
+  else if (hasButt && hasBentOver) scenario = 'bent over forward from behind, rear view, hands on knees or touching floor, camera behind her showing butt prominently, looking back over shoulder seductively, nude, bedroom'
+  // Butt + lying = lying on stomach showing butt
+  else if (hasButt && hasLying) scenario = 'lying face down on bed on her stomach, butt prominently visible, looking back at camera over shoulder, nude, soft sheets, intimate warm lighting'
+  // Butt + kneeling = on knees from behind
+  else if (hasButt && hasKneeling) scenario = 'on her knees from behind, rear view, kneeling on bed, back arched, butt prominently visible, looking over shoulder at camera, nude, bedroom'
+  // Pussy + spread = spread legs showing pussy
+  else if (hasPussy && hasSpread) scenario = 'lying on bed with legs spread wide open facing camera, nude, intimate area visible, leaning back, looking at camera seductively, close-up, bedroom, soft lighting'
+  // Pussy + lying = lying showing pussy
+  else if (hasPussy && hasLying) scenario = 'lying on her back on bed, legs parted, nude, intimate close-up from between legs, soft bedroom lighting, looking at camera'
+  // Breasts + kneeling = kneeling showing breasts
+  else if (hasBreasts && hasKneeling) scenario = 'kneeling on bed, topless, breasts visible and prominent, hands on thighs, looking up at camera from below, intimate lighting'
+  // Doggy / all fours (always from behind)
+  else if (hasDoggy) scenario = 'on all fours on bed, rear view from behind, back arched, looking back at camera over shoulder, butt visible, seductive expression, intimate bedroom lighting'
+  // Fingering / masturbation
+  else if (hasFingering) scenario = 'touching herself intimately, lying on bed, hand between legs, eyes closed in pleasure, nude, intimate close-up, soft warm lighting'
+
+  // ─── SINGLE POSES ──────────────────────────────────────────────────────────
+  // Bent over (no specific body part)
+  else if (hasBentOver) scenario = 'bent over forward, rear view from behind, hands on knees, looking back at camera over shoulder, butt visible, seductive, bedroom'
+  // Spread (no specific body part)
+  else if (hasSpread) scenario = 'sitting on bed with legs spread wide open facing camera, leaning back on hands, nude, seductive expression, intimate bedroom lighting, front-facing shot'
+  // Kneeling
+  else if (hasKneeling) scenario = 'kneeling on the floor, on her knees, sitting on her heels, hands on thighs, looking up at camera from below, seductive expression, low angle shot'
+  // Lying
+  else if (hasLying) scenario = 'lying on her back on bed, camera from above looking down at her, hair spread on pillow, looking up at camera, soft sheets, intimate warm lighting'
+  // Squatting
+  else if (hasSquat) scenario = 'squatting down low, knees apart, looking at camera at eye level, seductive confident pose, nude, bedroom'
+
+  // ─── SINGLE BODY PARTS ─────────────────────────────────────────────────────
+  // Butt / rear view
+  else if (hasButt) scenario = 'rear view from behind, camera behind her, back of body visible, showing her bare butt and back, looking over her shoulder at camera, standing pose, shot from behind, nude, posterior view, bedroom'
+  // Breasts
+  else if (hasBreasts) scenario = 'showing her breasts, topless, chest visible and prominent, close-up of chest area, looking at camera seductively, bedroom, intimate warm lighting'
+  // Pussy
+  else if (hasPussy) scenario = 'lying on bed, legs slightly parted, nude, intimate close-up, soft bedroom lighting, looking at camera seductively, sensual'
+  // Feet
+  else if (hasFeet) scenario = 'feet visible and prominent in frame, barefoot, close-up of feet, legs stretched out, sitting on bed, soft lighting'
+
+  // ─── CLOTHING ──────────────────────────────────────────────────────────────
+  else if (hasNude) scenario = 'fully nude, artistic pose, full body visible, bedroom, intimate lighting'
+  else if (/topless/i.test(lower)) scenario = 'topless, breasts visible, hands at sides, confident pose, bedroom'
+  else if (/lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|jarretel|garter|kous|stockings|corset|bodystocking|bodysuit|babydoll|negligee|nachthemd|nachtpon/i.test(lower)) scenario = 'wearing sexy lace lingerie set, bedroom, seductive pose on bed, sensual warm lighting'
+  else if (/bikini|zwempak|swimsuit|badpak/i.test(lower)) scenario = 'wearing bikini, beach, sunny, wet skin, golden hour lighting'
+
+  // ─── OTHER ─────────────────────────────────────────────────────────────────
+  else if (/dildo|vibrator|toy|speeltje/i.test(lower)) scenario = 'holding a toy, playful naughty expression, nude, bedroom, intimate'
+  else if (/sexy|verleidel|geil|hot|heet|opwindend|stout|naughty|dirty|vies/i.test(lower)) scenario = 'seductive pose, bedroom, sensual warm lighting, looking at camera with desire'
   // Home/cozy scenarios
   else if (/bank|couch|sofa|knus|knuffelen/i.test(lower)) scenario = 'sitting cozy on soft couch, legs tucked under, wearing oversized sweater or comfy outfit, warm cozy living room, soft warm lighting, relaxed happy smile'
   else if (/thuis|home/i.test(lower)) scenario = 'at home in living room, casual comfortable outfit, warm cozy atmosphere, natural candid pose, soft lighting'
@@ -738,7 +801,8 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   else if (/avond|evening|nacht|night/i.test(lower)) scenario = 'evening at home, cozy outfit, warm dim lighting, relaxed on couch, candles'
   else if (/wijn|wine|drink/i.test(lower)) scenario = 'sitting cozy with glass of wine, relaxed at home on couch, warm lighting, comfortable outfit, content smile'
 
-  return `${appearancePart}, ${scenario}, photorealistic, 8k, professional photography`
+  const identityReinforce = buildIdentityReinforcement(ap)
+  return `${appearancePart}, ${scenario}, ${identityReinforce}, photorealistic, 8k, professional photography`
 }
 
 // ─── Detect pure English text (should be Dutch) ─────────────────────────────
@@ -811,8 +875,9 @@ function enrichImagePromptWithAppearance(imagePrompt: string, companion: any, ac
     .replace(/\b(young|mature)\s+(woman|girl|man|guy)\b/gi, '')
     .trim()
 
-  // Prepend the full appearance
-  return `${appearancePart}, ${enriched}, photorealistic, 8k, professional photography, natural lighting`
+  // Prepend the full appearance + reinforce identity at the end
+  const identityReinforce = buildIdentityReinforcement(ap)
+  return `${appearancePart}, ${enriched}, ${identityReinforce}, photorealistic, 8k, professional photography, natural lighting`
 }
 
 export async function POST(request: Request) {

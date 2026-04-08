@@ -5,6 +5,7 @@ import LogoHero from '@/components/LogoHero'
 import PricingCards from '@/components/PricingCards'
 import ChatPreview from '@/components/ChatPreview'
 import FeatureCards from '@/components/FeatureCards'
+import SideCharacters from '@/components/SideCharacters'
 
 
 export default function LandingPage() {
@@ -31,7 +32,7 @@ export default function LandingPage() {
       {/* Nav */}
       <nav className="mobile-nav" style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        height: 110,
+        height: 76,
         background: 'rgba(6,4,14,0.88)',
         borderBottom: '1px solid rgba(233,30,140,0.12)',
         backdropFilter: 'blur(36px)',
@@ -58,9 +59,9 @@ export default function LandingPage() {
           <div className="mobile-hide" />
 
           {/* Center — Brand */}
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
             <div className="nav-brand-text" style={{
-              fontSize: 58, fontWeight: 300, letterSpacing: '0.04em', lineHeight: 1,
+              fontSize: 42, fontWeight: 300, letterSpacing: '0.04em', lineHeight: 1,
               fontStyle: 'italic',
               fontFamily: 'Georgia, "Times New Roman", serif',
               background: 'linear-gradient(110deg, #ffe0f0 0%, #f472b6 20%, #e91e8c 45%, #be185d 65%, #f9a8d4 85%, #ffe0f0 100%)',
@@ -69,7 +70,7 @@ export default function LandingPage() {
               SenseMates
             </div>
             <div className="mobile-hide" style={{
-              fontSize: 10, fontWeight: 300, letterSpacing: '0.38em', textTransform: 'uppercase',
+              fontSize: 9, fontWeight: 300, letterSpacing: '0.38em', textTransform: 'uppercase',
               color: 'rgba(249,168,212,0.35)', fontStyle: 'normal',
             }}>
               feel the connection
@@ -101,10 +102,12 @@ export default function LandingPage() {
       </nav>
 
       <div style={{ position: 'relative', zIndex: 1 }}>
+        <SideCharacters />
+
         {/* Hero */}
         <section className="mobile-hero" style={{
-          minHeight: '100vh', maxWidth: 1240, margin: '0 auto',
-          padding: '130px 60px 60px',
+          maxWidth: 1240, margin: '0 auto',
+          padding: '96px 60px 40px',
           display: 'grid', gridTemplateColumns: '1fr 1fr',
           alignItems: 'center', gap: 40,
         }}>
@@ -121,29 +124,30 @@ export default function LandingPage() {
               Create your perfect companion — choose their look, personality, and style.
               Chat, roleplay, and receive AI-generated photos.
             </p>
-            <p style={{ fontSize: 15, color: 'rgba(249,168,212,0.55)', marginBottom: 52, lineHeight: 1.7, maxWidth: 400, fontStyle: 'italic' }}>
+            <p style={{ fontSize: 15, color: 'rgba(249,168,212,0.55)', marginBottom: 36, lineHeight: 1.7, maxWidth: 400, fontStyle: 'italic' }}>
               No judgement. Full creative freedom — whenever you want it.
             </p>
-            <Link href="/signup" style={{
+            <Link href="/signup" className="hero-cta-pulse" style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              padding: '14px 40px', fontSize: 16, fontWeight: 600, textDecoration: 'none',
+              padding: '18px 52px', fontSize: 18, fontWeight: 700, textDecoration: 'none',
               color: '#fff', borderRadius: 100,
               background: 'linear-gradient(135deg, rgba(91,66,243,0.55), rgba(233,30,140,0.55))',
-              border: '1px solid rgba(233,30,140,0.35)',
+              border: '1px solid rgba(233,30,140,0.5)',
               backdropFilter: 'blur(12px)',
-              boxShadow: '0 4px 28px rgba(233,30,140,0.25)',
+              boxShadow: '0 6px 36px rgba(233,30,140,0.35), 0 0 80px rgba(91,66,243,0.15)',
+              letterSpacing: '-0.01em',
             }}>
               Meet Your SenseMate →
             </Link>
           </div>
 
           {/* Right: hero figure */}
-          <div className="mobile-hero-figure" style={{ position: 'relative', height: 860, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="mobile-hero-figure" style={{ position: 'relative', height: 620, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {/* Outer slow pulse — large blue/purple halo */}
             <div className="hero-glow-outer" style={{
               position: 'absolute', top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 820, height: 820, borderRadius: '50%',
+              width: 600, height: 600, borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(60,80,220,0.18) 0%, rgba(120,40,200,0.08) 45%, transparent 70%)',
               filter: 'blur(50px)',
               pointerEvents: 'none', zIndex: 1,
@@ -152,7 +156,7 @@ export default function LandingPage() {
             <div className="hero-glow-mid" style={{
               position: 'absolute', top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 580, height: 580, borderRadius: '50%',
+              width: 420, height: 420, borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(40,120,255,0.22) 0%, rgba(80,60,240,0.1) 50%, transparent 72%)',
               filter: 'blur(30px)',
               pointerEvents: 'none', zIndex: 1,
@@ -161,7 +165,7 @@ export default function LandingPage() {
             <div className="hero-glow-pink" style={{
               position: 'absolute', top: '62%', left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 280, height: 280, borderRadius: '50%',
+              width: 200, height: 200, borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(233,30,140,0.35) 0%, rgba(200,20,100,0.1) 50%, transparent 70%)',
               filter: 'blur(20px)',
               pointerEvents: 'none', zIndex: 1,
@@ -170,22 +174,22 @@ export default function LandingPage() {
             <div className="hero-glow-core" style={{
               position: 'absolute', top: '38%', left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 200, height: 200, borderRadius: '50%',
+              width: 150, height: 150, borderRadius: '50%',
               background: 'radial-gradient(circle, rgba(120,200,255,0.28) 0%, transparent 65%)',
               filter: 'blur(15px)',
               pointerEvents: 'none', zIndex: 1,
             }} />
-            <LogoHero maxHeight={860} />
+            <LogoHero maxHeight={620} />
           </div>
         </section>
 
         {/* Chat preview */}
-        <section className="mobile-section" style={{ padding: '20px 60px 80px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
+        <section className="mobile-section" style={{ padding: '40px 60px 100px', display: 'flex', justifyContent: 'center', position: 'relative', zIndex: 2 }}>
           <ChatPreview />
         </section>
 
         {/* What You Get */}
-        <section className="mobile-section" style={{ padding: '40px 60px 80px' }}>
+        <section className="mobile-section" style={{ padding: '60px 60px 80px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 40, maxWidth: 700, margin: '0 auto 40px' }}>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
             <h2 style={{ fontSize: 26, fontWeight: 600, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap', margin: 0 }}>

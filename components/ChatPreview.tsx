@@ -75,11 +75,11 @@ export default function ChatPreview() {
   return (
     <div ref={sectionRef} style={{
       width: '100%', maxWidth: 1000, margin: '0 auto',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 48,
+      display: 'grid', gridTemplateColumns: '1fr 1fr', alignItems: 'center', gap: 48,
     }} className="mobile-chat-preview">
 
       {/* Left: Feature highlights */}
-      <div style={{ flex: 1, maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, justifyContent: 'center' }}>
         <div style={{ marginBottom: 8 }}>
           <h3 style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-0.5px', color: '#fff', marginBottom: 8, lineHeight: 1.2 }}>
             See it in action
@@ -110,7 +110,7 @@ export default function ChatPreview() {
 
       {/* Right: Animated phone mockup */}
       <div style={{
-        width: 340, flexShrink: 0,
+        width: '100%', maxWidth: 420,
         borderRadius: 36, overflow: 'hidden',
         border: '1px solid rgba(255,255,255,0.08)',
         background: '#0b0b16',

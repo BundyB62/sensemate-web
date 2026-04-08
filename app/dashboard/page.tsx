@@ -63,7 +63,7 @@ export default async function DashboardPage() {
       {/* Nav — matching landing page */}
       <nav className="mobile-nav" style={{
         position: 'sticky', top: 0, zIndex: 100,
-        height: 110,
+        height: 76,
         background: 'rgba(6,4,14,0.88)',
         borderBottom: '1px solid rgba(233,30,140,0.12)',
         backdropFilter: 'blur(36px)',
@@ -89,9 +89,9 @@ export default async function DashboardPage() {
           </div>
 
           {/* Center — Brand */}
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+          <Link href="/" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
             <div className="nav-brand-text" style={{
-              fontSize: 58, fontWeight: 300, letterSpacing: '0.04em', lineHeight: 1,
+              fontSize: 42, fontWeight: 300, letterSpacing: '0.04em', lineHeight: 1,
               fontStyle: 'italic',
               fontFamily: 'Georgia, "Times New Roman", serif',
               background: 'linear-gradient(110deg, #ffe0f0 0%, #f472b6 20%, #e91e8c 45%, #be185d 65%, #f9a8d4 85%, #ffe0f0 100%)',
@@ -344,21 +344,104 @@ export default async function DashboardPage() {
             </div>
           </>
         ) : (
-          <div style={{ textAlign: 'center', padding: '100px 24px' }}>
-            <div style={{ fontSize: 80, marginBottom: 24, display: 'inline-block' }}>💝</div>
-            <h2 style={{ fontSize: 32, fontWeight: 800, marginBottom: 12, letterSpacing: '-1px' }}>No SenseMates yet</h2>
-            <p style={{ color: 'rgba(255,255,255,0.45)', marginBottom: 40, fontSize: 17, lineHeight: 1.7 }}>
-              Create your first SenseMate.<br />Choose a prebuilt or design your own.
-            </p>
-            <Link href="/onboarding" style={{
-              display: 'inline-flex', alignItems: 'center', padding: '16px 40px', fontSize: 16, fontWeight: 600,
-              textDecoration: 'none', color: '#fff', borderRadius: 100,
-              background: 'linear-gradient(135deg, rgba(91,66,243,0.6), rgba(233,30,140,0.6))',
-              border: '1px solid rgba(233,30,140,0.35)',
-              boxShadow: '0 4px 28px rgba(233,30,140,0.25)',
+          <div style={{ position: 'relative' }}>
+            {/* ─── Hero section with rotating showcase ─── */}
+            <div style={{ textAlign: 'center', padding: '40px 24px 48px', position: 'relative' }}>
+              {/* Ambient glow */}
+              <div style={{
+                position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%, -50%)',
+                width: 600, height: 500, borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(233,30,140,0.1) 0%, rgba(91,66,243,0.05) 50%, transparent 70%)',
+                filter: 'blur(80px)', pointerEvents: 'none',
+              }} />
+
+              {/* Floating portrait gallery */}
+              <div style={{
+                display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 48,
+                position: 'relative', perspective: 800,
+              }}>
+                {[
+                  { img: '/showcase-1.jpg', rotate: '-6deg', y: 12, label: 'Blonde Goddess' },
+                  { img: '/showcase-2.jpg', rotate: '-2deg', y: -8, label: 'Mysterious' },
+                  { img: '/showcase-3.jpg', rotate: '1deg', y: 4, label: 'Latina Fire' },
+                  { img: '/showcase-4.jpg', rotate: '3deg', y: -12, label: 'Dark Beauty' },
+                  { img: '/showcase-5.jpg', rotate: '-1deg', y: 8, label: 'Playful Red' },
+                  { img: '/showcase-6.jpg', rotate: '5deg', y: -4, label: 'Exotic' },
+                ].map((card, i) => (
+                  <div key={i} style={{
+                    width: 140, flexShrink: 0,
+                    transform: `rotate(${card.rotate}) translateY(${card.y}px)`,
+                    transition: 'transform 0.4s ease',
+                  }}>
+                    <div style={{
+                      width: '100%', aspectRatio: '1', borderRadius: 18, overflow: 'hidden',
+                      border: '2px solid rgba(255,255,255,0.08)',
+                      boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px rgba(233,30,140,0.08)',
+                      position: 'relative',
+                    }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={card.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                      <div style={{
+                        position: 'absolute', bottom: 0, left: 0, right: 0,
+                        background: 'linear-gradient(transparent, rgba(0,0,0,0.7))',
+                        padding: '20px 10px 8px', textAlign: 'center',
+                      }}>
+                        <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.7)', letterSpacing: '0.05em' }}>{card.label}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <h2 style={{
+                fontSize: 40, fontWeight: 800, marginBottom: 16, letterSpacing: '-1.5px',
+                background: 'linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.65) 100%)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              }}>
+                She&apos;s waiting for you
+              </h2>
+              <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: 17, lineHeight: 1.8, maxWidth: 460, margin: '0 auto 12px' }}>
+                Design every detail — her face, body, personality, and style.
+                Chat, roleplay, and receive photos. Anything goes.
+              </p>
+              <p style={{
+                color: 'rgba(249,168,212,0.5)', fontSize: 15, fontStyle: 'italic',
+                maxWidth: 380, margin: '0 auto 44px',
+              }}>
+                No limits. No filters. Just you and her.
+              </p>
+              <Link href="/onboarding" className="hero-cta-pulse" style={{
+                display: 'inline-flex', alignItems: 'center', padding: '18px 52px', fontSize: 18, fontWeight: 700,
+                textDecoration: 'none', color: '#fff', borderRadius: 100,
+                background: 'linear-gradient(135deg, rgba(91,66,243,0.55), rgba(233,30,140,0.55))',
+                border: '1px solid rgba(233,30,140,0.5)',
+                boxShadow: '0 6px 36px rgba(233,30,140,0.35), 0 0 80px rgba(91,66,243,0.15)',
+                letterSpacing: '-0.01em',
+              }}>
+                Create Your SenseMate →
+              </Link>
+            </div>
+
+            {/* ─── Feature highlights ─── */}
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16,
+              maxWidth: 800, margin: '20px auto 0', padding: '0 24px',
             }}>
-              Create Your SenseMate →
-            </Link>
+              {[
+                { icon: '🎨', title: '6,000+ Looks', desc: 'Kies etniciteit, lichaam, haar, ogen, kleding' },
+                { icon: '📸', title: 'AI Photos', desc: 'Elke pose, elke outfit, elk scenario' },
+                { icon: '🔞', title: 'No Limits', desc: 'Volledige vrijheid. Geen filters.' },
+              ].map(f => (
+                <div key={f.title} style={{
+                  padding: '24px 20px', borderRadius: 18, textAlign: 'center',
+                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)',
+                }}>
+                  <div style={{ fontSize: 28, marginBottom: 10 }}>{f.icon}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.8)', marginBottom: 6 }}>{f.title}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', lineHeight: 1.5 }}>{f.desc}</div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </main>

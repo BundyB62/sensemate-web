@@ -202,7 +202,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
         const lid = `imgload_${Date.now()}`
         setMessages(prev => [...prev, { id: lid, role: 'assistant', content: '📸', emotion: aiEmotion, type: 'image_loading', created_at: new Date().toISOString() }])
         try {
-          const ir = await fetch('/api/image', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: data.generateImage, avatarUrl: companion.avatar_url, bodyNegative: data.bodyNegative }) })
+          const ir = await fetch('/api/image', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt: data.generateImage, avatarUrl: companion.avatar_url, bodyNegative: data.bodyNegative, appearance: companion.appearance }) })
           const id = await ir.json()
           if (id.url && !id.error) {
             setMessages(prev => prev.map(m => m.id === lid ? { ...m, content: id.url, type: 'image' } : m))
@@ -550,17 +550,23 @@ export default function ChatInterface({ companion, initialMessages }: { companio
           position: isMobile ? 'fixed' : 'relative', inset: isMobile ? 0 : undefined,
           animation: isMobile ? 'slideInLeft 0.25s ease both' : undefined,
         }}>
-          {/* Close button */}
-          <button onClick={() => setShowSidebar(false)} style={{
-            position: 'absolute', top: 14, right: 14, zIndex: 20,
-            width: 36, height: 36, borderRadius: 18,
-            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-            color: 'rgba(255,255,255,0.5)', fontSize: 18, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>×</button>
+          {/* Top bar: Dashboard + Close */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderBottom: '1px solid rgba(255,255,255,0.04)', flexShrink: 0, zIndex: 20, position: 'relative' }}>
+            <Link href="/dashboard" style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px',
+              borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+              color: 'rgba(255,255,255,0.45)', textDecoration: 'none', fontSize: 12, fontWeight: 600,
+            }}>← Dashboard</Link>
+            <button onClick={() => setShowSidebar(false)} style={{
+              width: 32, height: 32, borderRadius: 16,
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+              color: 'rgba(255,255,255,0.5)', fontSize: 16, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>×</button>
+          </div>
 
           {/* Profile */}
-          <div style={{ padding: '40px 20px 20px', textAlign: 'center', position: 'relative' }}>
+          <div style={{ padding: '24px 20px 20px', textAlign: 'center', position: 'relative' }}>
             <div style={{
               position: 'absolute', top: 0, left: 0, right: 0, height: 120,
               background: `linear-gradient(180deg, ${accent}10, transparent)`,
@@ -580,9 +586,9 @@ export default function ChatInterface({ companion, initialMessages }: { companio
               }} />
               <div style={{
                 width: 90, height: 90, borderRadius: 45, overflow: 'hidden',
-                border: `2px solid ${accent}40`,
+                border: `2px solid ${accent}40`, cursor: 'pointer',
                 boxShadow: `0 0 20px ${accent}25`,
-              }}>
+              }} onClick={() => companion.avatar_url && setLightboxImg(companion.avatar_url)}>
                 {companion.avatar_url
                   ? <img src={companion.avatar_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
                   : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${PURPLE}, ${PINK})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32 }}>{e.emoji}</div>
@@ -662,20 +668,15 @@ export default function ChatInterface({ companion, initialMessages }: { companio
           )}
 
           {/* Actions */}
-          <div style={{ padding: '14px 20px', marginTop: 'auto' }}>
-            {isMobile && (
+          {isMobile && (
+            <div style={{ padding: '14px 20px', marginTop: 'auto' }}>
               <button onClick={() => setShowSidebar(false)} style={{
-                width: '100%', padding: '12px', marginBottom: 8, borderRadius: 12,
+                width: '100%', padding: '12px', borderRadius: 12,
                 background: `linear-gradient(135deg, ${PURPLE}, ${accent})`, border: 'none',
                 color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer',
               }}>💬 Chat met {name}</button>
-            )}
-            <Link href="/dashboard" style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px',
-              borderRadius: 12, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)',
-              color: 'rgba(255,255,255,0.3)', textDecoration: 'none', fontSize: 12, fontWeight: 500,
-            }}>← Dashboard</Link>
-          </div>
+            </div>
+          )}
         </aside>
       )}
 
@@ -702,13 +703,26 @@ export default function ChatInterface({ companion, initialMessages }: { companio
             display: 'flex', flexDirection: 'column',
             overflow: 'hidden',
           }}>
+            {/* Dashboard back link */}
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', flexShrink: 0 }}>
+              <Link href="/dashboard" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px',
+                borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                color: 'rgba(255,255,255,0.4)', textDecoration: 'none', fontSize: 12, fontWeight: 600,
+                transition: 'all 0.2s',
+              }}
+                onMouseEnter={ev => { ev.currentTarget.style.background = `${accent}10`; ev.currentTarget.style.color = 'rgba(255,255,255,0.7)' }}
+                onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.03)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
+              >← Dashboard</Link>
+            </div>
+
             {/* Profile header area */}
-            <div style={{ padding: '32px 24px 20px', textAlign: 'center', position: 'relative', flexShrink: 0 }}>
+            <div style={{ padding: '24px 24px 20px', textAlign: 'center', position: 'relative', flexShrink: 0 }}>
               {/* Gradient bg */}
               <div style={{
                 position: 'absolute', top: 0, left: 0, right: 0, height: 140,
                 background: `linear-gradient(180deg, ${accent}10, transparent)`,
-                borderRadius: `${PHONE_RADIUS}px 0 0 0`, transition: 'background 2s ease',
+                transition: 'background 2s ease',
               }} />
 
               {/* Avatar with heartbeat */}
@@ -828,18 +842,6 @@ export default function ChatInterface({ companion, initialMessages }: { companio
               </div>
             )}
 
-            {/* Dashboard link at bottom */}
-            <div style={{ padding: '16px 24px', marginTop: 'auto' }}>
-              <Link href="/dashboard" style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px',
-                borderRadius: 12, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)',
-                color: 'rgba(255,255,255,0.3)', textDecoration: 'none', fontSize: 12, fontWeight: 500,
-                transition: 'all 0.2s',
-              }}
-                onMouseEnter={ev => { ev.currentTarget.style.background = `${accent}08`; ev.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
-                onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.02)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}
-              >← Dashboard</Link>
-            </div>
           </div>
 
           {/* ─── Center: Chat Phone Frame ─────────────────────── */}
