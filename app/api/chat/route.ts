@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { buildAppearanceDescription } from '@/lib/avatarPrompt'
+import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatarPrompt'
 import { getScenario } from '@/lib/scenarios'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
@@ -1086,7 +1086,11 @@ export async function POST(request: Request) {
       emotionBlend: aiResponseBlend.intensities,
       valence: aiResponseBlend.valence,
       arousal: aiResponseBlend.arousal,
-      generateImage,
+      generateImage: generateImage ? (() => {
+        const bodyR = buildBodyReinforcement(companion.appearance || {})
+        return bodyR.emphasis ? `${generateImage}, ${bodyR.emphasis}` : generateImage
+      })() : null,
+      bodyNegative: generateImage ? buildBodyReinforcement(companion.appearance || {}).negative : undefined,
       bondLevel: newBondLevel,
       bondScore: newBondScore,
     })

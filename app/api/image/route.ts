@@ -15,19 +15,20 @@ function isExplicitPrompt(prompt: string): boolean {
 }
 
 // ─── Generate with Novita.ai (NSFW allowed) ────────────────────────────────
-async function generateNovita(prompt: string, apiKey: string): Promise<string | null> {
+async function generateNovita(prompt: string, apiKey: string, extraNegative?: string): Promise<string | null> {
   // Enhance for photorealism
   const fullPrompt = prompt +
     ', (masterpiece, best quality, photorealistic:1.4), RAW photo, 8k uhd' +
     ', detailed skin texture, realistic lighting, natural colors, sharp focus, film grain'
 
-  const negativePrompt =
+  let negativePrompt =
     'cartoon, anime, illustration, painting, drawing, sketch, 3d render, cgi, ' +
     'deformed, ugly, blurry, low quality, bad anatomy, bad proportions, ' +
     'extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text, ' +
     'extra limbs, extra legs, extra arms, missing limbs, fused limbs, too many fingers, ' +
     'three legs, four legs, three arms, four arms, duplicate limbs, malformed limbs, ' +
     'conjoined, siamese, mutation, mutant, gross proportions, malformed, cropped'
+  if (extraNegative) negativePrompt += ', ' + extraNegative
 
   try {
     // Step 1: Submit async task
@@ -252,7 +253,7 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { prompt, avatarUrl } = await request.json()
+    const { prompt, avatarUrl, bodyNegative } = await request.json()
     if (!prompt) return NextResponse.json({ error: 'No prompt' }, { status: 400 })
 
     const explicit = isExplicitPrompt(prompt)
@@ -266,7 +267,7 @@ export async function POST(request: Request) {
     if (explicit && novitaKey) {
       // NSFW → Novita.ai (no content filter)
       console.log('[Image] Using Novita.ai (NSFW allowed)')
-      imageUrl = await generateNovita(prompt, novitaKey)
+      imageUrl = await generateNovita(prompt, novitaKey, bodyNegative)
 
       // If Novita fails, try Flux as last resort (might be blocked but worth trying)
       if (!imageUrl) {
@@ -285,7 +286,7 @@ export async function POST(request: Request) {
       // Flux failed → try Novita as fallback
       if (!imageUrl && novitaKey) {
         console.log('[Image] Flux failed, falling back to Novita')
-        imageUrl = await generateNovita(prompt, novitaKey)
+        imageUrl = await generateNovita(prompt, novitaKey, bodyNegative)
       }
     }
 

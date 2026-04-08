@@ -267,6 +267,54 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
   return parts.join(', ')
 }
 
+// ─── Build body-type reinforcement for photo prompts ──────────────────────
+// Adds extra emphasis AND negative hints so the AI follows body type closely
+export function buildBodyReinforcement(profile: Record<string, any>): { emphasis: string; negative: string } {
+  const emphasis: string[] = []
+  const negative: string[] = []
+
+  // Build reinforcement
+  const build = profile.build || 'slim'
+  if (build === 'petite' || build === 'slim' || build === 'lean') {
+    emphasis.push('(very slim thin petite body:1.4)', '(small frame:1.3)')
+    negative.push('large breasts, big breasts, curvy, thick, overweight, fat, muscular, wide hips, voluptuous')
+  } else if (build === 'muscular' || build === 'athletic') {
+    emphasis.push('(muscular toned athletic body:1.3)')
+    negative.push('fat, overweight, skinny, thin')
+  } else if (build === 'thick' || build === 'curvy' || build === 'plus_size') {
+    emphasis.push('(curvy thick voluptuous body:1.3)')
+    negative.push('skinny, thin, slim, petite, flat')
+  }
+
+  // Breast reinforcement
+  const breast = profile.breastSize || ''
+  if (breast === 'cup-aa' || breast === 'cup-a') {
+    emphasis.push('(very small flat chest:1.5)', '(tiny breasts:1.4)', '(flat-chested:1.3)')
+    negative.push('large breasts, big breasts, medium breasts, busty, cleavage, big chest, D-cup, C-cup')
+  } else if (breast === 'cup-b') {
+    emphasis.push('(small breasts:1.3)')
+    negative.push('large breasts, big breasts, huge breasts, flat chest')
+  } else if (breast === 'cup-e' || breast === 'cup-f') {
+    emphasis.push('(very large huge breasts:1.4)', '(massive chest:1.3)')
+    negative.push('small breasts, flat chest, tiny breasts, A-cup')
+  }
+
+  // Ass reinforcement
+  const ass = profile.assSize || ''
+  if (ass === 'small') {
+    emphasis.push('(small tight butt:1.3)')
+    negative.push('large butt, big butt, thick butt, wide hips')
+  } else if (ass === 'xl') {
+    emphasis.push('(very large thick butt:1.3)')
+    negative.push('small butt, flat butt, no butt')
+  }
+
+  return {
+    emphasis: emphasis.join(', '),
+    negative: negative.join(', '),
+  }
+}
+
 // ─── Build negative prompt to prevent wrong features ──────────────────────
 export function buildNegativePrompt(profile: Record<string, any>): string {
   const parts = [
