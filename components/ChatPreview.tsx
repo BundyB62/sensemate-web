@@ -7,7 +7,7 @@ const CHAT_SCRIPT: { side: 'left' | 'right'; text: string; delay: number; photo?
   { side: 'right', text: 'Oh really? What were you thinking? 🔥', delay: 2200 },
   { side: 'left', text: 'That you might want to see something special 😘', delay: 2000 },
   { side: 'right', text: 'Send me a sexy photo 😍', delay: 1800 },
-  { side: 'left', text: 'Here you go babe, just for you 💕', delay: 1500 },
+  { side: 'left', text: 'Anything for you babe... 💋', delay: 1500 },
   { side: 'left', text: '', delay: 0, photo: true },
 ]
 
@@ -144,7 +144,7 @@ export default function ChatPreview() {
         </div>
 
         {/* Messages */}
-        <div ref={containerRef} style={{ padding: '10px 10px 6px', display: 'flex', flexDirection: 'column', gap: 4, height: 430, overflowY: 'hidden' }}>
+        <div ref={containerRef} style={{ padding: '10px 10px 6px', display: 'flex', flexDirection: 'column', gap: 4, height: 520, overflowY: 'hidden' }}>
           {/* Date */}
           <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 6px' }}>
             <span style={{ padding: '2px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.25)' }}>Today</span>
@@ -156,7 +156,7 @@ export default function ChatPreview() {
               return (
                 <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'flex-end', animation: 'lpMsgIn 0.3s ease both' }}>
                   <div style={{ width: 24 }} />
-                  <div style={{ width: '65%', borderRadius: 14, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', position: 'relative' }}>
+                  <div style={{ width: '80%', borderRadius: 14, overflow: 'hidden', boxShadow: '0 4px 24px rgba(0,0,0,0.5), 0 0 20px rgba(233,30,140,0.1)', position: 'relative' }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src="/landing-chat-preview.jpg" alt="" style={{ width: '100%', display: 'block' }} />
                     <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.5))', padding: '14px 8px 4px', display: 'flex', justifyContent: 'flex-end' }}>
