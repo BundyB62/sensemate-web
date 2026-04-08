@@ -613,17 +613,33 @@ body {
     gap: 12px !important;
   }
 
-  /* ─── Chat Preview — no hover zoom on mobile ────────────────────────── */
+  /* ─── Chat Preview — stack vertically on mobile ─────────────────────── */
   .mobile-chat-preview {
     transform: none !important;
     max-width: 100% !important;
+    flex-direction: column-reverse !important;
+    gap: 32px !important;
   }
 
-  /* ─── Pricing Cards — single column ─────────────────────────────────── */
+  /* ─── Pricing & Feature Cards — single column ───────────────────────── */
   .mobile-pricing-grid {
     grid-template-columns: 1fr !important;
     gap: 16px !important;
     max-width: 400px !important;
+  }
+
+  /* ─── Pricing comparison table — scrollable ─────────────────────────── */
+  .mobile-section table {
+    font-size: 12px !important;
+  }
+  .mobile-section table th,
+  .mobile-section table td {
+    padding: 10px 10px !important;
+  }
+
+  /* ─── Settings & Legal pages — tighter padding ──────────────────────── */
+  .glass {
+    padding: 20px 18px !important;
   }
 
   /* ─── Footer ────────────────────────────────────────────────────────── */
@@ -698,5 +714,10 @@ body {
   /* ─── Login / Signup card padding ──────────────────────────────────── */
   .mobile-auth-card {
     padding: 24px !important;
+  }
+
+  /* ─── Onboarding — 3 cols max on mobile ─────────────────────────────── */
+  .onb-image-grid-4 {
+    grid-template-columns: repeat(3, 1fr) !important;
   }
 }

@@ -20,7 +20,7 @@ export default async function SettingsPage() {
       {/* Header */}
       <header style={{
         position: 'sticky', top: 0, zIndex: 50,
-        borderBottom: '1px solid var(--card-border)', padding: '0 48px', height: 64,
+        borderBottom: '1px solid var(--card-border)', padding: '0 16px', height: 64,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         backdropFilter: 'blur(30px)', background: 'rgba(6,6,17,0.85)',
       }}>
