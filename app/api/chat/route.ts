@@ -674,8 +674,9 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
 function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeScenario?: { photoSetting: string; photoCostume: string } | null): string {
   const ap = companion.appearance || {}
 
-  // Build clean appearance description directly from profile data (skip clothing if scenario overrides it)
-  const appearancePart = buildAppearanceDescription(ap, true)
+  // Build appearance — skip clothing when scenario provides its own costume
+  const hasScenarioCostume = activeScenario && activeScenario.photoCostume
+  const appearancePart = buildAppearanceDescription(ap, true, !hasScenarioCostume)
 
   // If an active roleplay scenario exists, use its setting + costume as the base
   if (activeScenario && activeScenario.photoSetting) {
@@ -795,11 +796,12 @@ function isEnglishReasoning(text: string): boolean {
 // ─── Enrich any LLM-generated image prompt with full appearance details ────
 // The LLM often generates vague [FOTO:] descriptions missing body type, etc.
 // This ensures every photo prompt has the companion's full physical description.
-function enrichImagePromptWithAppearance(imagePrompt: string, companion: any): string {
+function enrichImagePromptWithAppearance(imagePrompt: string, companion: any, activeScenario?: { photoCostume: string } | null): string {
   const ap = companion.appearance || {}
 
-  // Build clean appearance description directly from profile data (with body details)
-  const appearancePart = buildAppearanceDescription(ap, true)
+  // Build appearance — skip clothing when scenario provides costume
+  const hasScenarioCostume = activeScenario && activeScenario.photoCostume
+  const appearancePart = buildAppearanceDescription(ap, true, !hasScenarioCostume)
 
   // Strip any existing vague appearance mentions from the LLM prompt
   let enriched = imagePrompt
@@ -995,7 +997,7 @@ export async function POST(request: Request) {
       // User explicitly asked for a photo
       if (bestImagePrompt) {
         // LLM generated a [FOTO:] tag — enrich with appearance
-        generateImage = enrichImagePromptWithAppearance(bestImagePrompt, companion)
+        generateImage = enrichImagePromptWithAppearance(bestImagePrompt, companion, scenario)
         // Add scenario setting/costume to photo prompt
         if (scenario && scenario.photoSetting) {
           generateImage += `, ${scenario.photoSetting}, ${scenario.photoCostume}`

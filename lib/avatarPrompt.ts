@@ -218,7 +218,7 @@ export const EMOTION_EXPRESSIONS: Record<string, string> = {
 
 // ─── Build a clean appearance description string (for chat photo prompts) ────
 // This gives a consistent, parseable appearance block without prompt engineering artifacts
-export function buildAppearanceDescription(profile: Record<string, any>, includeBody = true): string {
+export function buildAppearanceDescription(profile: Record<string, any>, includeBody = true, includeClothing = true): string {
   const gender = profile.gender === 'man' ? 'man' : 'woman'
   const isMale = gender === 'man'
 
@@ -258,8 +258,8 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
     }
   }
 
-  // Clothing style — always include if available
-  if (profile.clothingStyle) {
+  // Clothing style — skip when scenario overrides it
+  if (includeClothing && profile.clothingStyle) {
     const clothing = CLOTHING_MAP[profile.clothingStyle] || ''
     if (clothing) parts.push(clothing)
   }
