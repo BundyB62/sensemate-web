@@ -618,10 +618,9 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   const lower = text.toLowerCase()
 
   // First check if the user is REFUSING/STOPPING photos — NOT a photo request
-  if (/\b(stop|geen|niet|hou op|ophouden|klaar|genoeg|no more|don't|dont)\b.*(foto|photo|pic|stuur|afbeelding|image|send)/i.test(lower)) return false
-  if (/(foto|photo|pic|afbeelding).*(stop|geen|niet|hou op|klaar|genoeg|hoeft niet|don't|enough)/i.test(lower)) return false
-  if (/(wil geen|hoeft geen|stuur geen|geen foto|stop met|niet meer|no more photos|stop sending)/i.test(lower)) return false
-  if (/(ik zie niets|ik zie niks|ik zie geen|waar is|waar blijft|i don't see|i can't see|where is)/i.test(lower)) return false
+  // Be VERY specific to avoid false positives like "ik zie het niet, stuur het me"
+  if (/(wil geen|hoeft geen|stuur geen|geen foto|stop met foto|niet meer.*foto|no more photo|stop sending photo|hou op met|ophouden met)/i.test(lower)) return false
+  if (/^(stop|genoeg|klaar|no more)\s*[.!]*$/i.test(lower)) return false
 
   // Positive photo request patterns — broad matching for Dutch word order variations
   // "stuur foto", "foto sturen", "stuur een fototje", etc.
@@ -643,6 +642,14 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   if (/(sexy|hot|naughty|dirty|cute|beautiful|pretty).{0,10}(photo|pic|selfie|picture)/i.test(lower)) return true
   // "pose", "poseer"
   if (/\b(pose|poseer)\b/i.test(lower)) return true
+  // Implicit visual requests — "how do you look", "show yourself", "let me see you"
+  if (/(hoe zie|hoe ziet).{0,15}(eruit|er uit|uit)/i.test(lower)) return true
+  if (/(laat je|laat jezelf|laat je zelf).{0,10}(zien)/i.test(lower)) return true
+  if (/(show yourself|show me yourself|what do you look like|let me see you)/i.test(lower)) return true
+  // "ik wil je zien" / "ik wil het zien" / "kan ik je zien"
+  if (/(wil je zien|wil het zien|wil jou zien|kan ik je zien|mag ik je zien)/i.test(lower)) return true
+  // "stuur het" / "stuur maar" / "kan je het sturen" — without explicit "foto" word
+  if (/(stuur het|stuur 'm|stuur em|stuur maar|kan je.*sturen|kun je.*sturen)/i.test(lower)) return true
   // "ik wil een foto" / "kan je een foto" / "mag ik een foto"
   if (/(wil|kan|mag|kun).{0,20}(foto|pic|selfie|plaatje|fototje)/i.test(lower)) return true
   // "sexy foto", "leuke foto", "geile foto" — adjective + foto
