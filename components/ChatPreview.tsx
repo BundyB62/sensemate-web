@@ -3,11 +3,11 @@ import { useState, useEffect, useRef } from 'react'
 
 // Animated chat preview — messages appear one by one with typing effect
 const CHAT_SCRIPT: { side: 'left' | 'right'; text: string; delay: number; photo?: boolean }[] = [
-  { side: 'left', text: 'Hey you... I was just thinking about you 😏', delay: 800 },
-  { side: 'right', text: 'Oh really? What were you thinking? 🔥', delay: 2200 },
-  { side: 'left', text: 'That you might want to see something special 😘', delay: 2000 },
-  { side: 'right', text: 'Send me a sexy photo 😍', delay: 1800 },
-  { side: 'left', text: 'Anything for you babe... 💋', delay: 1500 },
+  { side: 'left', text: 'Hey you... I was just thinking about you 😏', delay: 1200 },
+  { side: 'right', text: 'Oh really? What were you thinking? 🔥', delay: 3000 },
+  { side: 'left', text: 'That you might want to see something special 😘', delay: 3200 },
+  { side: 'right', text: 'Send me a sexy photo 😍', delay: 2800 },
+  { side: 'left', text: 'Anything for you babe... 💋', delay: 2500 },
   { side: 'left', text: '', delay: 0, photo: true },
 ]
 
@@ -34,7 +34,7 @@ export default function ChatPreview() {
     if (!started || visibleCount >= CHAT_SCRIPT.length) return
 
     const next = CHAT_SCRIPT[visibleCount]
-    const typingDuration = next.photo ? 2500 : 1200
+    const typingDuration = next.photo ? 3500 : 1800
 
     // Show typing indicator
     setTypingSide(next.side)

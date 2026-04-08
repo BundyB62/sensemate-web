@@ -24,8 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body style={{ background: '#060514' }}>
-        <ParticleField />
-        {/* Silhouettes — black bg removed via mix-blend-mode screen */}
+        {/* Subtle silhouette — very low opacity, no animation */}
         <div style={{
           position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -37,8 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             style={{
               width: '100%', height: '100%', objectFit: 'cover',
               mixBlendMode: 'screen',
-              opacity: 0.3,
-              animation: 'silhouette-breathe 8s ease-in-out infinite',
+              opacity: 0.12,
             }}
           />
         </div>

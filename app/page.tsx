@@ -9,28 +9,21 @@ import ChatPreview from '@/components/ChatPreview'
 export default function LandingPage() {
   return (
     <div style={{ background: '#07050f', minHeight: '100vh', overflowX: 'hidden', color: '#fff' }}>
-      {/* Fixed atmospheric warm glow layers */}
+      {/* Subtle ambient glows — minimal, elegant */}
       <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
-        {/* Main warm amber glow - right side where hero figure is */}
+        {/* Soft pink glow — right side */}
         <div style={{
-          position: 'absolute', right: '-5%', top: '0',
-          width: '60%', height: '100vh',
-          background: 'radial-gradient(ellipse at 65% 40%, rgba(180,100,20,0.2) 0%, rgba(140,70,10,0.08) 40%, transparent 70%)',
-          filter: 'blur(50px)',
-        }} />
-        {/* Secondary amber bloom lower */}
-        <div style={{
-          position: 'absolute', right: '15%', top: '30%',
-          width: '35%', height: '70%',
-          background: 'radial-gradient(ellipse, rgba(200,120,30,0.12) 0%, transparent 65%)',
-          filter: 'blur(60px)',
-        }} />
-        {/* Deep purple ambient left */}
-        <div style={{
-          position: 'absolute', left: '-5%', top: '20%',
-          width: '40%', height: '60%',
-          background: 'radial-gradient(ellipse, rgba(60,20,120,0.15) 0%, transparent 70%)',
+          position: 'absolute', right: '-10%', top: '10%',
+          width: '50%', height: '60%',
+          background: 'radial-gradient(ellipse at 60% 40%, rgba(233,30,140,0.08) 0%, transparent 70%)',
           filter: 'blur(80px)',
+        }} />
+        {/* Soft purple glow — left side */}
+        <div style={{
+          position: 'absolute', left: '-10%', top: '30%',
+          width: '40%', height: '50%',
+          background: 'radial-gradient(ellipse, rgba(91,66,243,0.06) 0%, transparent 70%)',
+          filter: 'blur(100px)',
         }} />
       </div>
 
@@ -204,18 +197,19 @@ export default function LandingPage() {
               { icon: '🎨', title: 'Full Character Creator', desc: 'Design every detail — ethnicity, body type, hair, eyes, clothing. Over 6,000 combinations.' },
               { icon: '📸', title: 'AI Photo Generation', desc: 'Request photos in any pose, outfit, or scenario. Generated in seconds with your character.' },
               { icon: '🎭', title: '12 Roleplay Scenarios', desc: 'Hotel maid, nurse, secretary, police officer — one click to start a fantasy.' },
-              { icon: '💬', title: 'Natural Conversations', desc: 'Chat in Dutch or English. The AI remembers your name, preferences, and history.' },
+              { icon: '💬', title: 'Natural Conversations', desc: 'Chat in any language. The AI remembers your name, preferences, and conversation history.' },
               { icon: '🔞', title: 'No Content Limits', desc: 'Full mature content. No filters, no judgment. Everything is between you and your companion.' },
               { icon: '🔒', title: 'Private & Encrypted', desc: 'Your conversations are yours. No data sharing, no tracking, no ads. Ever.' },
             ].map(f => (
               <div key={f.title} style={{
                 padding: '28px 24px', borderRadius: 20,
-                background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)',
+                background: 'rgba(12,10,24,0.85)', backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 textAlign: 'center',
               }}>
                 <div style={{ fontSize: 32, marginBottom: 14 }}>{f.icon}</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 8 }}>{f.title}</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>{f.desc}</div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 8 }}>{f.title}</div>
+                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{f.desc}</div>
               </div>
             ))}
           </div>
