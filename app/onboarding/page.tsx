@@ -84,6 +84,9 @@ const ETHNICITY_LIST = [
   { id: 'turkish', label: 'Turkish', emoji: '🇹🇷' },
   { id: 'persian', label: 'Persian', emoji: '🇮🇷' },
   { id: 'lebanese', label: 'Lebanese', emoji: '🇱🇧' },
+  { id: 'moroccan', label: 'Moroccan', emoji: '🇲🇦' },
+  { id: 'egyptian', label: 'Egyptian', emoji: '🇪🇬' },
+  { id: 'arab', label: 'Arab / Gulf', emoji: '🇸🇦' },
   // Africa
   { id: 'west_african', label: 'West African', emoji: '🇳🇬' },
   { id: 'east_african', label: 'East African', emoji: '🇪🇹' },
@@ -179,6 +182,7 @@ const CLOTHING_WOMAN = [
   { id: 'luxury', label: 'Luxury', img: '/onboarding/clothing/woman/luxury.jpg' },
   { id: 'lingerie', label: 'Lingerie', img: '/onboarding/clothing/woman/lingerie.jpg' },
   { id: 'swimwear', label: 'Swimwear', img: '/onboarding/clothing/woman/swimwear.jpg' },
+  { id: 'jellaba', label: 'Jellaba', img: '/onboarding/clothing/woman/jellaba.jpg' },
 ]
 
 const CLOTHING_MAN = [
@@ -240,6 +244,7 @@ const HAIR_STYLES_WOMAN = [
   { id: 'afro', label: 'Afro', img: '/onboarding/hair/woman/afro.jpg' },
   { id: 'messy', label: 'Messy', img: '/onboarding/hair/woman/messy.jpg' },
   { id: 'dreadlocks', label: 'Dreadlocks', img: '/onboarding/hair/woman/dreadlocks.jpg' },
+  { id: 'hijab', label: 'Hijab', img: '/onboarding/hair/woman/hijab.jpg' },
 ]
 const HAIR_STYLES_MAN = [
   { id: 'short', label: 'Short', img: '/onboarding/hair/man/short.jpg' },

@@ -90,6 +90,7 @@ const HAIR_LENGTH_MAP: Record<string, string> = {
   dreadlocks: 'long dreadlocks hairstyle',
   cornrows: 'cornrow braids hairstyle',
   messy: 'messy tousled bedhead hair',
+  hijab: 'wearing hijab headscarf covering hair',
 }
 
 const HAIR_COLOR_MAP: Record<string, string> = {
@@ -165,6 +166,9 @@ const ETHNICITY_MAP: Record<string, string> = {
   turkish: 'Turkish',
   persian: 'Persian Iranian',
   lebanese: 'Lebanese Levantine',
+  moroccan: 'Moroccan North African',
+  egyptian: 'Egyptian North African',
+  arab: 'Arab Arabian Gulf',
   // African
   african: 'African',
   west_african: 'West African Nigerian',
@@ -199,6 +203,7 @@ const CLOTHING_MAP: Record<string, string> = {
   grunge: 'grunge outfit flannel and ripped jeans',
   lingerie: 'lingerie lace bra and panties',
   swimwear: 'bikini swimwear',
+  jellaba: 'traditional Moroccan jellaba dress with embroidery',
 }
 
 export const EMOTION_EXPRESSIONS: Record<string, string> = {
