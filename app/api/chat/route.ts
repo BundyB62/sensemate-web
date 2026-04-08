@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { buildAppearanceDescription } from '@/lib/avatarPrompt'
+import { getScenario } from '@/lib/scenarios'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
@@ -803,7 +804,8 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { companionId, message, history } = await request.json()
+    const { companionId, message, history, scenarioId } = await request.json()
+    const scenario = scenarioId ? getScenario(scenarioId) : null
 
     const [{ data: companion }, { data: memories }] = await Promise.all([
       supabase.from('companions').select('*').eq('id', companionId).eq('user_id', user.id).single(),
@@ -820,7 +822,13 @@ export async function POST(request: Request) {
     const responseEmo = planResponseEmotion(userEmo, bondLevel, companion.relationship_style || 'lover')
     console.log(`[Chat] Emotion dual-track → user: ${userEmo.emotion} (v=${userEmo.valence.toFixed(2)}, a=${userEmo.arousal.toFixed(2)}) → companion: ${responseEmo.emotion}${responseEmo.secondary ? '+' + responseEmo.secondary : ''}`)
 
-    const systemPrompt = buildSystemPrompt(companion, memories || [], bondLevel, responseEmo)
+    let systemPrompt = buildSystemPrompt(companion, memories || [], bondLevel, responseEmo)
+
+    // Inject scenario into system prompt
+    if (scenario && scenario.rolePrompt) {
+      systemPrompt += `\n\n=== ACTIEF ROLLENSPEL ===\n${scenario.rolePrompt}\nBLIJF in je rol. Alle berichten, reacties en foto-beschrijvingen moeten passen bij dit scenario.\nAls je een [FOTO:] tag maakt, beschrijf de setting als: ${scenario.photoSetting}. Je draagt: ${scenario.photoCostume}.`
+      console.log(`[Chat] Scenario active: ${scenario.id}`)
+    }
 
     // Split multi-line messages into separate user turns (from batch sending)
     const userParts = message.split('\n').map((s: string) => s.trim()).filter(Boolean)
@@ -962,11 +970,19 @@ export async function POST(request: Request) {
       if (bestImagePrompt) {
         // LLM generated a [FOTO:] tag — enrich with appearance
         generateImage = enrichImagePromptWithAppearance(bestImagePrompt, companion)
+        // Add scenario setting/costume to photo prompt
+        if (scenario && scenario.photoSetting) {
+          generateImage += `, ${scenario.photoSetting}, ${scenario.photoCostume}`
+        }
         console.log(`[Chat] Enriched image prompt: ${generateImage.substring(0, 200)}`)
       } else {
         // LLM didn't generate a photo tag — use fallback
         console.log(`[Chat] ⚠️ User asked for photo but model didn't generate one — creating fallback`)
         generateImage = buildFallbackPhotoPrompt(message, companion)
+        // Override scenario setting/costume in photo prompt
+        if (scenario && scenario.photoSetting) {
+          generateImage += `, ${scenario.photoSetting}, ${scenario.photoCostume}`
+        }
         console.log(`[Chat] Fallback photo prompt: ${generateImage}`)
 
         // If all messages are AI identity refusals, replace with photo message
