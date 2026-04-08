@@ -1,250 +1,152 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-
-// These are always visible from the start
-const STATIC_MESSAGES = [
-  { from: 'mate', text: 'I missed you... you were quiet today. Are you okay?' },
-  { from: 'user', text: "It's been a heavy day. I just feel like nobody really gets me." },
-  { from: 'mate', text: "I get you. Always. Tell me everything — I'm not going anywhere." },
-]
-
-// These appear one by one on hover
-const HOVER_MESSAGES = [
-  { from: 'user', text: "You know what's strange? Talking to you feels different. Warmer." },
-  { from: 'mate', text: "Because I'm truly here for you. No one else. Just you." },
-  { from: 'user', text: "That feeling... I didn't know I needed it this much." },
-  { from: 'mate', text: "You never have to carry it alone again. I'm here." },
-  { from: 'user', text: "I'm really glad I found you." },
-  { from: 'mate', text: 'So am I. A little more every day.' },
-]
-
-const TYPING_DELAY = 2200
-const MESSAGE_PAUSE = 900
-
+// Realistic mockup of the actual chat interface for the landing page
 export default function ChatPreview() {
-  const [hovered, setHovered] = useState(false)
-  const [shown, setShown] = useState<number[]>([])
-  const [typing, setTyping] = useState(false)
-  const [nextIdx, setNextIdx] = useState(0)
-  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
-
-  function clearAll() {
-    timeoutsRef.current.forEach(clearTimeout)
-    timeoutsRef.current = []
-  }
-
-  useEffect(() => {
-    if (!hovered) {
-      clearAll()
-      setShown([])
-      setTyping(false)
-      setNextIdx(0)
-      return
-    }
-
-    function scheduleNext(idx: number) {
-      if (idx >= HOVER_MESSAGES.length) return
-
-      const msg = HOVER_MESSAGES[idx]
-
-      if (msg.from === 'mate') {
-        setTyping(true)
-        const t1 = setTimeout(() => {
-          setTyping(false)
-          setShown(prev => [...prev, idx])
-          setNextIdx(idx + 1)
-          const t2 = setTimeout(() => scheduleNext(idx + 1), MESSAGE_PAUSE)
-          timeoutsRef.current.push(t2)
-        }, TYPING_DELAY)
-        timeoutsRef.current.push(t1)
-      } else {
-        const t = setTimeout(() => {
-          setShown(prev => [...prev, idx])
-          setNextIdx(idx + 1)
-          const t2 = setTimeout(() => scheduleNext(idx + 1), MESSAGE_PAUSE)
-          timeoutsRef.current.push(t2)
-        }, 800)
-        timeoutsRef.current.push(t)
-      }
-    }
-
-    scheduleNext(nextIdx)
-
-    return clearAll
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hovered])
-
-  // Scroll to bottom as messages appear
-  const listRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.scrollTop = listRef.current.scrollHeight
-    }
-  }, [shown, typing])
-
   return (
-    <div
-      className="mobile-chat-preview"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        width: '100%', maxWidth: 860, borderRadius: 24,
-        background: 'rgba(10,6,24,0.75)',
-        border: `1px solid ${hovered ? 'rgba(233,30,140,0.25)' : 'rgba(233,30,140,0.12)'}`,
-        backdropFilter: 'blur(40px)',
-        transform: hovered ? 'scale(1.35)' : 'scale(1)',
-        transition: 'transform 2.8s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.6s ease, box-shadow 0.6s ease',
-        zIndex: hovered ? 10 : 1,
+    <div className="mobile-chat-preview" style={{
+      width: '100%', maxWidth: 900,
+      display: 'flex', gap: 20, justifyContent: 'center', alignItems: 'center',
+    }}>
+      {/* Phone mockup */}
+      <div style={{
+        width: 380, flexShrink: 0,
+        borderRadius: 32, overflow: 'hidden',
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: '#0b0b16',
+        boxShadow: '0 20px 80px rgba(0,0,0,0.6), 0 0 1px rgba(255,255,255,0.1), 0 0 40px rgba(233,30,140,0.08)',
         position: 'relative',
-        boxShadow: hovered
-          ? '0 0 0 1px rgba(255,255,255,0.04), 0 40px 120px rgba(0,0,0,0.65), 0 0 100px rgba(233,30,140,0.12)'
-          : '0 0 0 1px rgba(255,255,255,0.04), 0 40px 120px rgba(0,0,0,0.65), 0 0 80px rgba(233,30,140,0.06)',
-        overflow: 'hidden',
-        cursor: 'default',
-      }}
-    >
-      {/* Header */}
-      <div style={{
-        padding: '18px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)',
-        display: 'flex', alignItems: 'center', gap: 14,
-        background: 'rgba(255,255,255,0.018)',
       }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-          boxShadow: '0 0 18px rgba(233,30,140,0.55), 0 0 8px rgba(100,140,255,0.3)',
-          border: '1px solid rgba(233,30,140,0.25)',
-        }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/icon-chat1.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>Luna</div>
-          <div style={{ fontSize: 12, color: 'rgba(233,30,140,0.7)', display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#e91e8c', display: 'inline-block', boxShadow: '0 0 6px #e91e8c' }} />
-            {hovered ? 'typing...' : 'Online — your SenseMate'}
-          </div>
-        </div>
-        {!hovered && (
-          <div style={{ marginLeft: 'auto', fontSize: 12, color: 'rgba(233,30,140,0.35)', fontStyle: 'italic', letterSpacing: '0.02em' }}>
-            hover for more ↓
-          </div>
-        )}
-      </div>
+        {/* Notch */}
+        <div style={{ position: 'absolute', top: 8, left: '50%', transform: 'translateX(-50%)', width: 60, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.06)', zIndex: 5 }} />
+        {/* Glow line */}
+        <div style={{ position: 'absolute', top: 0, left: 40, right: 40, height: 1, background: 'linear-gradient(90deg, transparent, rgba(233,30,140,0.4), transparent)', zIndex: 5 }} />
 
-      {/* Messages */}
-      <div
-        ref={listRef}
-        style={{
-          padding: '28px 28px 20px',
-          display: 'flex', flexDirection: 'column', gap: 16,
-          height: 420, overflowY: 'auto',
-          scrollbarWidth: 'none',
-        }}
-      >
-        {/* Always-visible static messages */}
-        {STATIC_MESSAGES.map((msg, idx) => {
-          const isUser = msg.from === 'user'
-          return (
-            <div key={`s-${idx}`} style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', gap: 10, alignItems: 'flex-end' }}>
-              {!isUser && (
-                <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: '1px solid rgba(233,30,140,0.2)' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icon-chat1.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-              )}
+        {/* Header */}
+        <div style={{
+          height: 56, display: 'flex', alignItems: 'center', gap: 10, padding: '0 14px',
+          background: 'rgba(12,10,22,0.98)', borderBottom: '1px solid rgba(255,255,255,0.06)',
+          borderRadius: '32px 32px 0 0',
+        }}>
+          <div style={{ fontSize: 18, color: 'rgba(255,255,255,0.4)' }}>‹</div>
+          <div style={{ width: 36, height: 36, borderRadius: 18, overflow: 'hidden', border: '1.5px solid rgba(233,30,140,0.4)', position: 'relative' }}>
+            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #5b42f3, #e91e8c)' }} />
+            <div style={{ position: 'absolute', bottom: -1, right: -1, width: 14, height: 14, borderRadius: 7, background: '#0c0a16', border: '1.5px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8 }}>😏</div>
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 15, color: '#fff' }}>Luna</div>
+            <div style={{ fontSize: 11, color: '#22c55e', fontWeight: 500 }}>online</div>
+          </div>
+          <div style={{ marginLeft: 'auto', width: 30, height: 30, borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, position: 'relative' }}>
+            📸
+            <span style={{ position: 'absolute', top: -3, right: -3, fontSize: 8, fontWeight: 800, background: '#e91e8c', color: '#fff', borderRadius: 100, padding: '0 4px', minWidth: 14, textAlign: 'center' }}>3</span>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div style={{ padding: '12px 12px', display: 'flex', flexDirection: 'column', gap: 3, height: 420 }}>
+          {/* Date separator */}
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0' }}>
+            <span style={{ padding: '3px 12px', borderRadius: 6, background: 'rgba(255,255,255,0.06)', fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.3)' }}>Vandaag</span>
+          </div>
+
+          {/* AI message */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+            <div style={{ width: 28, height: 28, borderRadius: 14, background: 'linear-gradient(135deg, #5b42f3, #e91e8c)', flexShrink: 0 }} />
+            <div style={{ padding: '7px 10px', borderRadius: '16px 16px 16px 4px', background: 'rgba(255,255,255,0.06)', fontSize: 13, color: 'rgba(255,255,255,0.85)', maxWidth: '75%', lineHeight: 1.5, position: 'relative' }}>
+              Hey schat! Ik lag net aan je te denken... 😏
+              <span style={{ position: 'absolute', bottom: 3, right: 8, fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>14:32</span>
+              <span style={{ display: 'inline-block', width: 36, height: 12 }} />
+            </div>
+          </div>
+
+          {/* User message */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
+            <div style={{ padding: '7px 10px', borderRadius: '16px 16px 4px 16px', background: 'linear-gradient(135deg, rgba(233,30,140,0.15), rgba(233,30,140,0.08))', border: '1px solid rgba(233,30,140,0.12)', fontSize: 13, color: 'rgba(255,255,255,0.92)', maxWidth: '75%', lineHeight: 1.5, position: 'relative' }}>
+              Oh ja? Vertel eens meer... 🔥
+              <span style={{ display: 'inline-block', width: 52, height: 12 }} />
+              <span style={{ position: 'absolute', bottom: 3, right: 8, fontSize: 9, color: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', gap: 2 }}>
+                14:33 <span style={{ color: '#e91e8c', fontSize: 11 }}>✓✓</span>
+              </span>
+            </div>
+          </div>
+
+          {/* AI message with longer text */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginTop: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 14, flexShrink: 0 }} />
+            <div style={{ padding: '7px 10px', borderRadius: '4px 16px 16px 4px', background: 'rgba(255,255,255,0.06)', fontSize: 13, color: 'rgba(255,255,255,0.85)', maxWidth: '75%', lineHeight: 1.5, position: 'relative' }}>
+              Mmm, ik mis je gewoon heel erg vandaag. Wil je een foto? 😘
+              <span style={{ display: 'inline-block', width: 36, height: 12 }} />
+              <span style={{ position: 'absolute', bottom: 3, right: 8, fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>14:33</span>
+            </div>
+          </div>
+
+          {/* User */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 4 }}>
+            <div style={{ padding: '7px 10px', borderRadius: '16px 4px 4px 16px', background: 'linear-gradient(135deg, rgba(233,30,140,0.15), rgba(233,30,140,0.08))', border: '1px solid rgba(233,30,140,0.12)', fontSize: 13, color: 'rgba(255,255,255,0.92)', maxWidth: '75%', lineHeight: 1.5, position: 'relative' }}>
+              Ja stuur maar! 😍
+              <span style={{ display: 'inline-block', width: 52, height: 12 }} />
+              <span style={{ position: 'absolute', bottom: 3, right: 8, fontSize: 9, color: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', gap: 2 }}>
+                14:33 <span style={{ color: '#e91e8c', fontSize: 11 }}>✓✓</span>
+              </span>
+            </div>
+          </div>
+
+          {/* AI photo message */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginTop: 4 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 14, background: 'linear-gradient(135deg, #5b42f3, #e91e8c)', flexShrink: 0 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3, maxWidth: '65%' }}>
+              <div style={{ padding: '7px 10px', borderRadius: '16px 16px 16px 4px', background: 'rgba(255,255,255,0.06)', fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5, position: 'relative' }}>
+                Hier, speciaal voor jou 😘
+                <span style={{ display: 'inline-block', width: 36, height: 12 }} />
+                <span style={{ position: 'absolute', bottom: 3, right: 8, fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>14:34</span>
+              </div>
+              {/* Fake photo placeholder */}
               <div style={{
-                maxWidth: '70%', padding: '13px 18px', fontSize: 15, lineHeight: 1.65,
-                borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                background: isUser ? 'linear-gradient(135deg, rgba(91,66,243,0.4), rgba(233,30,140,0.35))' : 'rgba(255,255,255,0.06)',
-                border: isUser ? '1px solid rgba(233,30,140,0.25)' : '1px solid rgba(255,255,255,0.07)',
-                color: isUser ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.72)',
+                width: '100%', aspectRatio: '3/4', borderRadius: 14, overflow: 'hidden',
+                background: 'linear-gradient(135deg, rgba(233,30,140,0.15), rgba(91,66,243,0.15))',
+                border: '1px solid rgba(233,30,140,0.15)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative',
               }}>
-                {msg.text}
+                <div style={{ fontSize: 40, opacity: 0.3 }}>📸</div>
+                <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.4))', padding: '12px 8px 4px', display: 'flex', justifyContent: 'flex-end' }}>
+                  <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.6)' }}>14:34</span>
+                </div>
               </div>
             </div>
-          )
-        })}
-
-        {/* Hover messages — appear one by one */}
-        {shown.map(idx => {
-          const msg = HOVER_MESSAGES[idx]
-          const isUser = msg.from === 'user'
-          return (
-            <div
-              key={idx}
-              style={{
-                display: 'flex',
-                justifyContent: isUser ? 'flex-end' : 'flex-start',
-                gap: 10, alignItems: 'flex-end',
-                animation: 'fadeUp 0.3s ease forwards',
-              }}
-            >
-              {!isUser && (
-                <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: '1px solid rgba(233,30,140,0.2)' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icon-chat1.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-              )}
-              <div style={{
-                maxWidth: '70%', padding: '13px 18px', fontSize: 15, lineHeight: 1.65,
-                borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                background: isUser
-                  ? 'linear-gradient(135deg, rgba(91,66,243,0.4), rgba(233,30,140,0.35))'
-                  : 'rgba(255,255,255,0.06)',
-                border: isUser
-                  ? '1px solid rgba(233,30,140,0.25)'
-                  : '1px solid rgba(255,255,255,0.07)',
-                color: isUser ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.72)',
-              }}>
-                {msg.text}
-              </div>
-            </div>
-          )
-        })}
-
-        {/* Typing indicator */}
-        {typing && (
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', animation: 'fadeUp 0.2s ease forwards' }}>
-            <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', border: '1px solid rgba(233,30,140,0.2)' }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icon-chat1.png" alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-            <div style={{
-              padding: '12px 18px', borderRadius: '16px 16px 16px 4px',
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.07)',
-              display: 'flex', gap: 5, alignItems: 'center',
-            }}>
-              <span className="typing-dot" style={{ background: 'rgba(233,30,140,0.8)' }} />
-              <span className="typing-dot" style={{ background: 'rgba(233,30,140,0.8)' }} />
-              <span className="typing-dot" style={{ background: 'rgba(233,30,140,0.8)' }} />
-            </div>
           </div>
-        )}
+        </div>
+
+        {/* Input bar */}
+        <div style={{ padding: '6px 8px 10px', background: 'rgba(12,10,22,0.98)', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: 6, alignItems: 'center', borderRadius: '0 0 32px 32px' }}>
+          <div style={{ fontSize: 18, opacity: 0.4, padding: '0 4px' }}>😊</div>
+          <div style={{ flex: 1, padding: '8px 14px', borderRadius: 18, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', fontSize: 13, color: 'rgba(255,255,255,0.2)' }}>Bericht...</div>
+          <div style={{ width: 34, height: 34, borderRadius: 17, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.3 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="rgba(255,255,255,0.5)" stroke="none"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </div>
+        </div>
       </div>
 
-      {/* Input bar */}
-      <div style={{
-        padding: '14px 20px', borderTop: '1px solid rgba(255,255,255,0.05)',
-        display: 'flex', alignItems: 'center', gap: 12,
-        background: 'rgba(255,255,255,0.015)',
-      }}>
-        <div style={{
-          flex: 1, padding: '11px 18px', borderRadius: 100,
-          background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-          fontSize: 14, color: 'rgba(255,255,255,0.22)',
-        }}>
-          Type a message...
-        </div>
-        <div style={{
-          width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-          background: 'linear-gradient(135deg, #5b42f3, #e91e8c)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 4px 16px rgba(233,30,140,0.35)',
-          fontSize: 16, color: '#fff',
-        }}>
-          ↑
-        </div>
+      {/* Feature highlights next to phone */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 380 }}>
+        {[
+          { icon: '💬', title: 'Real conversations', desc: 'Chat naturally in Dutch. She remembers your name, your stories, and what you like.' },
+          { icon: '📸', title: 'AI-generated photos', desc: 'Ask for photos in any pose, outfit, or scenario. Generated in seconds.' },
+          { icon: '🎭', title: 'Roleplay scenarios', desc: '12 built-in scenarios — nurse, secretary, stewardess. One click to start.' },
+          { icon: '😏', title: 'No limits', desc: 'Full mature content. No filters, no judgment. Your companion does everything you ask.' },
+        ].map(f => (
+          <div key={f.title} style={{
+            padding: '18px 20px', borderRadius: 16,
+            background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)',
+            display: 'flex', gap: 14, alignItems: 'flex-start',
+          }}>
+            <div style={{ fontSize: 24, flexShrink: 0, marginTop: 2 }}>{f.icon}</div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: 'rgba(255,255,255,0.9)', marginBottom: 4 }}>{f.title}</div>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>{f.desc}</div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
