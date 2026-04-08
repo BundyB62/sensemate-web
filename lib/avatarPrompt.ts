@@ -318,40 +318,64 @@ export function buildBodyReinforcement(profile: Record<string, any>): { emphasis
   const emphasis: string[] = []
   const negative: string[] = []
 
-  // Build reinforcement
+  // ─── Build / body type reinforcement ──────────────────────────────────────
   const build = profile.build || 'slim'
   if (build === 'petite' || build === 'slim' || build === 'lean') {
-    emphasis.push('(very slim thin petite body:1.4)', '(small frame:1.3)')
-    negative.push('large breasts, big breasts, curvy, thick, overweight, fat, muscular, wide hips, voluptuous')
+    emphasis.push('(very slim thin petite body:1.6)', '(small narrow frame:1.5)', '(skinny:1.4)')
+    negative.push('curvy, thick, overweight, fat, muscular, wide hips, voluptuous, chubby, plump, heavy, big body, large frame')
+  } else if (build === 'average') {
+    emphasis.push('(average normal body type:1.3)')
+    negative.push('very thin, anorexic, very fat, obese, extremely muscular')
   } else if (build === 'muscular' || build === 'athletic') {
-    emphasis.push('(muscular toned athletic body:1.3)')
-    negative.push('fat, overweight, skinny, thin')
-  } else if (build === 'thick' || build === 'curvy' || build === 'plus_size') {
-    emphasis.push('(curvy thick voluptuous body:1.3)')
+    emphasis.push('(muscular toned athletic body:1.5)', '(fit defined muscles visible:1.4)')
+    negative.push('fat, overweight, skinny, thin, chubby, soft body')
+  } else if (build === 'curvy' || build === 'hourglass') {
+    emphasis.push('(curvy hourglass body wide hips narrow waist:1.5)', '(voluptuous feminine curves:1.4)')
+    negative.push('skinny, thin, slim, petite, flat, boyish, straight body')
+  } else if (build === 'thick') {
+    emphasis.push('(thick curvy body wide hips thick thighs:1.5)', '(full-figured:1.4)')
     negative.push('skinny, thin, slim, petite, flat')
+  } else if (build === 'plus_size' || build === 'big') {
+    emphasis.push('(plus-size full-figured large body:1.5)', '(heavy thick body:1.4)')
+    negative.push('skinny, thin, slim, petite, athletic, fit, toned')
   }
 
-  // Breast reinforcement
+  // ─── Breast reinforcement — EVERY cup size covered ────────────────────────
   const breast = profile.breastSize || ''
   if (breast === 'cup-aa' || breast === 'cup-a') {
-    emphasis.push('(very small flat chest:1.5)', '(tiny breasts:1.4)', '(flat-chested:1.3)')
-    negative.push('large breasts, big breasts, medium breasts, busty, cleavage, big chest, D-cup, C-cup')
+    emphasis.push('(completely flat chest:1.7)', '(very small tiny breasts:1.6)', '(no cleavage flat-chested:1.5)', '(AA-cup breasts:1.5)')
+    negative.push('large breasts, big breasts, medium breasts, busty, cleavage, big chest, D-cup, C-cup, B-cup, round breasts, full breasts, breast implants, heavy breasts')
   } else if (breast === 'cup-b') {
-    emphasis.push('(small breasts:1.3)')
-    negative.push('large breasts, big breasts, huge breasts, flat chest')
+    emphasis.push('(small B-cup breasts:1.5)', '(modest small chest:1.4)')
+    negative.push('large breasts, big breasts, huge breasts, D-cup, DD-cup, busty, flat chest, cleavage')
+  } else if (breast === 'cup-c') {
+    emphasis.push('(medium C-cup breasts:1.4)', '(moderate chest size:1.3)')
+    negative.push('flat chest, huge breasts, very large breasts, tiny breasts')
+  } else if (breast === 'cup-d') {
+    emphasis.push('(large D-cup breasts:1.4)', '(full round breasts:1.3)')
+    negative.push('flat chest, small breasts, tiny breasts, flat-chested')
+  } else if (breast === 'cup-dd') {
+    emphasis.push('(very large DD-cup breasts:1.5)', '(big heavy round breasts:1.4)')
+    negative.push('flat chest, small breasts, tiny breasts, flat-chested, medium breasts')
   } else if (breast === 'cup-e' || breast === 'cup-f') {
-    emphasis.push('(very large huge breasts:1.4)', '(massive chest:1.3)')
-    negative.push('small breasts, flat chest, tiny breasts, A-cup')
+    emphasis.push('(extremely large massive breasts:1.6)', '(huge heavy breasts:1.5)', '(enormous chest:1.4)')
+    negative.push('small breasts, flat chest, tiny breasts, A-cup, B-cup, medium breasts, modest chest')
   }
 
-  // Ass reinforcement
+  // ─── Ass reinforcement — EVERY size covered ───────────────────────────────
   const ass = profile.assSize || ''
   if (ass === 'small') {
-    emphasis.push('(small tight butt:1.3)')
-    negative.push('large butt, big butt, thick butt, wide hips')
+    emphasis.push('(small tight flat butt:1.5)', '(narrow hips small rear:1.4)')
+    negative.push('large butt, big butt, thick butt, wide hips, round ass, bubble butt, big rear')
+  } else if (ass === 'medium') {
+    emphasis.push('(medium round butt:1.3)')
+    negative.push('flat butt, huge butt, very large butt')
+  } else if (ass === 'large') {
+    emphasis.push('(large round thick butt:1.4)', '(big rear wide hips:1.3)')
+    negative.push('flat butt, small butt, no butt, narrow hips')
   } else if (ass === 'xl') {
-    emphasis.push('(very large thick butt:1.3)')
-    negative.push('small butt, flat butt, no butt')
+    emphasis.push('(very large thick juicy butt:1.5)', '(massive round rear wide hips:1.4)', '(huge ass:1.3)')
+    negative.push('small butt, flat butt, no butt, narrow hips, thin rear')
   }
 
   return {

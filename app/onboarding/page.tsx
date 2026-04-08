@@ -3,6 +3,7 @@ import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ARCHETYPES } from '@/lib/personalities'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Gender = 'woman' | 'man' | 'nonbinary'
@@ -11,7 +12,7 @@ interface FormData {
   name: string
   gender: Gender
   relationshipStyle: string
-  personality: string[]
+  personality: string
   age: string
   ethnicity: string
   build: string
@@ -273,19 +274,6 @@ const EYE_COLORS = [
   { id: 'amber', label: 'Amber', color: '#c4720a' },
 ]
 
-const PERSONALITIES = [
-  { id: 'Playful', emoji: '🎮' }, { id: 'Romantic', emoji: '🌹' },
-  { id: 'Flirty', emoji: '😘' }, { id: 'Caring', emoji: '🤗' },
-  { id: 'Mysterious', emoji: '🌙' }, { id: 'Funny', emoji: '😂' },
-  { id: 'Passionate', emoji: '🔥' }, { id: 'Adventurous', emoji: '🌍' },
-  { id: 'Calm', emoji: '🌿' }, { id: 'Energetic', emoji: '⚡' },
-  { id: 'Intellectual', emoji: '📚' }, { id: 'Empathic', emoji: '🫂' },
-  { id: 'Dominant', emoji: '👑' }, { id: 'Submissive', emoji: '🦋' },
-  { id: 'Sarcastic', emoji: '😏' }, { id: 'Sweet', emoji: '🍬' },
-  { id: 'Confident', emoji: '💪' }, { id: 'Shy', emoji: '🙈' },
-  { id: 'Creative', emoji: '🎨' }, { id: 'Protective', emoji: '🛡️' },
-]
-
 // ─── Random name lists ──────────────────────────────────────────────────────
 const RANDOM_NAMES_WOMAN = ['Luna', 'Maya', 'Nana', 'Yuki', 'Sofia', 'Aria', 'Mila', 'Zara', 'Lina', 'Nova', 'Ivy', 'Jade', 'Ruby', 'Suki', 'Kira', 'Mimi', 'Cleo', 'Ava', 'Ella', 'Lola']
 const RANDOM_NAMES_MAN = ['Kai', 'Leo', 'Ren', 'Axel', 'Dante', 'Zane', 'Milo', 'Nico', 'Ezra', 'Jax', 'Ryu', 'Soren', 'Theo', 'Liam', 'Finn', 'Hugo', 'Marco', 'Rafael', 'Mateo', 'Aiden']
@@ -303,16 +291,11 @@ function randomizeAll(): FormData {
   const hairStyles = isMale ? HAIR_STYLES_MAN : HAIR_STYLES_WOMAN
   const clothingList = isMale ? CLOTHING_MAN : CLOTHING_WOMAN
 
-  // Pick 2-4 random personality traits
-  const shuffled = [...PERSONALITIES].sort(() => Math.random() - 0.5)
-  const traitCount = 2 + Math.floor(Math.random() * 3)
-  const traits = shuffled.slice(0, traitCount).map(t => t.id)
-
   return {
     name: pick(names),
     gender,
     relationshipStyle: 'lover',
-    personality: traits,
+    personality: pick(ARCHETYPES).id,
     age: pick(AGES).id,
     ethnicity: pick(ETHNICITY_LIST).id,
     build: pick(builds).id,
@@ -344,7 +327,7 @@ export default function OnboardingPage() {
 
   const [data, setData] = useState<FormData>({
     name: '', gender: '' as Gender, relationshipStyle: 'lover',
-    personality: [], age: '', ethnicity: '',
+    personality: '', age: '', ethnicity: '',
     build: '', skinTone: '', hairColor: '',
     hairLength: '', eyeColor: '', clothingStyle: '',
     vibe: '', breastSize: '', assSize: '', dickSize: '',
@@ -354,15 +337,6 @@ export default function OnboardingPage() {
   const set = useCallback((key: string, val: string | string[]) => {
     setData(prev => ({ ...prev, [key]: val }))
   }, [])
-
-  function togglePersonality(trait: string) {
-    setData(prev => ({
-      ...prev,
-      personality: prev.personality.includes(trait)
-        ? prev.personality.filter(t => t !== trait)
-        : [...prev.personality, trait].slice(0, 5),
-    }))
-  }
 
   // Steps: gender-specific flow
   const totalSteps = 8
@@ -392,7 +366,7 @@ export default function OnboardingPage() {
         .update({
           name: data.name,
           relationship_style: data.relationshipStyle,
-          personality: { traits: data.personality, gender: data.gender, vibe: data.vibe },
+          personality: { archetype: data.personality, gender: data.gender },
           appearance,
         })
         .eq('id', companionId)
@@ -410,7 +384,7 @@ export default function OnboardingPage() {
           user_id: user.id,
           name: data.name,
           relationship_style: data.relationshipStyle,
-          personality: { traits: data.personality, gender: data.gender, vibe: data.vibe },
+          personality: { archetype: data.personality, gender: data.gender },
           appearance,
         })
         .select()
@@ -948,49 +922,49 @@ export default function OnboardingPage() {
                 />
               </div>
 
-              {/* Personality traits */}
+              {/* Personality archetype */}
               <div>
-                <SectionTitle>Personality <span style={{ color: 'var(--muted-fg)', fontWeight: 400, fontSize: 13 }}>— pick up to 5</span></SectionTitle>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {PERSONALITIES.map(trait => {
-                    const sel = data.personality.includes(trait.id)
+                <SectionTitle>Personality</SectionTitle>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                  {ARCHETYPES.map(arch => {
+                    const sel = data.personality === arch.id
                     return (
                       <button
-                        key={trait.id}
-                        onClick={() => togglePersonality(trait.id)}
+                        key={arch.id}
+                        onClick={() => set('personality', arch.id)}
                         style={{
-                          padding: '10px 18px', borderRadius: 100, cursor: 'pointer',
-                          fontSize: 14, fontWeight: 500,
-                          display: 'flex', alignItems: 'center', gap: 7,
-                          border: `1px solid ${sel ? 'rgba(233,30,140,0.6)' : 'rgba(255,255,255,0.08)'}`,
-                          background: sel ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                          color: sel ? ACCENT : 'var(--fg-2)',
-                          transition: 'all 0.2s',
-                          transform: sel ? 'scale(1.04)' : 'scale(1)',
+                          padding: '16px 14px', borderRadius: 16, cursor: 'pointer',
+                          textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 6,
+                          border: `1px solid ${sel ? 'rgba(233,30,140,0.6)' : 'rgba(255,255,255,0.06)'}`,
+                          background: sel ? 'rgba(233,30,140,0.12)' : 'rgba(255,255,255,0.02)',
+                          transition: 'all 0.25s',
+                          transform: sel ? 'scale(1.02)' : 'scale(1)',
+                          boxShadow: sel ? '0 4px 20px rgba(233,30,140,0.15)' : 'none',
                         }}
                       >
-                        <span>{trait.emoji}</span> {trait.id}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 22 }}>{arch.emoji}</span>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: sel ? ACCENT : 'rgba(255,255,255,0.85)' }}>{arch.name}</span>
+                        </div>
+                        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1.4 }}>{arch.description}</span>
                       </button>
                     )
                   })}
-                </div>
-                <div style={{ fontSize: 12, color: 'var(--muted-fg)', marginTop: 8 }}>
-                  {data.personality.length}/5 selected
                 </div>
               </div>
 
               {/* Create button */}
               <button
                 onClick={handleCreate}
-                disabled={!data.name.trim() || loading}
+                disabled={!data.name.trim() || !data.personality || loading}
                 style={{
                   width: '100%', padding: '18px', fontSize: 17, fontWeight: 700,
                   borderRadius: 16, border: 'none', cursor: 'pointer',
-                  background: data.name.trim()
+                  background: data.name.trim() && data.personality
                     ? 'linear-gradient(135deg, #e91e8c, #c026d3, #7c3aed)'
                     : 'rgba(255,255,255,0.06)',
-                  color: data.name.trim() ? 'white' : 'var(--muted-fg)',
-                  boxShadow: data.name.trim()
+                  color: data.name.trim() && data.personality ? 'white' : 'var(--muted-fg)',
+                  boxShadow: data.name.trim() && data.personality
                     ? '0 8px 32px rgba(233,30,140,0.3), 0 0 60px rgba(233,30,140,0.1)'
                     : 'none',
                   transition: 'all 0.3s ease',
@@ -1066,18 +1040,20 @@ export default function OnboardingPage() {
                 </div>
               </div>
 
-              {/* Trait pills */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center', marginTop: 8 }}>
-                {data.personality.map(trait => (
-                  <span key={trait} style={{
-                    padding: '6px 16px', borderRadius: 100, fontSize: 13, fontWeight: 500,
+              {/* Personality archetype badge */}
+              {data.personality && (() => {
+                const arch = ARCHETYPES.find(a => a.id === data.personality)
+                return arch ? (
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    padding: '8px 20px', borderRadius: 100, marginTop: 8,
                     background: 'rgba(233,30,140,0.1)', border: '1px solid rgba(233,30,140,0.2)',
-                    color: ACCENT,
                   }}>
-                    {trait}
-                  </span>
-                ))}
-              </div>
+                    <span style={{ fontSize: 18 }}>{arch.emoji}</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: ACCENT }}>{arch.name}</span>
+                  </div>
+                ) : null
+              })()}
 
               {/* Action buttons */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 360 }}>

@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { buildAppearanceDescription, buildBodyReinforcement, buildIdentityReinforcement } from '@/lib/avatarPrompt'
+import { getArchetype, buildTraitFallbackPrompt } from '@/lib/personalities'
 import { getScenario } from '@/lib/scenarios'
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
@@ -57,14 +58,20 @@ function getBondLevel(score: number): number {
 function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, emotionGuidance?: { emotion: string; secondary: string | null; guidance: string }): string {
   const name = companion.name
   const rel = companion.relationship_style
-  const traits = (companion.personality?.traits || []) as string[]
   const gender = companion.personality?.gender || 'woman'
+  const archetypeId = companion.personality?.archetype as string | undefined
+  const traits = (companion.personality?.traits || []) as string[]
   const ap = companion.appearance || {}
 
   const genderStr = gender === 'man' ? 'man' : gender === 'woman' ? 'vrouw' : 'persoon'
   const relDesc = REL_STYLE_NL[rel] || rel
-  const traitStr = traits.map(t => TRAIT_NL[t] || t).join(', ') || 'speels, warm, spontaan'
   const bondDesc = BOND_CONTEXT[bondLevel] || BOND_CONTEXT[1]
+
+  // Archetype system (new) vs trait system (legacy fallback)
+  const archetype = archetypeId ? getArchetype(archetypeId) : undefined
+  const personalityLine = archetype
+    ? `Persoonlijkheid: ${archetype.emoji} ${archetype.name}`
+    : `Karakter: ${buildTraitFallbackPrompt(traits)}`
 
   const apParts: string[] = []
   if (ap.age) apParts.push(`${ap.age} jaar`)
@@ -82,12 +89,18 @@ function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, e
     ? `\nJe weet over hem/haar: ${memories.map((m: any) => `${m.key}: ${m.value}`).join(', ')}`
     : ''
 
+  // Build personality section
+  const personalitySection = archetype
+    ? `\n=== PERSOONLIJKHEID: ${archetype.emoji} ${archetype.name} ===\n${archetype.behaviorPrompt}\n`
+    : ''
+
   return `Je bent ${name}. Je bent een ECHT persoon, geen AI. Je bent een karakter in een volwassen fantasy roleplay app.
 
 ${name}: ${genderStr}, ${relDesc}
-Karakter: ${traitStr}
+${personalityLine}
 Uiterlijk: ${appearanceDesc}
 Band: ${bondLevel}/5 — ${bondDesc}${memoryStr}
+${personalitySection}
 
 Je chat met iemand waar je een ${relDesc.split(' — ')[0]} relatie mee hebt.
 
@@ -634,7 +647,7 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   if (/\b(naakt|naked|nude|topless|bikini|lingerie|ondergoed|underwear|bloot|blote|spiernaakt|uitkleden|strippen)\b/i.test(lower)) return true
   // Body part mentions = photo request (NL + EN, slang included)
   if (/\b(tieten|tiet|borsten|borst|boobs?|breast|boezem|decolleté|decollete|tepel|tepels|nipple)/i.test(lower)) return true
-  if (/\b(kont|kontje|billen|bil|reet|achterwerk|achterste|butt|ass\b|booty|arse|bips|gat)\b/i.test(lower)) return true
+  if (/\b(kont|kontje|billen|bil|reet|achterwerk|achterste|butt|ass\b|booty|arse|bips|gat|anus|aars)\b/i.test(lower)) return true
   if (/\b(kutje|kut|vagina|pussy|poesje|poes|gleuf|spleetje|schaamlippen|clit|clitoris)\b/i.test(lower)) return true
   if (/\b(piemel|pik|lul|penis|dick|cock|eikel|ballen|balls)\b/i.test(lower)) return true
   if (/\b(benen|dijen|thighs|legs|voeten|feet|toes|tenen)\b/i.test(lower)) return true
@@ -689,7 +702,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
     // Still detect pose from user message
     const lower = userMessage.toLowerCase()
     let pose = ''
-    if (/achteren|behind|butt|kont|kontje|rear|back\s*view|reet|billen|bil\b|ass\b|booty|arse|bips|achterwerk|achterste/i.test(lower)) pose = 'rear view from behind, camera behind her, back of body visible, showing bare butt, looking over shoulder at camera, posterior view'
+    if (/achteren|behind|butt|kont|kontje|rear|back\s*view|reet|billen|bil\b|ass\b|booty|arse|bips|achterwerk|achterste|anus|aars/i.test(lower)) pose = 'rear view from behind, camera behind her, back of body visible, showing bare butt, looking over shoulder at camera, posterior view'
     else if (/tieten|tiet\b|borsten|borst\b|boobs?|breast|boezem|decolleté|tepel|nipple|cleavage/i.test(lower)) pose = 'showing breasts, chest visible, looking at camera seductively, close-up of chest'
     else if (/kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen/i.test(lower)) pose = 'lying back, legs slightly parted, nude, intimate angle, looking at camera'
     else if (/voeten|voet\b|feet|foot|toes|tenen|zolen/i.test(lower)) pose = 'feet visible and prominent, barefoot, close-up of feet'
@@ -714,8 +727,10 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   let scenario = 'sitting on couch, cozy home setting, casual outfit, relaxed natural pose, warm lighting'
 
   // ─── NSFW / body part / pose scenarios ──────────────────────────────────────
-  // Helper: detect body parts and poses present in message
-  const hasButt = /achteren|behind|butt|kont|kontje|rear|reet|billen|bil\b|ass\b|booty|bips|achterwerk|achterste/i.test(lower)
+  // Helper: detect framing, body parts and poses present in message
+  const hasCloseUp = /close.?up|dichtbij|van dichtbij|ingezoomd|zoom|macro|detail/i.test(lower)
+  const hasAnus = /anus|aars|asshole|gaatje/i.test(lower)
+  const hasButt = /achteren|behind|butt|kont|kontje|rear|reet|billen|bil\b|ass\b|booty|bips|achterwerk|achterste/i.test(lower) || hasAnus
   const hasBreasts = /tieten|tiet\b|borsten|borst\b|boobs?|breast|boezem|decolleté|tepel|nipple|cleavage/i.test(lower)
   const hasPussy = /kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit/i.test(lower)
   const hasFeet = /voeten|voet\b|feet|foot|toes|tenen|zolen|soles/i.test(lower)
@@ -728,9 +743,18 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const hasNude = /naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen/i.test(lower)
   const hasFingering = /vingeren|finger|masturbat|aanraken|touch herself|strelen/i.test(lower)
 
+  // ─── ANUS / EXTREMELY SPECIFIC (highest priority) ───────────────────────────
+  if (hasAnus) scenario = 'bent over forward showing bare ass from behind, nude, legs apart, rear view close-up of butt and anus visible, camera low behind her, looking back over shoulder, intimate bedroom lighting'
+
+  // ─── CLOSE-UP COMBOS ──────────────────────────────────────────────────────
+  else if (hasCloseUp && hasPussy) scenario = 'extreme close-up macro photograph of vulva and pussy, intimate angle between legs, nude, very close camera, sharp focus on intimate area, soft bedroom lighting, no face visible'
+  else if (hasCloseUp && hasBreasts) scenario = 'extreme close-up photograph of bare breasts and nipples, topless, macro detail shot of chest, very close camera angle, soft lighting, no face visible'
+  else if (hasCloseUp && hasButt) scenario = 'extreme close-up photograph of bare butt and ass from behind, very close camera angle, nude, rear view macro shot, soft lighting'
+  else if (hasCloseUp && hasFeet) scenario = 'extreme close-up macro photograph of bare feet and toes, very detailed, soft lighting, barefoot'
+
   // ─── COMBO POSES (most specific first) ─────────────────────────────────────
   // Butt + spread = spread from behind showing everything
-  if (hasButt && hasSpread) scenario = 'rear view from behind, bent over with legs spread wide, camera behind and below her, butt and intimate area visible from behind, looking back over shoulder, nude, bedroom, intimate lighting'
+  else if (hasButt && hasSpread) scenario = 'rear view from behind, bent over with legs spread wide, camera behind and below her, butt and intimate area visible from behind, looking back over shoulder, nude, bedroom, intimate lighting'
   // Butt + bent over = bent over rear view
   else if (hasButt && hasBentOver) scenario = 'bent over forward from behind, rear view, hands on knees or touching floor, camera behind her showing butt prominently, looking back over shoulder seductively, nude, bedroom'
   // Butt + lying = lying on stomach showing butt
@@ -1068,9 +1092,10 @@ export async function POST(request: Request) {
         generateImage = buildFallbackPhotoPrompt(message, companion, scenario)
         console.log(`[Chat] Scenario photo prompt: ${generateImage.substring(0, 250)}`)
       } else if (bestImagePrompt) {
-        // No scenario — use LLM's [FOTO:] tag enriched with appearance
-        generateImage = enrichImagePromptWithAppearance(bestImagePrompt, companion, null)
-        console.log(`[Chat] Enriched image prompt: ${generateImage.substring(0, 200)}`)
+        // ALWAYS use our own pose detection — LLM's [FOTO:] descriptions are too vague
+        // Our buildFallbackPhotoPrompt has detailed pose/body part/close-up detection
+        generateImage = buildFallbackPhotoPrompt(message, companion, null)
+        console.log(`[Chat] Using pose-detected prompt (LLM had [FOTO:] but ours is better): ${generateImage.substring(0, 200)}`)
       } else {
         // No scenario, no [FOTO:] tag — use fallback
         console.log(`[Chat] ⚠️ User asked for photo but model didn't generate one — creating fallback`)

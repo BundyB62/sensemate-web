@@ -7,29 +7,35 @@ import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatar
 const NOVITA_URL = 'https://api.novita.ai/v3/async/txt2img'
 const NOVITA_RESULT_URL = 'https://api.novita.ai/v3/async/task-result'
 const NOVITA_MERGE_FACE_URL = 'https://api.novita.ai/v3/merge-face'
-// Fal.ai Flux Pro 1.1 — best quality, excellent prompt adherence
-const FAL_URL = 'https://fal.run/fal-ai/flux-pro/v1.1'
+// Fal.ai Flux 2 Pro — latest generation, best quality + prompt adherence
+const FAL_URL = 'https://fal.run/fal-ai/flux-2-pro'
 
 // ─── Check if prompt needs NSFW model ──────────────────────────────────────
 function isExplicitPrompt(prompt: string): boolean {
-  return /\b(naked|nude|topless|lingerie|underwear|bra\b|panties|bikini|sexy|seductiv|sensual|erotic|bed\b|bedroom|shower|bath\b|intimate|provocat|revealing|sheer|lace\b|stockings|garter|cleavage|undress|strip|tease|bare\s*skin|thong|nightgown|negligee|corset|bodysuit|spiernaakt|naakt|geile?|stout|verleidel|ass\b|butt|boobs?|breast|nipple|pussy|vagina|penis|dick|cock|spread|legs\s*open|orgasm|moan|cum|wet\b|horny|aroused|pleasure|masturbat|finger|dildo|toy|bondage|tied|handcuff|whip|spank|choking|throat|blowjob|oral|anal|penetrat|riding|doggy|missionary|bent\s*over|on\s*knees|submissiv|dominat|fetish|feet|toes|armpit|sweat|pee|squirt|cream|load|facial|deep\s*throat|gagg|suck|lick|grind|hump|mount|straddle|lap\s*dance|pole\s*dance|kut|pik|lul|tieten|kontje|behaarde?|kutje|neuk|pijp|aftrek|klaarkom|spuit|zuig|lik)/i.test(prompt)
+  return /\b(naked|nude|topless|lingerie|underwear|bra\b|panties|bikini|sexy|seductiv|sensual|erotic|bed\b|bedroom|shower|bath\b|intimate|provocat|revealing|sheer|lace\b|stockings|garter|cleavage|undress|strip|tease|bare\s*skin|thong|nightgown|negligee|corset|bodysuit|spiernaakt|naakt|geile?|stout|verleidel|ass\b|butt|boobs?|breast|nipple|pussy|vagina|penis|dick|cock|spread|legs\s*open|orgasm|moan|cum|wet\b|horny|aroused|pleasure|masturbat|finger|dildo|toy|bondage|tied|handcuff|whip|spank|choking|throat|blowjob|oral|anal|penetrat|riding|doggy|missionary|bent\s*over|on\s*knees|submissiv|dominat|fetish|feet|toes|armpit|sweat|pee|squirt|cream|load|facial|deep\s*throat|gagg|suck|lick|grind|hump|mount|straddle|lap\s*dance|pole\s*dance|kut|pik|lul|tieten|kontje|behaarde?|kutje|neuk|pijp|aftrek|klaarkom|spuit|zuig|lik|anus|aars)/i.test(prompt)
 }
 
 // ─── Generate with Novita.ai (NSFW allowed) ────────────────────────────────
 async function generateNovita(prompt: string, apiKey: string, extraNegative?: string): Promise<string | null> {
-  // Enhance for photorealism
-  const fullPrompt = prompt +
-    ', (masterpiece, best quality, photorealistic:1.4), RAW photo, 8k uhd' +
-    ', detailed skin texture, realistic lighting, natural colors, sharp focus, film grain'
+  // Enhance for photorealism — keep it short, Novita has 1024 char limit!
+  let fullPrompt = prompt + ', (photorealistic:1.4), RAW photo, 8k, sharp focus'
+
+  // CRITICAL: Novita has a 1024 character limit for prompts
+  if (fullPrompt.length > 1020) {
+    console.log(`[Image] Novita prompt too long (${fullPrompt.length}), truncating...`)
+    fullPrompt = fullPrompt.substring(0, 1020)
+    // Cut at last comma to avoid broken words
+    const lastComma = fullPrompt.lastIndexOf(',')
+    if (lastComma > 800) fullPrompt = fullPrompt.substring(0, lastComma)
+  }
 
   let negativePrompt =
-    'cartoon, anime, illustration, painting, drawing, sketch, 3d render, cgi, ' +
-    'deformed, ugly, blurry, low quality, bad anatomy, bad proportions, ' +
-    'extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text, ' +
-    'extra limbs, extra legs, extra arms, missing limbs, fused limbs, too many fingers, ' +
-    'three legs, four legs, three arms, four arms, duplicate limbs, malformed limbs, ' +
-    'conjoined, siamese, mutation, mutant, gross proportions, malformed, cropped'
-  if (extraNegative) negativePrompt += ', ' + extraNegative
+    'cartoon, anime, illustration, 3d render, deformed, ugly, blurry, low quality, bad anatomy, extra fingers, mutated hands, watermark, text'
+  if (extraNegative) {
+    // Also truncate negative prompt if needed
+    const neg = extraNegative.substring(0, 400)
+    negativePrompt += ', ' + neg
+  }
 
   try {
     // Step 1: Submit async task
@@ -45,13 +51,13 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
           enable_nsfw_detection: false,
         },
         request: {
-          model_name: 'juggernautXL_juggXIByRundiffusion_695423.safetensors',
+          model_name: 'lustifySDXLNSFW_endgame_999340.safetensors',
           prompt: fullPrompt,
           negative_prompt: negativePrompt,
-          width: 1024,
-          height: 1536,
+          width: 832,
+          height: 1216,
           image_num: 1,
-          steps: 35,
+          steps: 30,
           clip_skip: 2,
           guidance_scale: 6,
           sampler_name: 'DPM++ 2M Karras',
@@ -75,10 +81,10 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
 
     console.log(`[Image] Novita task submitted: ${taskId}`)
 
-    // Step 2: Poll for result (max 45 seconds)
-    const maxAttempts = 30
+    // Step 2: Poll for result (max 90 seconds)
+    const maxAttempts = 45
     for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(r => setTimeout(r, 1500)) // wait 1.5s between polls
+      await new Promise(r => setTimeout(r, 2000)) // wait 2s between polls
 
       const resultRes = await fetch(`${NOVITA_RESULT_URL}?task_id=${taskId}`, {
         headers: { 'Authorization': `Bearer ${apiKey}` },
@@ -107,7 +113,7 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
       // TASK_STATUS_QUEUED or TASK_STATUS_PROCESSING — keep polling
     }
 
-    console.error('[Image] Novita timed out after 45s')
+    console.error('[Image] Novita timed out after 90s')
     return null
   } catch (err) {
     console.error('[Image] Novita error:', err)
@@ -130,11 +136,10 @@ async function generateFlux(prompt: string, apiKey: string): Promise<string | nu
       body: JSON.stringify({
         prompt: prompt + ', photorealistic, 8k, ultra detailed, professional photography, natural lighting',
         image_size: { width: 1024, height: 1536 },
-        num_inference_steps: 35,
+        num_inference_steps: 28,
         num_images: 1,
         enable_safety_checker: false,
-        guidance_scale: 7.5,
-        safety_tolerance: 6,
+        guidance_scale: 2.5,
       }),
       signal: controller.signal,
     })
@@ -258,19 +263,24 @@ export async function POST(request: Request) {
     const { prompt, avatarUrl, bodyNegative, appearance } = await request.json()
     if (!prompt) return NextResponse.json({ error: 'No prompt' }, { status: 400 })
 
-    // Build appearance-enriched prompt if appearance data is available
+    // The prompt from chat/route.ts already contains full appearance data
+    // Only add appearance if it's NOT already in the prompt (e.g. direct API calls)
     let enrichedPrompt = prompt
     let extraNegativeFromAppearance = ''
 
-    if (appearance) {
-      const appearanceDesc = buildAppearanceDescription(appearance, true, false) // body yes, clothing no (prompt has it)
-      const bodyReinforce = buildBodyReinforcement(appearance)
+    const promptAlreadyHasAppearance = /year old.*woman|year old.*man/i.test(prompt)
 
-      // Prepend appearance to the prompt so the AI generates the right person
+    if (appearance && !promptAlreadyHasAppearance) {
+      const appearanceDesc = buildAppearanceDescription(appearance, true, false)
+      const bodyReinforce = buildBodyReinforcement(appearance)
       enrichedPrompt = `${appearanceDesc}, ${bodyReinforce.emphasis}, ${prompt}`
       extraNegativeFromAppearance = bodyReinforce.negative
-
-      console.log(`[Image] Appearance enriched: ${appearanceDesc.substring(0, 120)}`)
+      console.log(`[Image] Appearance added: ${appearanceDesc.substring(0, 120)}`)
+    } else if (appearance) {
+      // Prompt already has appearance — only add negative reinforcement
+      const bodyReinforce = buildBodyReinforcement(appearance)
+      extraNegativeFromAppearance = bodyReinforce.negative
+      console.log(`[Image] Prompt already has appearance, adding negatives only`)
     }
 
     const explicit = isExplicitPrompt(enrichedPrompt)
