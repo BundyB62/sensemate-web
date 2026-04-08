@@ -11,6 +11,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
+  const [ageConfirmed, setAgeConfirmed] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -36,6 +37,8 @@ export default function SignupPage() {
           <h1 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>Check your inbox</h1>
           <p style={{ color: 'var(--muted-fg)', fontSize: 15, lineHeight: 1.7, maxWidth: 360, margin: '0 auto 28px' }}>
             We sent a confirmation link to <strong style={{ color: 'var(--fg)' }}>{email}</strong>. Click the link to activate your account.
+            <br /><br />
+            <span style={{ fontSize: 13, color: 'var(--muted-fg)' }}>Can&apos;t find it? Check your spam folder.</span>
           </p>
           <Link href="/login" style={{ color: '#e91e8c', textDecoration: 'none', fontSize: 14, fontWeight: 600 }}>
             Back to login →
@@ -55,7 +58,7 @@ export default function SignupPage() {
             <Logo size="lg" />
           </Link>
           <h1 style={{ fontSize: 28, fontWeight: 800, marginTop: 28, marginBottom: 8, letterSpacing: '-0.5px' }}>Create your account</h1>
-          <p style={{ color: 'var(--muted-fg)', fontSize: 15 }}>Free to start, no credit card needed</p>
+          <p style={{ color: 'var(--muted-fg)', fontSize: 15 }}>Free to start. No credit card needed.</p>
         </div>
 
         <div className="glass mobile-auth-card" style={{ borderRadius: 26, padding: '40px' }}>
@@ -81,7 +84,27 @@ export default function SignupPage() {
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="btn-primary" style={{ padding: '14px', fontSize: 16, marginTop: 4 }}>
+            {/* Age verification */}
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', padding: '4px 0' }}>
+              <input
+                type="checkbox"
+                checked={ageConfirmed}
+                onChange={e => setAgeConfirmed(e.target.checked)}
+                required
+                style={{ width: 18, height: 18, marginTop: 2, accentColor: '#e91e8c', cursor: 'pointer', flexShrink: 0 }}
+              />
+              <span style={{ fontSize: 13, color: 'var(--fg-2)', lineHeight: 1.5 }}>
+                I confirm I am <strong style={{ color: 'var(--fg)' }}>18 years or older</strong> and agree to the{' '}
+                <Link href="/terms" style={{ color: '#e91e8c', textDecoration: 'none' }}>Terms of Service</Link>{' '}and{' '}
+                <Link href="/privacy" style={{ color: '#e91e8c', textDecoration: 'none' }}>Privacy Policy</Link>.
+              </span>
+            </label>
+
+            <button type="submit" disabled={loading || !ageConfirmed} className="btn-primary" style={{
+              padding: '14px', fontSize: 16, marginTop: 4,
+              opacity: !ageConfirmed ? 0.5 : 1,
+              cursor: !ageConfirmed ? 'not-allowed' : 'pointer',
+            }}>
               {loading ? (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', animation: 'spin-slow 0.7s linear infinite', display: 'inline-block' }} />
@@ -89,10 +112,6 @@ export default function SignupPage() {
                 </span>
               ) : 'Create Account →'}
             </button>
-
-            <p style={{ textAlign: 'center', color: 'var(--muted-fg)', fontSize: 12, lineHeight: 1.6 }}>
-              By signing up you agree to our terms.<br />For adults 18+ only.
-            </p>
           </form>
         </div>
 

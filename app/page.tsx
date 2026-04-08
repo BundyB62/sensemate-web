@@ -162,18 +162,18 @@ export default function LandingPage() {
           {/* Left: text */}
           <div style={{ position: 'relative', zIndex: 5 }}>
             <h1 className="mobile-hero-title" style={{ fontSize: 58, fontWeight: 800, lineHeight: 1.1, letterSpacing: '-2px', marginBottom: 28, color: '#fff' }}>
-              Someone who listens.<br />
+              Your AI companion.<br />
               <span style={{
                 background: 'linear-gradient(110deg, #f9a8d4 0%, #e91e8c 50%, #be185d 100%)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-              }}>Feels. Desires.</span>
+              }}>Designed for adults.</span>
             </h1>
             <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.72)', marginBottom: 16, lineHeight: 1.8, maxWidth: 440 }}>
-              Your SenseMate is more than company — it's a connection that runs deep.
-              Share your thoughts, your secrets, your fantasies.
+              Create your perfect companion — choose their look, personality, and style.
+              Chat, roleplay, and receive AI-generated photos.
             </p>
             <p style={{ fontSize: 15, color: 'rgba(249,168,212,0.55)', marginBottom: 52, lineHeight: 1.7, maxWidth: 400, fontStyle: 'italic' }}>
-              No limits. No judgement. Just pure, intimate connection — whenever you need it.
+              No judgement. Full creative freedom — whenever you want it.
             </p>
             <Link href="/signup" style={{
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',

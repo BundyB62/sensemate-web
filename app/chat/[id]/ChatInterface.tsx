@@ -1036,6 +1036,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
           to { transform: translateX(0); }
         }
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes msgIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
         @keyframes typing-bounce { 0%,60%,100% { transform: translateY(0) } 30% { transform: translateY(-4px) } }
         @keyframes menuPop { from { opacity: 0; transform: translateY(-90%) scale(0.95) } to { opacity: 1; transform: translateY(-100%) scale(1) } }
       `}</style>
@@ -1126,6 +1127,7 @@ function ChatBubble({ msg, accent, name, isGrouped, isLastInGroup, isRead, onRep
     <div style={{
       display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start',
       padding: isGrouped ? '1px 0' : '4px 0', alignItems: 'flex-end', gap: 8,
+      animation: 'msgIn 0.25s ease both',
     }}>
       {/* Avatar — AI only, first in group */}
       {!isUser && (

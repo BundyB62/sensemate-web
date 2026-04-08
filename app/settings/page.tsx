@@ -34,7 +34,7 @@ export default async function SettingsPage() {
           }}>← Dashboard</Link>
           <form action="/auth/signout" method="post">
             <button type="submit" style={{ fontSize: 13, color: 'var(--muted-fg)', background: 'none', border: 'none', cursor: 'pointer' }}>
-              Uitloggen
+              Log out
             </button>
           </form>
         </div>
@@ -43,7 +43,7 @@ export default async function SettingsPage() {
       <main style={{ maxWidth: 760, margin: '0 auto', padding: '52px 24px', position: 'relative', zIndex: 1 }}>
         <div className="animate-fadeup">
           <div style={{ fontSize: 13, color: '#e91e8c', fontWeight: 600, marginBottom: 6 }}>Account</div>
-          <h1 style={{ fontSize: 36, fontWeight: 900, letterSpacing: '-1.5px', marginBottom: 40 }}>Instellingen</h1>
+          <h1 style={{ fontSize: 36, fontWeight: 900, letterSpacing: '-1.5px', marginBottom: 40 }}>Settings</h1>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }} className="stagger">
@@ -52,8 +52,8 @@ export default async function SettingsPage() {
           <section className="glass" style={{ borderRadius: 22, padding: '28px 32px' }}>
             <SectionTitle icon="👤" title="Account" />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <InfoRow label="E-mailadres" value={user.email || '—'} />
-              <InfoRow label="Lid sinds" value={new Date(user.created_at).toLocaleDateString('nl-NL', { year: 'numeric', month: 'long', day: 'numeric' })} />
+              <InfoRow label="Email" value={user.email || '—'} />
+              <InfoRow label="Member since" value={new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })} />
               <InfoRow label="Plan" value={
                 <span style={{
                   padding: '3px 10px', borderRadius: 100, fontSize: 11, fontWeight: 700, textTransform: 'uppercase',
@@ -68,7 +68,7 @@ export default async function SettingsPage() {
 
           {/* Companions */}
           <section className="glass" style={{ borderRadius: 22, padding: '28px 32px' }}>
-            <SectionTitle icon="💝" title="Jouw companions" />
+            <SectionTitle icon="💝" title="Your companions" />
             {companions && companions.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {companions.map((c: any) => (
@@ -78,7 +78,7 @@ export default async function SettingsPage() {
                   }}>
                     <div style={{ fontWeight: 600, fontSize: 15 }}>{c.name}</div>
                     <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                      <span style={{ fontSize: 12, color: 'var(--muted-fg)' }}>Niveau {c.bond_level || 1} · {c.bond_score || 0} punten</span>
+                      <span style={{ fontSize: 12, color: 'var(--muted-fg)' }}>Level {c.bond_level || 1} · {c.bond_score || 0} pts</span>
                       <Link href={`/chat/${c.id}`} style={{
                         fontSize: 12, color: '#e91e8c', textDecoration: 'none', fontWeight: 600,
                         padding: '5px 12px', borderRadius: 100, background: 'rgba(233,30,140,0.1)',
@@ -90,19 +90,19 @@ export default async function SettingsPage() {
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--muted-fg)', fontSize: 14 }}>
-                Nog geen companions. <Link href="/onboarding" style={{ color: '#e91e8c', textDecoration: 'none' }}>Maak er een aan →</Link>
+                No companions yet. <Link href="/onboarding" style={{ color: '#e91e8c', textDecoration: 'none' }}>Create one →</Link>
               </div>
             )}
           </section>
 
-          {/* Plan */}
+          {/* Plan & limits */}
           <section className="glass" style={{ borderRadius: 22, padding: '28px 32px' }}>
-            <SectionTitle icon="⭐" title="Plan & limieten" />
+            <SectionTitle icon="⭐" title="Plan & limits" />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
               {[
                 { label: 'Companions', value: plan === 'free' ? '1' : plan === 'pro' ? '3' : '∞' },
-                { label: 'Berichten/dag', value: plan === 'free' ? '50' : '∞' },
-                { label: "Foto's/dag", value: plan === 'free' ? '5' : plan === 'pro' ? '50' : '∞' },
+                { label: 'Messages/day', value: plan === 'free' ? '50' : '∞' },
+                { label: 'Photos/day', value: plan === 'free' ? '5' : plan === 'pro' ? '50' : '∞' },
               ].map(item => (
                 <div key={item.label} style={{ padding: '14px 16px', borderRadius: 14, background: 'var(--muted)', border: '1px solid var(--card-border)', textAlign: 'center' }}>
                   <div style={{ fontSize: 22, fontWeight: 800, background: 'linear-gradient(135deg, #e91e8c, #ff6b6b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 4 }}>
@@ -114,26 +114,40 @@ export default async function SettingsPage() {
             </div>
             {plan === 'free' && (
               <Link href="/upgrade" className="btn-primary" style={{ padding: '12px 24px', fontSize: 14, textDecoration: 'none', width: '100%', display: 'flex' }}>
-                ✨ Upgraden naar Pro
+                ✨ Upgrade to Pro
               </Link>
             )}
           </section>
 
+          {/* Account actions */}
+          <section className="glass" style={{ borderRadius: 22, padding: '28px 32px' }}>
+            <SectionTitle icon="🔐" title="Account actions" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <form action="/auth/signout" method="post">
+                <button type="submit" style={{
+                  padding: '11px 22px', borderRadius: 100, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  background: 'var(--muted)', border: '1px solid var(--card-border)', color: 'var(--fg-2)',
+                  transition: 'all 0.18s', width: '100%',
+                }}>
+                  Log out
+                </button>
+              </form>
+            </div>
+          </section>
+
           {/* Danger zone */}
-          <section className="glass" style={{ borderRadius: 22, padding: '28px 32px', border: '1px solid rgba(239,68,68,0.2)' }}>
-            <SectionTitle icon="⚠️" title="Gevarenzone" />
+          <section className="glass" style={{ borderRadius: 22, padding: '28px 32px', border: '1px solid rgba(239,68,68,0.15)' }}>
+            <SectionTitle icon="⚠️" title="Danger zone" />
             <p style={{ color: 'var(--fg-2)', fontSize: 14, marginBottom: 20, lineHeight: 1.7 }}>
-              Als je je account verwijdert worden alle companions, gesprekken en foto's permanent gewist. Dit kan niet ongedaan worden gemaakt.
+              Deleting your account will permanently remove all companions, conversations, and photos. This cannot be undone.
             </p>
-            <form action="/auth/signout" method="post">
-              <button type="submit" style={{
-                padding: '11px 22px', borderRadius: 100, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171',
-                transition: 'all 0.18s',
-              }}>
-                Uitloggen
-              </button>
-            </form>
+            <button style={{
+              padding: '11px 22px', borderRadius: 100, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+              background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171',
+              transition: 'all 0.18s',
+            }}>
+              Delete account
+            </button>
           </section>
         </div>
       </main>

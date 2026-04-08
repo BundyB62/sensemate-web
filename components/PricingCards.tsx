@@ -59,6 +59,7 @@ export default function PricingCards() {
           Basic
         </div>
         <h3 style={{ fontSize: 22, fontWeight: 600, marginBottom: 6, color: 'rgba(255,255,255,0.55)' }}>Free</h3>
+        <div style={{ fontSize: 28, fontWeight: 800, color: 'rgba(255,255,255,0.4)', marginBottom: 4 }}>$0<span style={{ fontSize: 14, fontWeight: 500 }}>/month</span></div>
         <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, marginBottom: 28, lineHeight: 1.6 }}>Get a taste of what SenseMates can be</p>
 
         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 32 }}>
@@ -95,6 +96,7 @@ export default function PricingCards() {
           Most Popular
         </div>
         <h3 style={{ fontSize: 28, fontWeight: 800, marginBottom: 6, color: '#fff', letterSpacing: '-0.5px' }}>Pro</h3>
+        <div style={{ fontSize: 32, fontWeight: 800, color: '#fff', marginBottom: 4 }}>$9.99<span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(190,160,255,0.7)' }}>/month</span></div>
         <p style={{ fontSize: 13, fontWeight: 600, color: 'rgba(190,160,255,0.8)', marginBottom: 24 }}>Deeper Connection</p>
 
         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 11, marginBottom: 36 }}>
@@ -103,8 +105,8 @@ export default function PricingCards() {
             'Unlimited messages',
             'Advanced memory',
             'Evolving personality',
-            'Custom voices',
-            'Adult mode',
+            'AI photo generation',
+            'Mature content',
           ].map(f => (
             <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'rgba(255,255,255,0.75)' }}>
               <span style={{ color: '#e91e8c', fontWeight: 700, fontSize: 12 }}>✓</span>{f}
@@ -149,6 +151,11 @@ export default function PricingCards() {
           background: 'linear-gradient(135deg, #ffe0a0 0%, #f59e0b 40%, #e07b00 70%, #ffd080 100%)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
         }}>Premium</h3>
+
+        <div style={{ fontSize: 34, fontWeight: 900, marginBottom: 4 }}>
+          <span style={{ background: 'linear-gradient(135deg, #ffe0a0, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>$24.99</span>
+          <span style={{ fontSize: 14, fontWeight: 500, color: 'rgba(255,200,100,0.5)' }}>/month</span>
+        </div>
 
         <p style={{ fontSize: 14, fontStyle: 'italic', color: 'rgba(255,200,100,0.65)', marginBottom: 28, letterSpacing: '0.02em' }}>
           For those who want it all
