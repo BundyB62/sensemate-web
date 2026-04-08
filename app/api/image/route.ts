@@ -24,7 +24,10 @@ async function generateNovita(prompt: string, apiKey: string): Promise<string | 
   const negativePrompt =
     'cartoon, anime, illustration, painting, drawing, sketch, 3d render, cgi, ' +
     'deformed, ugly, blurry, low quality, bad anatomy, bad proportions, ' +
-    'extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text'
+    'extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text, ' +
+    'extra limbs, extra legs, extra arms, missing limbs, fused limbs, too many fingers, ' +
+    'three legs, four legs, three arms, four arms, duplicate limbs, malformed limbs, ' +
+    'conjoined, siamese, mutation, mutant, gross proportions, malformed, cropped'
 
   try {
     // Step 1: Submit async task
@@ -293,6 +296,7 @@ export async function POST(request: Request) {
 
     // Face merge — swap the avatar's face onto the generated image for consistency
     // Retry up to 2 times if face merge fails (it can be flaky)
+    console.log(`[Image] Face merge check: avatarUrl=${avatarUrl ? 'yes(' + avatarUrl.substring(0, 60) + '...)' : 'NONE'}, novitaKey=${novitaKey ? 'yes' : 'NONE'}`)
     if (avatarUrl && novitaKey) {
       let mergedUrl: string | null = null
       for (let attempt = 1; attempt <= 2; attempt++) {

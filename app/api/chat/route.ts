@@ -662,11 +662,28 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
 }
 
 // ─── Build a fallback photo prompt from user message + companion appearance ──
-function buildFallbackPhotoPrompt(userMessage: string, companion: any): string {
+function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeScenario?: { photoSetting: string; photoCostume: string } | null): string {
   const ap = companion.appearance || {}
 
-  // Build clean appearance description directly from profile data
+  // Build clean appearance description directly from profile data (skip clothing if scenario overrides it)
   const appearancePart = buildAppearanceDescription(ap, true)
+
+  // If an active roleplay scenario exists, use its setting + costume as the base
+  if (activeScenario && activeScenario.photoSetting) {
+    // Still detect pose from user message
+    const lower = userMessage.toLowerCase()
+    let pose = ''
+    if (/knie[eë]n|knees|kneeling|op.*knie/i.test(lower)) pose = 'on her knees, kneeling, looking up at camera'
+    else if (/lig|ligg|liggen|lying/i.test(lower)) pose = 'lying down, looking at camera'
+    else if (/achteren|behind|kont/i.test(lower)) pose = 'from behind, looking over shoulder'
+    else if (/spreid|spread|benen.*open/i.test(lower)) pose = 'legs spread, sitting'
+    else if (/buig|bukken|voorover/i.test(lower)) pose = 'bending forward'
+    else if (/naakt|naked|nude/i.test(lower)) pose = 'nude, artistic pose'
+    else if (/topless/i.test(lower)) pose = 'topless'
+    else pose = 'seductive confident pose, looking at camera'
+
+    return `${appearancePart}, ${activeScenario.photoCostume}, ${pose}, ${activeScenario.photoSetting}, photorealistic, 8k, professional photography`
+  }
 
   // Extract pose/scenario hints from the user message
   const lower = userMessage.toLowerCase()
@@ -978,11 +995,7 @@ export async function POST(request: Request) {
       } else {
         // LLM didn't generate a photo tag — use fallback
         console.log(`[Chat] ⚠️ User asked for photo but model didn't generate one — creating fallback`)
-        generateImage = buildFallbackPhotoPrompt(message, companion)
-        // Override scenario setting/costume in photo prompt
-        if (scenario && scenario.photoSetting) {
-          generateImage += `, ${scenario.photoSetting}, ${scenario.photoCostume}`
-        }
+        generateImage = buildFallbackPhotoPrompt(message, companion, scenario)
         console.log(`[Chat] Fallback photo prompt: ${generateImage}`)
 
         // If all messages are AI identity refusals, replace with photo message
