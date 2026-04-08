@@ -65,9 +65,9 @@ export default function PricingCards() {
         <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 9, marginBottom: 32 }}>
           {[
             '1 companion',
-            'Limited messages per day',
-            'Basic personality',
-            'Text chat only',
+            '100 messages / day',
+            '5 photos / day',
+            '3 roleplay scenarios',
           ].map(f => (
             <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: 'rgba(255,255,255,0.3)' }}>
               <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 11 }}>–</span>{f}
@@ -103,9 +103,9 @@ export default function PricingCards() {
           {[
             'Up to 3 companions',
             'Unlimited messages',
-            'Advanced memory',
-            'Evolving personality',
-            'AI photo generation',
+            '50 HD photos / day',
+            'All 12 scenarios',
+            'Full conversation memory',
             'Mature content',
           ].map(f => (
             <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: 'rgba(255,255,255,0.75)' }}>
@@ -165,10 +165,10 @@ export default function PricingCards() {
           {[
             { text: 'Unlimited companions', highlight: true },
             { text: 'Everything in Pro', highlight: false },
-            { text: 'Priority AI generation', highlight: false },
-            { text: 'Exclusive personas & looks', highlight: true },
-            { text: 'Early access to new features', highlight: false },
-            { text: 'Dedicated VIP support', highlight: false },
+            { text: 'Unlimited HD photos', highlight: true },
+            { text: 'Priority generation speed', highlight: false },
+            { text: 'Custom scenarios', highlight: true },
+            { text: 'Priority support', highlight: false },
           ].map(f => (
             <li key={f.text} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, color: f.highlight ? 'rgba(255,220,120,0.95)' : 'rgba(255,255,255,0.7)' }}>
               <span style={{ color: '#f59e0b', fontWeight: 700, fontSize: 13, filter: 'drop-shadow(0 0 4px rgba(245,158,11,0.8))' }}>✦</span>

@@ -24,7 +24,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body style={{ background: '#060514' }}>
-        {/* Subtle silhouette — very low opacity, no animation */}
+        <ParticleField />
+        {/* Subtle silhouette */}
         <div style={{
           position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -36,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             style={{
               width: '100%', height: '100%', objectFit: 'cover',
               mixBlendMode: 'screen',
-              opacity: 0.12,
+              opacity: 0.15,
             }}
           />
         </div>

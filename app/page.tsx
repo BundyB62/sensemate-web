@@ -196,39 +196,52 @@ export default function LandingPage() {
           <FeatureCards />
         </section>
 
-        {/* Pricing — 3 plans */}
-        <section className="mobile-section" style={{ padding: '20px 60px 120px' }}>
+        {/* Pricing */}
+        <section className="mobile-section" style={{ padding: '20px 60px 40px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 28, marginBottom: 40, maxWidth: 700, margin: '0 auto 40px' }}>
+            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+            <h2 style={{ fontSize: 26, fontWeight: 600, color: 'rgba(255,255,255,0.9)', whiteSpace: 'nowrap', margin: 0 }}>
+              Choose Your Plan
+            </h2>
+            <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+          </div>
           <PricingCards />
+        </section>
 
-          {/* Comparison table */}
-          <div style={{ maxWidth: 700, margin: '60px auto 0', borderRadius: 20, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+        {/* Comparison table */}
+        <section className="mobile-section" style={{ padding: '0 60px 120px' }}>
+          <div style={{ maxWidth: 760, margin: '0 auto', borderRadius: 24, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(10,8,20,0.8)', backdropFilter: 'blur(20px)' }}>
+            {/* Table header */}
+            <div style={{ padding: '20px 24px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.8)' }}>Compare plans</div>
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>See exactly what you get with each plan</div>
+            </div>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 14 }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-                  <th style={{ padding: '16px 20px', textAlign: 'left', color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>Feature</th>
-                  <th style={{ padding: '16px 16px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontWeight: 600, fontSize: 12 }}>Free</th>
-                  <th style={{ padding: '16px 16px', textAlign: 'center', color: '#a78bfa', fontWeight: 700, fontSize: 12 }}>Pro</th>
-                  <th style={{ padding: '16px 16px', textAlign: 'center', fontWeight: 700, fontSize: 12, background: 'linear-gradient(135deg, #ffe0a0, #f59e0b)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Premium</th>
+                  <th style={{ padding: '14px 24px', textAlign: 'left', color: 'rgba(255,255,255,0.3)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1.5 }}>Feature</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'center', color: 'rgba(255,255,255,0.35)', fontWeight: 600, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 }}>Free</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'center', color: '#a78bfa', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, background: 'rgba(91,66,243,0.05)' }}>Pro</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'center', fontWeight: 700, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1, background: 'rgba(245,158,11,0.05)', color: '#f59e0b' }}>Premium</th>
                 </tr>
               </thead>
               <tbody>
                 {[
                   { feature: 'Companions', free: '1', pro: '3', premium: '∞' },
-                  { feature: 'Messages / day', free: '50', pro: '∞', premium: '∞' },
-                  { feature: 'Photo generation / day', free: '5', pro: '50', premium: '∞' },
-                  { feature: 'Roleplay scenarios', free: '3', pro: 'All', premium: 'All' },
-                  { feature: 'Advanced memory', free: '—', pro: '✓', premium: '✓' },
-                  { feature: 'AI photo generation', free: '—', pro: '✓', premium: '✓' },
+                  { feature: 'Messages per day', free: '100', pro: 'Unlimited', premium: 'Unlimited' },
+                  { feature: 'Photos per day', free: '5', pro: '50', premium: 'Unlimited' },
+                  { feature: 'Roleplay scenarios', free: '3', pro: '12', premium: '12' },
+                  { feature: 'Photo quality', free: 'Standard', pro: 'HD', premium: 'HD + Priority' },
+                  { feature: 'Conversation memory', free: 'Last 20 msgs', pro: 'Full history', premium: 'Full history' },
                   { feature: 'Mature content', free: '—', pro: '✓', premium: '✓' },
-                  { feature: 'Priority generation', free: '—', pro: '—', premium: '✓' },
-                  { feature: 'Exclusive personas', free: '—', pro: '—', premium: '✓' },
-                  { feature: 'VIP support', free: '—', pro: '—', premium: '✓' },
-                ].map((row, i) => (
-                  <tr key={row.feature} style={{ borderBottom: i < 9 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                    <td style={{ padding: '12px 20px', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>{row.feature}</td>
-                    <td style={{ padding: '12px 16px', textAlign: 'center', color: 'rgba(255,255,255,0.3)' }}>{row.free}</td>
-                    <td style={{ padding: '12px 16px', textAlign: 'center', color: row.pro === '✓' || row.pro === 'All' || row.pro === '∞' ? '#a78bfa' : 'rgba(255,255,255,0.3)' }}>{row.pro}</td>
-                    <td style={{ padding: '12px 16px', textAlign: 'center', color: row.premium === '✓' || row.premium === 'All' || row.premium === '∞' ? '#f59e0b' : 'rgba(255,255,255,0.3)' }}>{row.premium}</td>
+                  { feature: 'Custom scenarios', free: '—', pro: '—', premium: '✓' },
+                  { feature: 'Priority support', free: '—', pro: '—', premium: '✓' },
+                ].map((row, i, arr) => (
+                  <tr key={row.feature} style={{ borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                    <td style={{ padding: '14px 24px', color: 'rgba(255,255,255,0.65)', fontWeight: 500, fontSize: 13 }}>{row.feature}</td>
+                    <td style={{ padding: '14px 20px', textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 13 }}>{row.free}</td>
+                    <td style={{ padding: '14px 20px', textAlign: 'center', fontSize: 13, fontWeight: row.pro === '✓' || row.pro === 'Unlimited' ? 600 : 400, color: row.pro === '✓' || row.pro === 'Unlimited' || row.pro === '12' || row.pro === 'HD' || row.pro === 'Full history' ? '#a78bfa' : 'rgba(255,255,255,0.3)', background: 'rgba(91,66,243,0.03)' }}>{row.pro}</td>
+                    <td style={{ padding: '14px 20px', textAlign: 'center', fontSize: 13, fontWeight: row.premium === '✓' || row.premium === 'Unlimited' ? 600 : 400, color: row.premium === '✓' || row.premium === 'Unlimited' || row.premium === '12' || row.premium === 'HD + Priority' || row.premium === 'Full history' || row.premium === '∞' ? '#f59e0b' : 'rgba(255,255,255,0.3)', background: 'rgba(245,158,11,0.03)' }}>{row.premium}</td>
                   </tr>
                 ))}
               </tbody>

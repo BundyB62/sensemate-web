@@ -30,29 +30,29 @@ export default function ParticleField() {
     resize()
     window.addEventListener('resize', resize)
 
-    const COUNT = 78
+    const COUNT = 40
     const types: Particle['type'][] = [
-      'gold', 'gold', 'gold', 'gold', 'gold', 'gold', 'gold',
+      'gold', 'gold', 'gold',
       'amber', 'amber',
       'white',
     ]
     const particles: Particle[] = Array.from({ length: COUNT }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
-      size: Math.random() * 3.5 + 1.2,
-      baseOpacity: Math.random() * 0.5 + 0.45,
-      speedX: (Math.random() - 0.5) * 0.45,
-      speedY: (Math.random() - 0.5) * 0.45,
+      size: Math.random() * 2.2 + 0.8,
+      baseOpacity: Math.random() * 0.35 + 0.2,
+      speedX: (Math.random() - 0.5) * 0.2,
+      speedY: (Math.random() - 0.5) * 0.2,
       phase: Math.random() * Math.PI * 2,
-      pulseSpeed: Math.random() * 2.5 + 0.6,
-      pulseDepth: Math.random() * 0.7 + 0.3,
+      pulseSpeed: Math.random() * 1.8 + 0.4,
+      pulseDepth: Math.random() * 0.5 + 0.2,
       type: types[Math.floor(Math.random() * types.length)],
     }))
 
     const COLORS: Record<Particle['type'], [number, number, number]> = {
-      gold:  [220, 170, 50],
-      amber: [200, 130, 30],
-      white: [255, 240, 190],
+      gold:  [233, 130, 180],
+      amber: [180, 120, 200],
+      white: [255, 220, 240],
     }
 
     let t = 0
