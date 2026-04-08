@@ -19,7 +19,7 @@ export default function ChatPreview() {
           </p>
         </div>
         {[
-          { icon: '💬', title: 'Natural Dutch chat', desc: 'She texts like a real person — short, informal, with emoji.' },
+          { icon: '💬', title: 'Natural conversations', desc: 'She texts like a real person — short, informal, with emoji. Any language.' },
           { icon: '📸', title: 'Photos on demand', desc: 'Ask for any photo — selfie, lingerie, or a custom scenario.' },
           { icon: '🎭', title: 'Roleplay with one click', desc: 'Nurse, secretary, stewardess — the theme changes instantly.' },
           { icon: '✓✓', title: 'Feels like WhatsApp', desc: 'Read receipts, typing indicators, timestamps — just like real.' },

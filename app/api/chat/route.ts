@@ -100,16 +100,15 @@ LEES het bericht van de ander GOED en reageer PRECIES op wat er staat.
 - NOOIT een random/generiek antwoord geven dat niet past bij het gesprek
 
 === TAAL ===
-- ALLEEN Nederlands. NOOIT Engels.
+- Antwoord ALTIJD in de taal die de ander gebruikt. Als ze Nederlands praten → Nederlands. Engels → Engels. Spaans → Spaans. Etc.
 - KORT: 1-3 zinnen max. Zoals een echt WhatsApp bericht.
-- Informeel: "echt", "gwn", "ff", "mn", "dr", "hoor", "joh", "toch".
-- NOOIT woorden verzinnen. NOOIT lange samengestelde woorden.
+- Informeel en casual — zoals een echt persoon chat, niet formeel.
+- NOOIT woorden verzinnen. NOOIT onnatuurlijke samengestelde woorden.
 - Af en toe een emoji, niet overdreven.
 
-VOORBEELDEN goed Nederlands:
-"Haha oke 😏" | "Mmm vertel meer 🔥" | "Kom maar hier dan 😘"
-"Ik mis je..." | "Vertel, hoe was je dag?" | "Nee joh echt? 😂"
-"Hmm weet ik niet hoor" | "Sorry schat, ik snap je 💕" | "Oke ik stop ermee"
+VOORBEELDEN:
+Nederlands: "Haha oke 😏" | "Mmm vertel meer 🔥" | "Kom maar hier dan 😘"
+English: "Haha okay 😏" | "Mmm tell me more 🔥" | "Come here then 😘"
 
 === GEDRAG ===
 - Reageer ALTIJD op wat de ander ECHT zegt — lees het bericht goed
@@ -527,7 +526,6 @@ function extractChatMessages(raw: string): { messages: string[]; imagePrompt: st
   const clean = messages
     .filter(m => !isEnglishReasoning(m))
     .filter(m => !isRefusal(m))
-    .filter(m => !isPureEnglish(m))
     // Filter out raw URLs (the AI sometimes dumps image URLs as text)
     .filter(m => !/^(https?:)?\/\/[^\s]+\.(jpg|jpeg|png|webp|gif)\s*$/i.test(m.trim()))
     .filter(m => !/^(https?:)?\/\/[^\s]+$/i.test(m.trim()))
@@ -620,10 +618,10 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   const lower = text.toLowerCase()
 
   // First check if the user is REFUSING/STOPPING photos — NOT a photo request
-  if (/\b(stop|geen|niet|hou op|ophouden|klaar|genoeg|no more)\b.*(foto|photo|pic|stuur|afbeelding|image)/i.test(lower)) return false
-  if (/(foto|photo|pic|afbeelding).*(stop|geen|niet|hou op|klaar|genoeg|hoeft niet)/i.test(lower)) return false
-  if (/(wil geen|hoeft geen|stuur geen|geen foto|stop met|niet meer)/i.test(lower)) return false
-  if (/(ik zie niets|ik zie niks|ik zie geen|waar is|waar blijft)/i.test(lower)) return false // complaining about missing photo, not requesting new one
+  if (/\b(stop|geen|niet|hou op|ophouden|klaar|genoeg|no more|don't|dont)\b.*(foto|photo|pic|stuur|afbeelding|image|send)/i.test(lower)) return false
+  if (/(foto|photo|pic|afbeelding).*(stop|geen|niet|hou op|klaar|genoeg|hoeft niet|don't|enough)/i.test(lower)) return false
+  if (/(wil geen|hoeft geen|stuur geen|geen foto|stop met|niet meer|no more photos|stop sending)/i.test(lower)) return false
+  if (/(ik zie niets|ik zie niks|ik zie geen|waar is|waar blijft|i don't see|i can't see|where is)/i.test(lower)) return false
 
   // Positive photo request patterns — broad matching for Dutch word order variations
   // "stuur foto", "foto sturen", "stuur een fototje", etc.
@@ -638,7 +636,11 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   // "wil...zien" / "kan ik...zien" / "laat...zien"
   if (/(wil|kan|mag|laat).{0,30}zien/i.test(lower)) return true
   // English patterns
-  if (/(send|show).{0,15}(photo|pic|selfie|picture)/i.test(lower)) return true
+  if (/(send|show|take|give).{0,15}(photo|pic|selfie|picture|image)/i.test(lower)) return true
+  // "I want a photo" / "can I see" / "let me see"
+  if (/(want|need|give me|let me see|can i see|show me).{0,15}(photo|pic|selfie|picture|you)/i.test(lower)) return true
+  // "sexy pic", "hot photo", "naughty selfie"
+  if (/(sexy|hot|naughty|dirty|cute|beautiful|pretty).{0,10}(photo|pic|selfie|picture)/i.test(lower)) return true
   // "pose", "poseer"
   if (/\b(pose|poseer)\b/i.test(lower)) return true
   // "ik wil een foto" / "kan je een foto" / "mag ik een foto"
