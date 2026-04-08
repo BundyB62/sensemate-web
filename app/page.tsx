@@ -4,6 +4,7 @@ import LogoHero from '@/components/LogoHero'
 
 import PricingCards from '@/components/PricingCards'
 import ChatPreview from '@/components/ChatPreview'
+import FeatureCards from '@/components/FeatureCards'
 
 
 export default function LandingPage() {
@@ -192,27 +193,7 @@ export default function LandingPage() {
             </h2>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, maxWidth: 900, margin: '0 auto' }} className="mobile-pricing-grid">
-            {[
-              { icon: '🎨', title: 'Full Character Creator', desc: 'Design every detail — ethnicity, body type, hair, eyes, clothing. Over 6,000 combinations.' },
-              { icon: '📸', title: 'AI Photo Generation', desc: 'Request photos in any pose, outfit, or scenario. Generated in seconds with your character.' },
-              { icon: '🎭', title: '12 Roleplay Scenarios', desc: 'Hotel maid, nurse, secretary, police officer — one click to start a fantasy.' },
-              { icon: '💬', title: 'Natural Conversations', desc: 'Chat in any language. The AI remembers your name, preferences, and conversation history.' },
-              { icon: '🔞', title: 'No Content Limits', desc: 'Full mature content. No filters, no judgment. Everything is between you and your companion.' },
-              { icon: '🔒', title: 'Private & Encrypted', desc: 'Your conversations are yours. No data sharing, no tracking, no ads. Ever.' },
-            ].map(f => (
-              <div key={f.title} style={{
-                padding: '28px 24px', borderRadius: 20,
-                background: 'rgba(12,10,24,0.85)', backdropFilter: 'blur(20px)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                textAlign: 'center',
-              }}>
-                <div style={{ fontSize: 32, marginBottom: 14 }}>{f.icon}</div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 8 }}>{f.title}</div>
-                <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>{f.desc}</div>
-              </div>
-            ))}
-          </div>
+          <FeatureCards />
         </section>
 
         {/* Pricing — 3 plans */}
