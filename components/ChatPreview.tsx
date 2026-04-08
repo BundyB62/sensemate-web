@@ -1,9 +1,79 @@
 'use client'
+import { useState, useEffect, useRef } from 'react'
 
-// Landing page showcase — realistic phone mockup with actual AI photo
+// Animated chat preview — messages appear one by one with typing effect
+const CHAT_SCRIPT: { side: 'left' | 'right'; text: string; delay: number; photo?: boolean }[] = [
+  { side: 'left', text: 'Hey you... I was just thinking about you 😏', delay: 800 },
+  { side: 'right', text: 'Oh really? What were you thinking? 🔥', delay: 2200 },
+  { side: 'left', text: 'That you might want to see something special 😘', delay: 2000 },
+  { side: 'right', text: 'Send me a sexy photo 😍', delay: 1800 },
+  { side: 'left', text: 'Here you go babe, just for you 💕', delay: 1500 },
+  { side: 'left', text: '', delay: 0, photo: true },
+]
+
 export default function ChatPreview() {
+  const [visibleCount, setVisibleCount] = useState(0)
+  const [typing, setTyping] = useState(false)
+  const [typingSide, setTypingSide] = useState<'left' | 'right'>('left')
+  const [started, setStarted] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const sectionRef = useRef<HTMLDivElement>(null)
+
+  // Start animation when section enters viewport
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting && !started) setStarted(true) },
+      { threshold: 0.3 }
+    )
+    if (sectionRef.current) observer.observe(sectionRef.current)
+    return () => observer.disconnect()
+  }, [started])
+
+  // Play messages one by one
+  useEffect(() => {
+    if (!started || visibleCount >= CHAT_SCRIPT.length) return
+
+    const next = CHAT_SCRIPT[visibleCount]
+    const typingDuration = next.photo ? 2500 : 1200
+
+    // Show typing indicator
+    setTypingSide(next.side)
+    setTyping(true)
+
+    const t1 = setTimeout(() => {
+      setTyping(false)
+      setVisibleCount(v => v + 1)
+
+      // Scroll down
+      if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight
+      }
+    }, typingDuration)
+
+    return () => clearTimeout(t1)
+  }, [started, visibleCount])
+
+  // Auto-scroll when messages appear
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight
+    }
+  }, [visibleCount, typing])
+
+  // Replay after all messages shown
+  useEffect(() => {
+    if (visibleCount >= CHAT_SCRIPT.length) {
+      const t = setTimeout(() => {
+        setVisibleCount(0)
+        setStarted(false)
+        setTimeout(() => setStarted(true), 500)
+      }, 6000)
+      return () => clearTimeout(t)
+    }
+  }, [visibleCount])
+
   return (
-    <div style={{
+    <div ref={sectionRef} style={{
       width: '100%', maxWidth: 1000, margin: '0 auto',
       display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 48,
     }} className="mobile-chat-preview">
@@ -15,18 +85,16 @@ export default function ChatPreview() {
             See it in action
           </h3>
           <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
-            A real WhatsApp-style chat with your AI companion. Photos, roleplay, and conversations that feel genuine.
+            A real chat experience with your AI companion. Photos, roleplay, and conversations that feel genuine.
           </p>
         </div>
         {[
-          { icon: '💬', title: 'Natural conversations', desc: 'She texts like a real person — short, informal, with emoji. Any language.' },
-          { icon: '📸', title: 'Photos on demand', desc: 'Ask for any photo — selfie, lingerie, or a custom scenario.' },
-          { icon: '🎭', title: 'Roleplay with one click', desc: 'Nurse, secretary, stewardess — the theme changes instantly.' },
-          { icon: '✓✓', title: 'Feels like WhatsApp', desc: 'Read receipts, typing indicators, timestamps — just like real.' },
+          { icon: '💬', title: 'Natural conversations', desc: 'She texts like a real person — short, flirty, with emoji. Any language.' },
+          { icon: '📸', title: 'Photos on demand', desc: 'Ask for any photo — selfie, lingerie, or a custom scenario. Generated in seconds.' },
+          { icon: '🎭', title: 'Roleplay with one click', desc: 'Nurse, secretary, stewardess — 12 built-in scenarios.' },
+          { icon: '✓✓', title: 'Feels like WhatsApp', desc: 'Read receipts, typing indicators, timestamps — just like real messaging.' },
         ].map(f => (
-          <div key={f.title} style={{
-            display: 'flex', gap: 14, alignItems: 'flex-start',
-          }}>
+          <div key={f.title} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
             <div style={{
               width: 40, height: 40, borderRadius: 12, flexShrink: 0,
               background: 'rgba(233,30,140,0.08)', border: '1px solid rgba(233,30,140,0.12)',
@@ -40,7 +108,7 @@ export default function ChatPreview() {
         ))}
       </div>
 
-      {/* Right: Phone mockup */}
+      {/* Right: Animated phone mockup */}
       <div style={{
         width: 340, flexShrink: 0,
         borderRadius: 36, overflow: 'hidden',
@@ -66,68 +134,80 @@ export default function ChatPreview() {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 700, fontSize: 14, color: '#fff' }}>Luna</div>
-            <div style={{ fontSize: 10, color: '#22c55e', fontWeight: 500 }}>online</div>
+            <div style={{ fontSize: 10, color: typing && typingSide === 'left' ? 'rgba(255,255,255,0.4)' : '#22c55e', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
+              {typing && typingSide === 'left' ? (
+                <>typing<span style={{ display: 'flex', gap: 2, marginLeft: 2 }}>{[0,1,2].map(i => <span key={i} style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.4)', animation: `landingTypingDot 1s ${i * 0.15}s infinite` }} />)}</span></>
+              ) : 'online'}
+            </div>
           </div>
           <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)' }}>📸</div>
         </div>
 
-        {/* Chat messages */}
-        <div style={{ padding: '10px 10px 6px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {/* Messages */}
+        <div ref={containerRef} style={{ padding: '10px 10px 6px', display: 'flex', flexDirection: 'column', gap: 4, height: 430, overflowY: 'hidden' }}>
           {/* Date */}
           <div style={{ display: 'flex', justifyContent: 'center', padding: '4px 0 6px' }}>
-            <span style={{ padding: '2px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.25)' }}>Vandaag</span>
+            <span style={{ padding: '2px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.05)', fontSize: 9, fontWeight: 600, color: 'rgba(255,255,255,0.25)' }}>Today</span>
           </div>
 
-          {/* AI */}
-          <Bubble side="left" text="Hey lieverd, ik dacht net aan jou... 😏" time="14:22" />
-          {/* User */}
-          <Bubble side="right" text="Oh ja? Wat dacht je dan? 🔥" time="14:23" read />
-          {/* AI */}
-          <Bubble side="left" text="Dat je vast een leuke foto zou willen 😘" time="14:23" />
-          {/* User */}
-          <Bubble side="right" text="Stuur maar! Ik ben benieuwd" time="14:24" read />
-          {/* AI text + photo */}
-          <Bubble side="left" text="Hier, speciaal voor jou 💕" time="14:24" />
+          {/* Rendered messages */}
+          {CHAT_SCRIPT.slice(0, visibleCount).map((msg, i) => {
+            if (msg.photo) {
+              return (
+                <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'flex-end', animation: 'lpMsgIn 0.3s ease both' }}>
+                  <div style={{ width: 24 }} />
+                  <div style={{ width: '65%', borderRadius: 14, overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', position: 'relative' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/landing-chat-preview.jpg" alt="" style={{ width: '100%', display: 'block' }} />
+                    <div style={{ position: 'absolute', bottom: 0, right: 0, left: 0, background: 'linear-gradient(transparent, rgba(0,0,0,0.5))', padding: '14px 8px 4px', display: 'flex', justifyContent: 'flex-end' }}>
+                      <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.7)' }}>14:25</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
+            return <Bubble key={i} side={msg.side} text={msg.text} time={`14:${22 + i}`} read={msg.side === 'right'} />
+          })}
 
-          {/* Actual AI photo */}
-          <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', marginTop: -2 }}>
-            <div style={{ width: 24 }} />
-            <div style={{
-              width: '65%', borderRadius: 14, overflow: 'hidden',
-              boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-              position: 'relative',
-            }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/landing-chat-preview.jpg" alt="AI generated companion" style={{ width: '100%', display: 'block' }} />
+          {/* Typing indicator */}
+          {typing && (
+            <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end', justifyContent: typingSide === 'right' ? 'flex-end' : 'flex-start', animation: 'lpMsgIn 0.2s ease both' }}>
+              {typingSide === 'left' && <div style={{ width: 24, height: 24, borderRadius: 12, background: 'linear-gradient(135deg, #5b42f3, #e91e8c)', flexShrink: 0 }} />}
               <div style={{
-                position: 'absolute', bottom: 0, right: 0, left: 0,
-                background: 'linear-gradient(transparent, rgba(0,0,0,0.5))',
-                padding: '14px 8px 4px', display: 'flex', justifyContent: 'flex-end',
+                padding: '10px 16px',
+                borderRadius: typingSide === 'left' ? '14px 14px 14px 4px' : '14px 14px 4px 14px',
+                background: typingSide === 'left' ? 'rgba(255,255,255,0.05)' : 'linear-gradient(135deg, rgba(233,30,140,0.14), rgba(233,30,140,0.08))',
+                border: typingSide === 'right' ? '1px solid rgba(233,30,140,0.1)' : 'none',
+                display: 'flex', gap: 4,
               }}>
-                <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.7)' }}>14:24</span>
+                {[0,1,2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: 3, background: typingSide === 'left' ? '#e91e8c' : 'rgba(255,255,255,0.5)', opacity: 0.5, animation: `landingTypingDot 1s ${i * 0.15}s infinite` }} />)}
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Input bar */}
         <div style={{ padding: '6px 8px 12px', background: 'rgba(12,10,22,0.98)', borderTop: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: 6, alignItems: 'center', borderRadius: '0 0 36px 36px' }}>
           <div style={{ fontSize: 16, opacity: 0.3, padding: '0 4px' }}>😊</div>
-          <div style={{ flex: 1, padding: '7px 12px', borderRadius: 16, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)', fontSize: 12, color: 'rgba(255,255,255,0.15)' }}>Bericht...</div>
+          <div style={{ flex: 1, padding: '7px 12px', borderRadius: 16, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)', fontSize: 12, color: 'rgba(255,255,255,0.15)' }}>Message...</div>
           <div style={{ width: 30, height: 30, borderRadius: 15, background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.25 }}>
             <svg width="12" height="12" viewBox="0 0 24 24" fill="rgba(255,255,255,0.5)" stroke="none"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
           </div>
         </div>
+
+        <style>{`
+          @keyframes lpMsgIn { from { opacity: 0; transform: translateY(8px) } to { opacity: 1; transform: translateY(0) } }
+          @keyframes landingTypingDot { 0%,60%,100% { transform: translateY(0); opacity: 0.4 } 30% { transform: translateY(-3px); opacity: 1 } }
+        `}</style>
       </div>
     </div>
   )
 }
 
-// Mini bubble component for the mockup
 function Bubble({ side, text, time, read }: { side: 'left' | 'right'; text: string; time: string; read?: boolean }) {
   const isUser = side === 'right'
   return (
-    <div style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', gap: 6, alignItems: 'flex-end' }}>
+    <div style={{ display: 'flex', justifyContent: isUser ? 'flex-end' : 'flex-start', gap: 6, alignItems: 'flex-end', animation: 'lpMsgIn 0.3s ease both' }}>
       {!isUser && <div style={{ width: 24, height: 24, borderRadius: 12, background: 'linear-gradient(135deg, #5b42f3, #e91e8c)', flexShrink: 0 }} />}
       <div style={{
         padding: '6px 9px', maxWidth: '72%',
@@ -139,11 +219,7 @@ function Bubble({ side, text, time, read }: { side: 'left' | 'right'; text: stri
       }}>
         {text}
         <span style={{ display: 'inline-block', width: isUser ? 48 : 30, height: 10 }} />
-        <span style={{
-          position: 'absolute', bottom: 3, right: 7,
-          fontSize: 8, color: 'rgba(255,255,255,0.2)',
-          display: 'flex', alignItems: 'center', gap: 2,
-        }}>
+        <span style={{ position: 'absolute', bottom: 3, right: 7, fontSize: 8, color: 'rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', gap: 2 }}>
           {time}
           {isUser && <span style={{ fontSize: 10, color: read ? '#e91e8c' : 'rgba(255,255,255,0.2)' }}>✓✓</span>}
         </span>
