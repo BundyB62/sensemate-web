@@ -5,7 +5,7 @@ import { readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
 import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatarPrompt'
 
-export const maxDuration = 120
+export const maxDuration = 60
 
 // Novita.ai — supports NSFW with enable_nsfw_detection: false
 const NOVITA_URL = 'https://api.novita.ai/v3/async/txt2img'
@@ -114,8 +114,8 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
 
     console.log(`[Image] Novita task submitted: ${taskId}`)
 
-    // Step 2: Poll for result (max 60 seconds)
-    const maxAttempts = 30
+    // Step 2: Poll for result (max 50 seconds, fits within Vercel Hobby 60s limit)
+    const maxAttempts = 25
     for (let i = 0; i < maxAttempts; i++) {
       await new Promise(r => setTimeout(r, 2000)) // wait 2s between polls
 
@@ -146,7 +146,7 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
       // TASK_STATUS_QUEUED or TASK_STATUS_PROCESSING — keep polling
     }
 
-    console.error('[Image] Novita timed out after 60s')
+    console.error('[Image] Novita timed out after 50s')
     return null
   } catch (err) {
     console.error('[Image] Novita error:', err)
