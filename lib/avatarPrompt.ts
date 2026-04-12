@@ -329,8 +329,11 @@ export function buildBodyReinforcement(profile: Record<string, any>): { emphasis
   } else if (build === 'muscular' || build === 'athletic') {
     emphasis.push('(muscular toned athletic body:1.5)', '(fit defined muscles visible:1.4)')
     negative.push('fat, overweight, skinny, thin, chubby, soft body')
-  } else if (build === 'curvy' || build === 'hourglass') {
-    emphasis.push('(curvy hourglass body wide hips narrow waist:1.5)', '(voluptuous feminine curves:1.4)')
+  } else if (build === 'hourglass') {
+    emphasis.push('(perfect hourglass figure:1.6)', '(very narrow cinched waist:1.5)', '(proportional curves wide hips:1.4)')
+    negative.push('skinny, thin, petite, flat, straight body, thick, chubby, plus-size, overweight')
+  } else if (build === 'curvy') {
+    emphasis.push('(curvy voluptuous body wide hips:1.5)', '(voluptuous feminine curves:1.4)')
     negative.push('skinny, thin, slim, petite, flat, boyish, straight body')
   } else if (build === 'thick') {
     emphasis.push('(thick curvy body wide hips thick thighs:1.5)', '(full-figured:1.4)')
