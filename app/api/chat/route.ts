@@ -654,6 +654,17 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   // ✅ English: "send/show/take a photo/pic/selfie"
   if (/(send|show me|take).{0,15}(photo|pic|selfie|picture|image)/i.test(lower)) return true
 
+  // ✅ Turkish: "gönder/yolla/göster + foto/resim/fotoğraf"
+  if (/(g[oö]nder|yolla|g[oö]ster|ver\b).{0,30}(foto|fotograf|fotoğraf|resim|pic)/i.test(lower)) return true
+  if (/(foto|fotograf|fotoğraf|resim).{0,30}(g[oö]nder|yolla|g[oö]ster)/i.test(lower)) return true
+
+  // ✅ "foto van je X" — "foto" with possessive (no verb needed, intent is clear)
+  if (/\bfoto\b.{0,25}(van|je|haar|zijn|mijn)\b/i.test(lower)) return true
+
+  // ✅ "foto" + explicit body part nearby (kutje, tieten, kont, etc.)
+  if (/\bfoto\b.{0,30}(kutje|kut\b|vagina|pussy|tieten|tiet\b|borsten|borst\b|kontje|kont\b|billen|bil\b|naakt|bloot)/i.test(lower)) return true
+  if (/(kutje|kut\b|vagina|pussy|tieten|tiet\b|borsten|kontje|kont\b|billen|naakt|bloot).{0,30}\bfoto\b/i.test(lower)) return true
+
   // ✅ "laat zien" only when combined with visual/body context
   if (/(laat.{0,10}(je|jezelf).{0,10}zien|laat.{0,10}(foto|pic|selfie).{0,10}zien)/i.test(lower)) return true
 
@@ -666,9 +677,10 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   // ✅ Context-aware: user gives short "yes" after AI offered/mentioned a photo
   if (lastAssistantMsg) {
     const lastLower = lastAssistantMsg.toLowerCase()
-    const lastMentionedPhoto = /(foto|photo|pic|selfie|stuur|komt-ie|hier is|verstuurd|gestuurd)/i.test(lastLower)
+    const lastMentionedPhoto = /(foto|photo|pic|selfie|stuur|komt-ie|hier is|verstuurd|gestuurd|gönderiyorum|gonderiyorum|g[oö]nderiyorum)/i.test(lastLower)
     if (lastMentionedPhoto) {
-      if (/^(ja|yes|ok(e|é)?|sure|do(e)?\s*(maar|het)|stuur\s*(maar)?|graag|please|alsjeblieft|go|send|nu|now|goed|prima|tuurlijk|natuurlijk)\s*[.!?😘😏🔥💕]*\s*$/i.test(lower)) {
+      // Dutch / English / Turkish short affirmations
+      if (/^(ja|yes|ok(e|é)?|sure|do(e)?\s*(maar|het)|stuur\s*(maar)?|graag|please|alsjeblieft|go|send|nu|now|goed|prima|tuurlijk|natuurlijk|hadi|tamam|evet)\s*[.!?😘😏🔥💕]*\s*$/i.test(lower)) {
         return true
       }
     }
@@ -684,7 +696,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   // Detect if user is requesting a specific outfit or body-part reveal
   // → if so, skip default clothing from appearancePart so it doesn't conflict
   const _msgCheck = userMessage.toLowerCase()
-  const hasOutfitOverride = /bikini|zwempak|swimsuit|badpak|lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|topless|naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen|jurk\b|dress\b|kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit|tieten|tiet\b|borsten|borst\b|boobs?|breast|tepel|nipple/i.test(_msgCheck)
+  const hasOutfitOverride = /bikini|zwempak|swimsuit|badpak|lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|topless|naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen|jurk\b|dress\b|kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit|tieten|tiet\b|borsten|borst\b|boobs?|breast|tepel|nipple|ami\b|amini|göğüs|gogus|kalça|kalcasi/i.test(_msgCheck)
 
   // Build appearance — skip clothing when: scenario has its own costume, OR user requests specific outfit/body parts
   const hasScenarioCostume = activeScenario && activeScenario.photoCostume
@@ -817,7 +829,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   else if (hasNude) scenario = 'fully nude, artistic pose, full body visible, bedroom, intimate lighting'
   else if (/topless/i.test(lower)) scenario = 'topless, breasts visible, hands at sides, confident pose, bedroom'
   else if (/lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|jarretel|garter|kous|stockings|corset|bodystocking|bodysuit|babydoll|negligee|nachthemd|nachtpon/i.test(lower)) scenario = 'wearing sexy lace lingerie set, bedroom, seductive pose on bed, sensual warm lighting'
-  else if (/bikini|zwempak|swimsuit|badpak/i.test(lower)) scenario = 'wearing bikini, beach, sunny, wet skin, golden hour lighting'
+  else if (/bikini|zwempak|swimsuit|badpak/i.test(lower)) scenario = '(wearing complete bikini set:1.5), (bikini top covering breasts:1.4), (bikini bottom:1.3), beach, sunny, wet skin, golden hour lighting, fully clothed in swimwear'
 
   // ─── OTHER ─────────────────────────────────────────────────────────────────
   else if (/dildo|vibrator|toy|speeltje/i.test(lower)) scenario = 'holding a toy, playful naughty expression, nude, bedroom, intimate'
