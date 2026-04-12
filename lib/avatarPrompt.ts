@@ -450,7 +450,7 @@ const FANTASY_CLOTHING_MAP: Record<string, string> = {
 
 // ─── Build a clean appearance description string (for chat photo prompts) ────
 // This gives a consistent, parseable appearance block without prompt engineering artifacts
-export function buildAppearanceDescription(profile: Record<string, any>, includeBody = true, includeClothing = true): string {
+export function buildAppearanceDescription(profile: Record<string, any>, includeBody = true, includeClothing = true, isNudeRequest = false): string {
   // Fantasy characters — built from race + features + body
   if (profile.style === 'fantasy') {
     const race = RACE_MAP[profile.race] || 'fantasy woman'
@@ -515,8 +515,8 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
     if (includeClothing && profile.clothingStyle) {
       const clothing = FANTASY_CLOTHING_MAP[profile.clothingStyle] || ''
       if (clothing) parts.push(clothing)
-    } else if (!includeClothing) {
-      // Nude tokens for explicit requests
+    } else if (!includeClothing && isNudeRequest) {
+      // Nude tokens ONLY for actual nude requests (not lingerie/bikini)
       parts.push('(completely nude:1.5), (naked:1.4), bare skin')
     }
 
@@ -538,7 +538,7 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
   // Hijab special handling — always include color consistency
   const isHijab = profile.hairLength === 'hijab'
   const hairDesc = isHijab
-    ? `(wearing ${hairColor} colored hijab headscarf:1.4)`
+    ? `(wearing ${hairColor} colored hijab headscarf:1.6), (${hairColor} hijab NOT blue NOT white:1.4)`
     : `(${hairColor} ${hairLength}:1.3)`
 
   const parts: string[] = [
@@ -634,7 +634,7 @@ export function buildIdentityReinforcement(profile: Record<string, any>): string
   const isHijab = profile.hairLength === 'hijab'
   if (isHijab) {
     const hijabColor = HAIR_COLOR_MAP[profile.hairColor] || 'dark'
-    parts.push(`(MUST be wearing ${hijabColor} hijab headscarf on head at all times:1.5)`)
+    parts.push(`(MUST be wearing ${hijabColor} colored hijab headscarf:1.6), (hijab color is ${hijabColor} NOT blue NOT white:1.4)`)
   } else {
     const hairColor = HAIR_COLOR_MAP[profile.hairColor] || 'brown'
     const hairLength = HAIR_LENGTH_MAP[profile.hairLength] || 'medium length'

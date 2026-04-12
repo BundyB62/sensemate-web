@@ -740,13 +740,17 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const ap = companion.appearance || {}
 
   // Detect if user is requesting a specific outfit or body-part reveal
-  // → if so, skip default clothing from appearancePart so it doesn't conflict
+  // Split into two checks: one for "strip default clothing" and one for "is nude/explicit"
   const _msgCheck = userMessage.toLowerCase()
+  // hasOutfitOverride: strip default clothing (jellaba, casual, etc.) — includes clothed alternatives like lingerie/bikini
   const hasOutfitOverride = /bikini|zwempak|swimsuit|badpak|lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|topless|naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen|jurk\b|dress\b|kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit|tieten|tiet\b|borsten|borst\b|boobs?|breast|tepel|nipple|ami\b|amini|göğüs|gogus|kalça|kalcasi|spreid|spread|wijd|achteren|kont\b|kontje|billen|bil\b|reet|anus|aars|doggy|voorover|bent.?over|op.*vier|handen.*knie|hurk|squat|knie[eë]n|kneeling/i.test(_msgCheck)
+  // isNudeRequest: actual nudity — does NOT include lingerie/bikini (those are clothed)
+  const isNudeRequest = /topless|naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen|kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit|tieten|tiet\b|borsten|borst\b|boobs?|breast|tepel|nipple|ami\b|amini|spreid|spread|wijd|achteren|kont\b|kontje|billen|bil\b|reet|anus|aars|doggy|voorover|bent.?over|op.*vier|handen.*knie|hurk|squat|knie[eë]n|kneeling/i.test(_msgCheck)
 
   // Build appearance — skip clothing when: scenario has its own costume, OR user requests specific outfit/body parts
+  // Pass isNudeRequest to control whether nude tokens are added (only for actual nudity, not lingerie/bikini)
   const hasScenarioCostume = activeScenario && activeScenario.photoCostume
-  const appearancePart = buildAppearanceDescription(ap, true, !hasScenarioCostume && !hasOutfitOverride)
+  const appearancePart = buildAppearanceDescription(ap, true, !hasScenarioCostume && !hasOutfitOverride, isNudeRequest)
 
   // If an active roleplay scenario exists, use its setting + costume as the base
   if (activeScenario && activeScenario.photoSetting) {
@@ -910,10 +914,10 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
     'topless lying on side, breasts visible, looking at camera over shoulder',
   ])
   else if (/lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|jarretel|garter|kous|stockings|corset|bodystocking|bodysuit|babydoll|negligee|nachthemd|nachtpon/i.test(lower)) scenario = randPick([
-    `wearing sexy lace lingerie set, ${randPick(BED_VAR)} bedroom, seductive pose on bed`,
-    'wearing sheer black lace bra and thong, standing pose, seductive look, bedroom mirror',
-    `wearing red lace lingerie, lying on ${randPick(BED_VAR)}, looking at camera with desire`,
-    'wearing elegant silk negligee, sitting on edge of bed, intimate bedroom lighting',
+    `(wearing sexy lace lingerie set:1.5), (lace bra and panties visible:1.4), NOT nude NOT naked, ${randPick(BED_VAR)} bedroom, seductive pose on bed`,
+    '(wearing sheer black lace bra and thong:1.5), (lingerie clearly visible:1.4), NOT nude, standing pose, seductive look, bedroom mirror',
+    `(wearing red lace lingerie set:1.5), (bra and panties:1.4), NOT nude, lying on ${randPick(BED_VAR)}, looking at camera with desire`,
+    '(wearing elegant silk negligee:1.5), (sheer nightgown visible:1.4), NOT nude, sitting on edge of bed, intimate bedroom lighting',
   ])
   else if (/bikini|zwempak|swimsuit|badpak/i.test(lower)) scenario = '(wearing complete bikini set:1.5), (bikini top covering breasts:1.4), (bikini bottom:1.3), beach, sunny, wet skin, golden hour lighting, fully clothed in swimwear'
 
