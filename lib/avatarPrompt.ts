@@ -441,19 +441,33 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
 // ─── Identity reinforcement — core features that must NEVER change ──────────
 // Repeated at the END of prompts to ensure hijab, hair color, eye color, body type persist
 export function buildIdentityReinforcement(profile: Record<string, any>): string {
-  // Fantasy: reinforce race + distinctive features
+  // Fantasy: reinforce ALL distinctive features strongly for consistency
   if (profile.style === 'fantasy') {
     const parts: string[] = []
     const race = RACE_MAP[profile.race] || 'fantasy woman'
-    parts.push(`(${race}:1.3)`)
+    parts.push(`(${race}:1.5)`)
+    // Skin
+    const skin = FANTASY_SKIN_MAP[profile.skinTone] || ''
+    if (skin) parts.push(`(${skin}:1.4)`)
+    // Hair
+    const hairColor = HAIR_COLOR_MAP[profile.hairColor] || ''
+    const hairLength = HAIR_LENGTH_MAP[profile.hairLength] || ''
+    if (hairColor || hairLength) parts.push(`(${hairColor} ${hairLength}:1.4)`)
+    // Eyes
+    const eyeColor = FANTASY_EYE_MAP[profile.eyeColor] || ''
+    if (eyeColor) parts.push(`(${eyeColor}:1.3)`)
+    // Features
     const ears = EARS_MAP[profile.ears] || ''
     if (ears) parts.push(ears)
     const horns = HORNS_MAP[profile.horns] || ''
     if (horns) parts.push(horns)
     const wings = WINGS_MAP[profile.wings] || ''
     if (wings) parts.push(wings)
-    const eyeColor = FANTASY_EYE_MAP[profile.eyeColor] || 'blue eyes'
-    parts.push(`(${eyeColor}:1.2)`)
+    const tail = TAIL_MAP[profile.tail] || ''
+    if (tail) parts.push(tail)
+    // Build
+    const build = BUILD_MAP[profile.build] || ''
+    if (build) parts.push(`(${build}:1.3)`)
     return parts.join(', ')
   }
 

@@ -46,18 +46,18 @@ const GENDERS = [
 
 // ─── Fantasy Data ───────────────────────────────────────────────────────────
 const FANTASY_RACES = [
-  { id: 'elf', label: 'Elf', emoji: '🧝' },
-  { id: 'dark_elf', label: 'Dark Elf', emoji: '🖤' },
-  { id: 'demon', label: 'Demon / Succubus', emoji: '😈' },
-  { id: 'angel', label: 'Angel', emoji: '😇' },
-  { id: 'vampire', label: 'Vampire', emoji: '🧛' },
-  { id: 'fairy', label: 'Fairy', emoji: '🧚' },
-  { id: 'orc', label: 'Orc', emoji: '👹' },
-  { id: 'dragon_kin', label: 'Dragon-kin', emoji: '🐉' },
-  { id: 'catgirl', label: 'Catgirl', emoji: '🐱' },
-  { id: 'foxgirl', label: 'Foxgirl / Kitsune', emoji: '🦊' },
-  { id: 'werewolf', label: 'Werewolf', emoji: '🐺' },
-  { id: 'mermaid', label: 'Mermaid / Siren', emoji: '🧜' },
+  { id: 'elf', label: 'Elf', img: '/onboarding/fantasy/race/elf.jpg' },
+  { id: 'dark_elf', label: 'Dark Elf', img: '/onboarding/fantasy/race/dark_elf.jpg' },
+  { id: 'demon', label: 'Demon / Succubus', img: '/onboarding/fantasy/race/demon.jpg' },
+  { id: 'angel', label: 'Angel', img: '/onboarding/fantasy/race/angel.jpg' },
+  { id: 'vampire', label: 'Vampire', img: '/onboarding/fantasy/race/vampire.jpg' },
+  { id: 'fairy', label: 'Fairy', img: '/onboarding/fantasy/race/fairy.jpg' },
+  { id: 'orc', label: 'Orc', img: '/onboarding/fantasy/race/orc.jpg' },
+  { id: 'dragon_kin', label: 'Dragon-kin', img: '/onboarding/fantasy/race/dragon_kin.jpg' },
+  { id: 'catgirl', label: 'Catgirl', img: '/onboarding/fantasy/race/catgirl.jpg' },
+  { id: 'foxgirl', label: 'Foxgirl / Kitsune', img: '/onboarding/fantasy/race/foxgirl.jpg' },
+  { id: 'werewolf', label: 'Werewolf', img: '/onboarding/fantasy/race/werewolf.jpg' },
+  { id: 'mermaid', label: 'Mermaid / Siren', img: '/onboarding/fantasy/race/mermaid.jpg' },
 ]
 
 const FANTASY_EARS = [
@@ -129,12 +129,17 @@ const FANTASY_EYES = [
 ]
 
 const FANTASY_CLOTHING = [
-  { id: 'armor', label: 'Plate Armor' }, { id: 'leather', label: 'Leather Armor' },
-  { id: 'robes', label: 'Mage Robes' }, { id: 'elvish', label: 'Elvish Outfit' },
-  { id: 'royal', label: 'Royal Gown' }, { id: 'priestess', label: 'Priestess Robes' },
-  { id: 'tribal', label: 'Tribal' }, { id: 'dark', label: 'Dark Gothic' },
-  { id: 'minimal', label: 'Minimal / Wraps' }, { id: 'chains', label: 'Chains & Straps' },
-  { id: 'nothing', label: 'Nothing' },
+  { id: 'armor', label: 'Plate Armor', img: '/onboarding/fantasy/clothing/armor.jpg' },
+  { id: 'leather', label: 'Leather Armor', img: '/onboarding/fantasy/clothing/leather.jpg' },
+  { id: 'robes', label: 'Mage Robes', img: '/onboarding/fantasy/clothing/robes.jpg' },
+  { id: 'elvish', label: 'Elvish Outfit', img: '/onboarding/fantasy/clothing/elvish.jpg' },
+  { id: 'royal', label: 'Royal Gown', img: '/onboarding/fantasy/clothing/royal.jpg' },
+  { id: 'priestess', label: 'Priestess Robes', img: '/onboarding/fantasy/clothing/priestess.jpg' },
+  { id: 'tribal', label: 'Tribal', img: '/onboarding/fantasy/clothing/tribal.jpg' },
+  { id: 'dark', label: 'Dark Gothic', img: '/onboarding/fantasy/clothing/dark.jpg' },
+  { id: 'minimal', label: 'Minimal / Wraps', img: '/onboarding/fantasy/clothing/minimal.jpg' },
+  { id: 'chains', label: 'Chains & Straps', img: '/onboarding/fantasy/clothing/chains.jpg' },
+  { id: 'nothing', label: 'Nothing', img: '/onboarding/fantasy/clothing/nothing.jpg' },
 ]
 
 const RELATIONSHIPS = [
@@ -724,23 +729,19 @@ export default function OnboardingPage() {
             title="Choose a race"
             subtitle="What kind of fantasy being will your companion be?"
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, width: '100%' }}>
-              {FANTASY_RACES.map(r => {
-                const sel = data.race === r.id
-                return (
-                  <button key={r.id} onClick={() => { set('race', r.id); goNext() }} style={{
-                    padding: '18px 12px', borderRadius: 16, cursor: 'pointer',
-                    border: sel ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.08)',
-                    background: sel ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                    transition: 'all 0.2s', color: '#fff',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                  }}>
-                    <span style={{ fontSize: 28 }}>{r.emoji}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700 }}>{r.label}</span>
-                  </button>
-                )
-              })}
-            </div>
+            <ImageGrid cols={4}>
+              {FANTASY_RACES.map(r => (
+                <ImageCard
+                  key={r.id}
+                  img={r.img}
+                  label={r.label}
+                  selected={data.race === r.id}
+                  onClick={() => { set('race', r.id); goNext() }}
+                  aspectRatio="3/4"
+                  small
+                />
+              ))}
+            </ImageGrid>
           </StepContainer>
         )}
 
@@ -1078,19 +1079,19 @@ export default function OnboardingPage() {
             subtitle="How does your SenseMate dress?"
           >
             {data.gender === 'fantasy' ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, width: '100%' }}>
-                {FANTASY_CLOTHING.map(c => {
-                  const sel = data.clothingStyle === c.id
-                  return (
-                    <button key={c.id} onClick={() => set('clothingStyle', c.id)} style={{
-                      padding: '16px 12px', borderRadius: 14, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                      border: sel ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.08)',
-                      background: sel ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                      color: sel ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
-                    }}>{c.label}</button>
-                  )
-                })}
-              </div>
+              <ImageGrid cols={4}>
+                {FANTASY_CLOTHING.map(c => (
+                  <ImageCard
+                    key={c.id}
+                    img={c.img}
+                    label={c.label}
+                    selected={data.clothingStyle === c.id}
+                    onClick={() => set('clothingStyle', c.id)}
+                    aspectRatio="3/4"
+                    small
+                  />
+                ))}
+              </ImageGrid>
             ) : (
               <ImageGrid cols={4}>
                 {(data.gender === 'man' ? CLOTHING_MAN : CLOTHING_WOMAN).map(c => (
