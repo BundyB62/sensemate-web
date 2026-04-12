@@ -5,6 +5,8 @@ import { readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
 import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatarPrompt'
 
+export const maxDuration = 120
+
 // Novita.ai — supports NSFW with enable_nsfw_detection: false
 const NOVITA_URL = 'https://api.novita.ai/v3/async/txt2img'
 const NOVITA_RESULT_URL = 'https://api.novita.ai/v3/async/task-result'
@@ -112,8 +114,8 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
 
     console.log(`[Image] Novita task submitted: ${taskId}`)
 
-    // Step 2: Poll for result (max 90 seconds)
-    const maxAttempts = 45
+    // Step 2: Poll for result (max 60 seconds)
+    const maxAttempts = 30
     for (let i = 0; i < maxAttempts; i++) {
       await new Promise(r => setTimeout(r, 2000)) // wait 2s between polls
 
@@ -144,7 +146,7 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
       // TASK_STATUS_QUEUED or TASK_STATUS_PROCESSING — keep polling
     }
 
-    console.error('[Image] Novita timed out after 90s')
+    console.error('[Image] Novita timed out after 60s')
     return null
   } catch (err) {
     console.error('[Image] Novita error:', err)
@@ -202,10 +204,13 @@ async function generateFlux(prompt: string, apiKey: string): Promise<string | nu
 async function mergeAvatarFace(imageUrl: string, avatarUrl: string, apiKey: string): Promise<string | null> {
   try {
     // Download both images as base64
+    const dlController = new AbortController()
+    const dlTimeout = setTimeout(() => dlController.abort(), 15000)
     const [imgRes, avatarRes] = await Promise.all([
-      fetch(imageUrl),
-      fetch(avatarUrl),
+      fetch(imageUrl, { signal: dlController.signal }),
+      fetch(avatarUrl, { signal: dlController.signal }),
     ])
+    clearTimeout(dlTimeout)
 
     if (!imgRes.ok || !avatarRes.ok) {
       console.error('[Image] Failed to download images for face merge')
@@ -222,6 +227,8 @@ async function mergeAvatarFace(imageUrl: string, avatarUrl: string, apiKey: stri
 
     console.log(`[Image] Merging avatar face onto generated image... (img: ${Math.round(imgBuf.byteLength/1024)}KB, avatar: ${Math.round(avatarBuf.byteLength/1024)}KB)`)
 
+    const mergeController = new AbortController()
+    const mergeTimeout = setTimeout(() => mergeController.abort(), 30000)
     const mergeRes = await fetch(NOVITA_MERGE_FACE_URL, {
       method: 'POST',
       headers: {
@@ -236,7 +243,9 @@ async function mergeAvatarFace(imageUrl: string, avatarUrl: string, apiKey: stri
           enterprise_plan: { enabled: false },
         },
       }),
+      signal: mergeController.signal,
     })
+    clearTimeout(mergeTimeout)
 
     if (!mergeRes.ok) {
       const err = await mergeRes.text()
