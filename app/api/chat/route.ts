@@ -681,9 +681,14 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
 function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeScenario?: { photoSetting: string; photoCostume: string } | null): { prompt: string; poseId?: string } {
   const ap = companion.appearance || {}
 
-  // Build appearance — skip clothing when scenario provides its own costume
+  // Detect if user is requesting a specific outfit or body-part reveal
+  // → if so, skip default clothing from appearancePart so it doesn't conflict
+  const _msgCheck = userMessage.toLowerCase()
+  const hasOutfitOverride = /bikini|zwempak|swimsuit|badpak|lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|topless|naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen|jurk\b|dress\b|kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit|tieten|tiet\b|borsten|borst\b|boobs?|breast|tepel|nipple/i.test(_msgCheck)
+
+  // Build appearance — skip clothing when: scenario has its own costume, OR user requests specific outfit/body parts
   const hasScenarioCostume = activeScenario && activeScenario.photoCostume
-  const appearancePart = buildAppearanceDescription(ap, true, !hasScenarioCostume)
+  const appearancePart = buildAppearanceDescription(ap, true, !hasScenarioCostume && !hasOutfitOverride)
 
   // If an active roleplay scenario exists, use its setting + costume as the base
   if (activeScenario && activeScenario.photoSetting) {

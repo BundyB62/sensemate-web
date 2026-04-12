@@ -5,7 +5,6 @@ import LogoHero from '@/components/LogoHero'
 import PricingCards from '@/components/PricingCards'
 import ChatPreview from '@/components/ChatPreview'
 import FeatureCards from '@/components/FeatureCards'
-import SideCharacters from '@/components/SideCharacters'
 
 
 export default function LandingPage() {
@@ -102,7 +101,6 @@ export default function LandingPage() {
       </nav>
 
       <div style={{ position: 'relative', zIndex: 1 }}>
-        <SideCharacters />
 
         {/* Hero */}
         <section className="mobile-hero" style={{
