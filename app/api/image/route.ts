@@ -54,7 +54,7 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
   }
 
   let negativePrompt =
-    'cartoon, anime, illustration, 3d render, deformed, ugly, blurry, low quality, bad anatomy, extra fingers, mutated hands, watermark, text'
+    'cartoon, anime, illustration, 3d render, deformed, ugly, blurry, low quality, bad anatomy, extra fingers, mutated hands, watermark, text, tattoo, tattoos, body art, tattooed skin'
   if (extraNegative) {
     // Also truncate negative prompt if needed
     const neg = extraNegative.substring(0, 400)
