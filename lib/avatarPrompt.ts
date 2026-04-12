@@ -231,7 +231,15 @@ export function buildAnimeNegativePrompt(): string {
 export function buildAppearanceDescription(profile: Record<string, any>, includeBody = true, includeClothing = true): string {
   // Anime characters use promptTags directly instead of building from profile fields
   if (profile.style === 'anime') {
-    const tags = profile.promptTags || ''
+    let tags = profile.promptTags || ''
+    if (!includeClothing) {
+      // Strip outfit/clothing descriptions for nude/explicit requests
+      // Remove "wearing ..." clauses and common clothing/accessory words
+      tags = tags
+        .replace(/,?\s*wearing [^,]+/gi, '')
+        .replace(/,?\s*(school uniform|sailor uniform|shrine maiden outfit|maid outfit|maid dress|idol costume|tactical bodysuit|fantasy armor|sorceress robes|royal attire|samurai hakama|open kimono|kimono|corset|boots|thigh-high boots|knee-high boots|stockings|white stockings|headband|frilly headband|cape|fur cape|black cape|dress|white dress|blouse|white blouse|skirt|pleated skirt|frilly skirt|crop top[^,]*|hotpants|choker[^,]*|tiara|silver tiara|microphone|sword[^,]*|katana[^,]*|magical staff|arcane symbols|neon accents|cyberpunk implants|leather and steel|silver accessories|white haori|red hakama|hair ribbons|bowing|warrior pose)[^,]*/gi, '')
+        .replace(/,\s*,/g, ',').replace(/,\s*$/, '').replace(/^\s*,/, '')
+    }
     return `${tags}, anime style, masterpiece, best quality, highres, detailed`
   }
 
