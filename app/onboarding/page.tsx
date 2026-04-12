@@ -1183,7 +1183,8 @@ export default function OnboardingPage() {
                   Start chatting with {data.name} 💬
                 </button>
 
-                {/* Regenerate photo */}
+                {/* Regenerate photo — hide for anime (fixed avatars) */}
+                {data.gender !== 'anime' && (
                 <button
                   onClick={handleRegenerateAvatar}
                   disabled={regenerating}
@@ -1201,8 +1202,10 @@ export default function OnboardingPage() {
                 >
                   {regenerating ? 'Generating...' : 'Generate new photo 📸'}
                 </button>
+                )}
 
-                {/* Edit appearance — go back to step 1 */}
+                {/* Edit appearance — go back to step 1 (hide for anime) */}
+                {data.gender !== 'anime' && (
                 <button
                   onClick={() => { setAnimDir('back'); setStep(1) }}
                   style={{
@@ -1218,6 +1221,7 @@ export default function OnboardingPage() {
                 >
                   ← Edit appearance
                 </button>
+                )}
               </div>
             </div>
           </StepContainer>
