@@ -1302,7 +1302,20 @@ export async function POST(request: Request) {
         const bodyR = buildBodyReinforcement(companion.appearance || {})
         return bodyR.emphasis ? `${generateImage}, ${bodyR.emphasis}` : generateImage
       })() : null,
-      bodyNegative: generateImage ? buildBodyReinforcement(companion.appearance || {}).negative : undefined,
+      bodyNegative: generateImage ? (() => {
+        const ap = companion.appearance || {}
+        let neg = buildBodyReinforcement(ap).negative || ''
+        // For anime/game: when outfit was stripped (nude/explicit request), add character outfit to negatives
+        // This prevents the model from regenerating the outfit from character name association
+        if ((ap.style === 'anime' || ap.style === 'game') && ap.outfit) {
+          const msgLower = (message || '').toLowerCase()
+          const isExplicitReq = /naakt|nude|naked|bloot|lingerie|bikini|topless|kutje|kut\b|pussy|tieten|borsten|breast|boobs|spreid|spread|achteren|kont|billen|anus/i.test(msgLower)
+          if (isExplicitReq) {
+            neg = neg ? `${neg}, ${ap.outfit}, clothed, dressed` : `${ap.outfit}, clothed, dressed`
+          }
+        }
+        return neg || undefined
+      })() : undefined,
       poseId: generatePoseId || undefined,
       bondLevel: newBondLevel,
       bondScore: newBondScore,
