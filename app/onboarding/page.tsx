@@ -899,8 +899,8 @@ export default function OnboardingPage() {
 
             {showBodyDetails && (
               <>
-                {/* Breast size (woman/nonbinary) */}
-                {(data.gender === 'woman' || data.gender === 'nonbinary') && (
+                {/* Breast size (woman/nonbinary/fantasy) */}
+                {(data.gender === 'woman' || data.gender === 'nonbinary' || data.gender === 'fantasy') && (
                   <>
                     <div style={{ marginBottom: 32 }}>
                       <SectionTitle>Breast Size</SectionTitle>
