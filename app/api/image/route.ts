@@ -117,7 +117,7 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
     // Step 2: Poll for result (max 50 seconds, fits within Vercel Hobby 60s limit)
     const maxAttempts = 25
     for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(r => setTimeout(r, 2000)) // wait 2s between polls
+      await new Promise(r => setTimeout(r, 1500)) // wait 1.5s between polls
 
       const resultRes = await fetch(`${NOVITA_RESULT_URL}?task_id=${taskId}`, {
         headers: { 'Authorization': `Bearer ${apiKey}` },
@@ -205,7 +205,7 @@ async function mergeAvatarFace(imageUrl: string, avatarUrl: string, apiKey: stri
   try {
     // Download both images as base64
     const dlController = new AbortController()
-    const dlTimeout = setTimeout(() => dlController.abort(), 15000)
+    const dlTimeout = setTimeout(() => dlController.abort(), 6000)
     const [imgRes, avatarRes] = await Promise.all([
       fetch(imageUrl, { signal: dlController.signal }),
       fetch(avatarUrl, { signal: dlController.signal }),
@@ -228,7 +228,7 @@ async function mergeAvatarFace(imageUrl: string, avatarUrl: string, apiKey: stri
     console.log(`[Image] Merging avatar face onto generated image... (img: ${Math.round(imgBuf.byteLength/1024)}KB, avatar: ${Math.round(avatarBuf.byteLength/1024)}KB)`)
 
     const mergeController = new AbortController()
-    const mergeTimeout = setTimeout(() => mergeController.abort(), 30000)
+    const mergeTimeout = setTimeout(() => mergeController.abort(), 10000)
     const mergeRes = await fetch(NOVITA_MERGE_FACE_URL, {
       method: 'POST',
       headers: {
