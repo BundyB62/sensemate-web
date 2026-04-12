@@ -203,7 +203,7 @@ const CLOTHING_MAP: Record<string, string> = {
   grunge: 'grunge outfit flannel and ripped jeans',
   lingerie: 'lingerie lace bra and panties',
   swimwear: 'bikini swimwear',
-  jellaba: 'form-fitting traditional jellaba dress with embroidery, tight fitted modest robe hugging hourglass curves, body shape clearly visible through fabric',
+  jellaba: 'traditional Moroccan jellaba long robe with hood and embroidery, fitted at the waist showing hourglass silhouette, elegant modest full-length dress',
 }
 
 export const EMOTION_EXPRESSIONS: Record<string, string> = {
