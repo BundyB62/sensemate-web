@@ -203,7 +203,7 @@ const CLOTHING_MAP: Record<string, string> = {
   grunge: 'grunge outfit flannel and ripped jeans',
   lingerie: 'lingerie lace bra and panties',
   swimwear: 'bikini swimwear',
-  jellaba: 'traditional Moroccan jellaba dress with embroidery',
+  jellaba: 'form-fitting traditional jellaba dress with embroidery, tight fitted modest robe hugging hourglass curves, body shape clearly visible through fabric',
 }
 
 export const EMOTION_EXPRESSIONS: Record<string, string> = {
@@ -423,9 +423,9 @@ export function buildNegativePrompt(profile: Record<string, any>): string {
     parts.push('skinny, thin, slim, lean, petite')
   }
 
-  // Hijab negative — prevent abaya/loose robe that hides body
+  // Hijab negative — prevent face-covering items only (niqab/burqa), jellaba is allowed
   if (profile.hairLength === 'hijab') {
-    parts.push('abaya, loose robe, shapeless dress, baggy clothing, full body covering, niqab, burqa, shapeless outfit')
+    parts.push('niqab, burqa, face veil, face covering')
   }
 
   return parts.join(', ')
@@ -449,12 +449,6 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
   let clothing = CLOTHING_MAP[profile.clothingStyle] || 'casual outfit'
   if (sfwMode && /lingerie|bikini|swimwear|nude|naked/i.test(clothing)) {
     clothing = 'elegant classy outfit'
-  }
-  // Hijab override: force body-visible clothing so avatar shows actual body proportions
-  // Without this, models default to a full abaya which hides all body features
-  const isHijabAvatar = profile.hairLength === 'hijab'
-  if (isHijabAvatar) {
-    clothing = 'form-fitting long dress hugging body curves, tight fitted modest outfit, waist clearly visible, body shape visible, NOT abaya NOT loose robe'
   }
 
   // Beard (men only)
