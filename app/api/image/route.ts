@@ -13,7 +13,7 @@ const NOVITA_RESULT_URL = 'https://api.novita.ai/v3/async/task-result'
 
 // Model names
 const NOVITA_REALISTIC_MODEL = 'lustifySDXLNSFW_endgame_999340.safetensors'
-const NOVITA_ANIME_MODEL = 'anythingXL_v50_180813.safetensors'
+const NOVITA_ANIME_MODEL = 'sdxlYamersAnimeUltra_yamersAnimeV3_121537.safetensors'
 
 // ─── Pose skeleton mapping for ControlNet ──────────────────────────────────
 // Maps pose IDs to OpenPose skeleton image files in public/poses/
