@@ -26,12 +26,23 @@ interface FormData {
   assSize: string
   dickSize: string
   beard: string
-  // Fantasy-specific
+  // Fantasy-specific (dynamic per race)
   race: string
   ears: string
   horns: string
   wings: string
   tail: string
+  markings: string
+  aura: string
+  halo: string
+  fangs: string
+  antenna: string
+  fur: string
+  scales: string
+  fins: string
+  gills: string
+  form: string
+  accessories: string
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -60,37 +71,174 @@ const FANTASY_RACES = [
   { id: 'mermaid', label: 'Mermaid / Siren', img: '/onboarding/fantasy/race/mermaid.jpg' },
 ]
 
-const FANTASY_EARS = [
-  { id: 'normal', label: 'Normal' },
-  { id: 'pointed_short', label: 'Pointed (short)' },
-  { id: 'pointed_long', label: 'Pointed (long elf)' },
-  { id: 'animal', label: 'Animal ears' },
-]
+// ─── Race-specific feature sets ─────────────────────────────────────────────
+// Each race has its own relevant features with appropriate options
+type FeatureGroup = { label: string; key: string; options: { id: string; label: string }[] }
 
-const FANTASY_HORNS = [
-  { id: 'none', label: 'None' },
-  { id: 'small', label: 'Small' },
-  { id: 'large', label: 'Large curved' },
-  { id: 'ram', label: 'Ram-style' },
-  { id: 'demon', label: 'Demon' },
-  { id: 'antlers', label: 'Antlers' },
-]
-
-const FANTASY_WINGS = [
-  { id: 'none', label: 'None' },
-  { id: 'angel', label: 'Angel (white feathers)' },
-  { id: 'demon', label: 'Demon (bat-like)' },
-  { id: 'fairy', label: 'Fairy (translucent)' },
-  { id: 'dragon', label: 'Dragon' },
-]
-
-const FANTASY_TAILS = [
-  { id: 'none', label: 'None' },
-  { id: 'demon', label: 'Demon tail' },
-  { id: 'fox', label: 'Fox tail (fluffy)' },
-  { id: 'cat', label: 'Cat tail' },
-  { id: 'dragon', label: 'Dragon tail' },
-]
+const RACE_FEATURES: Record<string, FeatureGroup[]> = {
+  elf: [
+    { label: 'Ears', key: 'ears', options: [
+      { id: 'pointed_short', label: 'Pointed (short)' }, { id: 'pointed_long', label: 'Pointed (long)' }, { id: 'very_long', label: 'Very long elven' },
+    ]},
+    { label: 'Markings', key: 'markings', options: [
+      { id: 'none', label: 'None' }, { id: 'facial_tattoo', label: 'Facial tattoos' }, { id: 'rune_marks', label: 'Rune markings' }, { id: 'freckles', label: 'Freckles' },
+    ]},
+    { label: 'Aura', key: 'aura', options: [
+      { id: 'none', label: 'None' }, { id: 'nature_glow', label: 'Nature glow' }, { id: 'moonlight', label: 'Moonlight shimmer' }, { id: 'golden', label: 'Golden aura' },
+    ]},
+  ],
+  dark_elf: [
+    { label: 'Ears', key: 'ears', options: [
+      { id: 'pointed_short', label: 'Pointed (short)' }, { id: 'pointed_long', label: 'Pointed (long)' }, { id: 'very_long', label: 'Very long' },
+    ]},
+    { label: 'Markings', key: 'markings', options: [
+      { id: 'none', label: 'None' }, { id: 'facial_tattoo', label: 'Face tattoos' }, { id: 'rune_marks', label: 'Dark runes' }, { id: 'war_paint', label: 'War paint' }, { id: 'glowing_veins', label: 'Glowing veins' },
+    ]},
+    { label: 'Aura', key: 'aura', options: [
+      { id: 'none', label: 'None' }, { id: 'dark_magic', label: 'Dark magic aura' }, { id: 'shadow', label: 'Shadow wisps' }, { id: 'purple_glow', label: 'Purple glow' },
+    ]},
+  ],
+  demon: [
+    { label: 'Horns', key: 'horns', options: [
+      { id: 'small', label: 'Small' }, { id: 'large', label: 'Large curved' }, { id: 'ram', label: 'Ram-style' }, { id: 'demon', label: 'Demon crown' }, { id: 'none', label: 'None' },
+    ]},
+    { label: 'Wings', key: 'wings', options: [
+      { id: 'none', label: 'None' }, { id: 'demon', label: 'Bat wings (small)' }, { id: 'demon_large', label: 'Bat wings (large)' },
+    ]},
+    { label: 'Tail', key: 'tail', options: [
+      { id: 'none', label: 'None' }, { id: 'demon', label: 'Thin pointed' }, { id: 'demon_thick', label: 'Thick barbed' }, { id: 'demon_whip', label: 'Whip-like' },
+    ]},
+    { label: 'Markings', key: 'markings', options: [
+      { id: 'none', label: 'None' }, { id: 'rune_marks', label: 'Rune tattoos' }, { id: 'glowing_veins', label: 'Glowing veins' }, { id: 'body_marks', label: 'Body markings' },
+    ]},
+  ],
+  angel: [
+    { label: 'Wings', key: 'wings', options: [
+      { id: 'angel', label: 'White feathered' }, { id: 'angel_large', label: 'Large white wings' }, { id: 'golden_wings', label: 'Golden wings' }, { id: 'fallen', label: 'Broken/fallen wings' },
+    ]},
+    { label: 'Halo', key: 'halo', options: [
+      { id: 'none', label: 'None' }, { id: 'golden', label: 'Golden halo' }, { id: 'broken', label: 'Broken halo' }, { id: 'dark', label: 'Dark halo' },
+    ]},
+    { label: 'Aura', key: 'aura', options: [
+      { id: 'none', label: 'None' }, { id: 'holy_glow', label: 'Holy glow' }, { id: 'divine_radiance', label: 'Divine radiance' }, { id: 'subtle_shimmer', label: 'Subtle shimmer' },
+    ]},
+  ],
+  vampire: [
+    { label: 'Fangs', key: 'fangs', options: [
+      { id: 'subtle', label: 'Subtle' }, { id: 'prominent', label: 'Prominent' }, { id: 'long', label: 'Long & sharp' },
+    ]},
+    { label: 'Features', key: 'markings', options: [
+      { id: 'none', label: 'None' }, { id: 'pale_veins', label: 'Pale veins' }, { id: 'blood_tears', label: 'Blood tears' }, { id: 'dark_circles', label: 'Dark under-eyes' },
+    ]},
+    { label: 'Aura', key: 'aura', options: [
+      { id: 'none', label: 'None' }, { id: 'dark_mist', label: 'Dark mist' }, { id: 'blood_red_glow', label: 'Blood red glow' }, { id: 'shadow', label: 'Shadow wisps' },
+    ]},
+  ],
+  fairy: [
+    { label: 'Wings', key: 'wings', options: [
+      { id: 'fairy', label: 'Translucent' }, { id: 'butterfly', label: 'Butterfly' }, { id: 'dragonfly', label: 'Dragonfly' }, { id: 'petal', label: 'Petal-shaped' },
+    ]},
+    { label: 'Glow', key: 'aura', options: [
+      { id: 'none', label: 'None' }, { id: 'body_shimmer', label: 'Body shimmer' }, { id: 'sparkle_trail', label: 'Sparkle trail' }, { id: 'bioluminescent', label: 'Bioluminescent' },
+    ]},
+    { label: 'Antenna', key: 'antenna', options: [
+      { id: 'none', label: 'None' }, { id: 'butterfly', label: 'Butterfly antenna' }, { id: 'moth', label: 'Moth antenna' },
+    ]},
+    { label: 'Ears', key: 'ears', options: [
+      { id: 'pointed_short', label: 'Pointed' }, { id: 'normal', label: 'Normal' },
+    ]},
+  ],
+  orc: [
+    { label: 'Tusks', key: 'fangs', options: [
+      { id: 'small', label: 'Small tusks' }, { id: 'prominent', label: 'Medium tusks' }, { id: 'long', label: 'Large tusks' },
+    ]},
+    { label: 'Markings', key: 'markings', options: [
+      { id: 'none', label: 'None' }, { id: 'war_paint', label: 'War paint' }, { id: 'tribal_scars', label: 'Tribal scars' }, { id: 'facial_tattoo', label: 'Tattoos' },
+    ]},
+    { label: 'Accessories', key: 'accessories', options: [
+      { id: 'none', label: 'None' }, { id: 'piercings', label: 'Piercings' }, { id: 'bone_jewelry', label: 'Bone jewelry' }, { id: 'war_braids', label: 'War braids' },
+    ]},
+  ],
+  dragon_kin: [
+    { label: 'Horns', key: 'horns', options: [
+      { id: 'small', label: 'Small ridges' }, { id: 'large', label: 'Large horns' }, { id: 'crown', label: 'Crown horns' }, { id: 'antlers', label: 'Antler-style' },
+    ]},
+    { label: 'Scales', key: 'scales', options: [
+      { id: 'none', label: 'None' }, { id: 'scattered', label: 'Scattered (face)' }, { id: 'partial', label: 'Partial body' }, { id: 'full', label: 'Full coverage' },
+    ]},
+    { label: 'Tail', key: 'tail', options: [
+      { id: 'none', label: 'None' }, { id: 'dragon', label: 'Dragon tail' }, { id: 'dragon_spiked', label: 'Spiked dragon tail' },
+    ]},
+    { label: 'Wings', key: 'wings', options: [
+      { id: 'none', label: 'None' }, { id: 'dragon', label: 'Dragon wings (small)' }, { id: 'dragon_large', label: 'Dragon wings (large)' },
+    ]},
+    { label: 'Breath Element', key: 'aura', options: [
+      { id: 'none', label: 'None' }, { id: 'fire_aura', label: 'Fire aura' }, { id: 'ice_aura', label: 'Ice aura' }, { id: 'lightning_aura', label: 'Lightning aura' },
+    ]},
+  ],
+  catgirl: [
+    { label: 'Cat Ears', key: 'ears', options: [
+      { id: 'cat_pointed', label: 'Pointed' }, { id: 'cat_round', label: 'Round' }, { id: 'cat_folded', label: 'Folded (Scottish)' }, { id: 'cat_tufted', label: 'Tufted (lynx)' },
+    ]},
+    { label: 'Tail', key: 'tail', options: [
+      { id: 'cat', label: 'Sleek tail' }, { id: 'cat_fluffy', label: 'Fluffy tail' }, { id: 'cat_short', label: 'Short bobbed' }, { id: 'cat_striped', label: 'Striped tail' },
+    ]},
+    { label: 'Extra Features', key: 'markings', options: [
+      { id: 'none', label: 'None' }, { id: 'whiskers', label: 'Whisker marks' }, { id: 'paw_pads', label: 'Paw pads (hands)' }, { id: 'fangs', label: 'Small fangs' },
+    ]},
+    { label: 'Fur Patches', key: 'fur', options: [
+      { id: 'none', label: 'None' }, { id: 'hands_feet', label: 'Hands & feet' }, { id: 'scattered', label: 'Scattered' },
+    ]},
+  ],
+  foxgirl: [
+    { label: 'Fox Ears', key: 'ears', options: [
+      { id: 'fox_pointed', label: 'Pointed fox' }, { id: 'fox_large', label: 'Large fluffy' }, { id: 'fox_round', label: 'Round fox' },
+    ]},
+    { label: 'Tails', key: 'tail', options: [
+      { id: 'fox', label: 'Single fluffy' }, { id: 'fox_multi', label: 'Multiple tails (kitsune)' }, { id: 'fox_short', label: 'Short fluffy' },
+    ]},
+    { label: 'Extra Features', key: 'markings', options: [
+      { id: 'none', label: 'None' }, { id: 'whisker_marks', label: 'Whisker marks' }, { id: 'facial_marks', label: 'Face markings' },
+    ]},
+    { label: 'Fur', key: 'fur', options: [
+      { id: 'none', label: 'None' }, { id: 'fluffy_collar', label: 'Fluffy neck fur' }, { id: 'arm_leg', label: 'Arm & leg fur' },
+    ]},
+  ],
+  werewolf: [
+    { label: 'Form', key: 'form', options: [
+      { id: 'mostly_human', label: 'Mostly human' }, { id: 'partial_wolf', label: 'Partial wolf' }, { id: 'hybrid', label: 'Full hybrid' },
+    ]},
+    { label: 'Ears', key: 'ears', options: [
+      { id: 'normal', label: 'Human' }, { id: 'wolf', label: 'Wolf ears' }, { id: 'pointed_short', label: 'Pointed' },
+    ]},
+    { label: 'Tail', key: 'tail', options: [
+      { id: 'none', label: 'None' }, { id: 'wolf', label: 'Wolf tail' }, { id: 'wolf_bushy', label: 'Bushy wolf tail' },
+    ]},
+    { label: 'Fur', key: 'fur', options: [
+      { id: 'none', label: 'None' }, { id: 'arm_leg', label: 'Arms & legs' }, { id: 'partial', label: 'Chest & back too' }, { id: 'full', label: 'Full body fur' },
+    ]},
+    { label: 'Fangs', key: 'fangs', options: [
+      { id: 'subtle', label: 'Subtle' }, { id: 'prominent', label: 'Prominent' }, { id: 'long', label: 'Large & wild' },
+    ]},
+  ],
+  mermaid: [
+    { label: 'Ears', key: 'ears', options: [
+      { id: 'fin_ears', label: 'Fin-shaped' }, { id: 'pointed_short', label: 'Pointed' }, { id: 'shell_ears', label: 'Shell-decorated' }, { id: 'normal', label: 'Normal' },
+    ]},
+    { label: 'Fins', key: 'fins', options: [
+      { id: 'none', label: 'None' }, { id: 'dorsal', label: 'Dorsal fin (back)' }, { id: 'arm_fins', label: 'Arm fins' }, { id: 'crown_fin', label: 'Head fin crown' },
+    ]},
+    { label: 'Scales', key: 'scales', options: [
+      { id: 'none', label: 'None' }, { id: 'scattered', label: 'Scattered' }, { id: 'neckline', label: 'Neckline & shoulders' }, { id: 'full_shimmer', label: 'Full body shimmer' },
+    ]},
+    { label: 'Gills', key: 'gills', options: [
+      { id: 'none', label: 'None' }, { id: 'neck', label: 'Neck gills' }, { id: 'side', label: 'Side gills' },
+    ]},
+    { label: 'Aura', key: 'aura', options: [
+      { id: 'none', label: 'None' }, { id: 'water_glow', label: 'Water glow' }, { id: 'bioluminescent', label: 'Bioluminescent' }, { id: 'pearl_shimmer', label: 'Pearl shimmer' },
+    ]},
+  ],
+}
 
 const FANTASY_SKIN = [
   { id: 'porcelain', label: 'Porcelain', color: '#F5E6D3' },
@@ -414,7 +562,8 @@ function randomizeAll(): FormData {
     assSize: !isMale ? pick(ASS_SIZES).id : '',
     dickSize: isMale ? pick(DICK_SIZES).id : '',
     beard: isMale ? pick(BEARD_STYLES).id : '',
-    race: '', ears: 'normal', horns: 'none', wings: 'none', tail: 'none',
+    race: '', ears: '', horns: '', wings: '', tail: '',
+    markings: '', aura: '', halo: '', fangs: '', antenna: '', fur: '', scales: '', fins: '', gills: '', form: '', accessories: '',
   }
 }
 
@@ -438,7 +587,8 @@ export default function OnboardingPage() {
     hairLength: '', eyeColor: '', clothingStyle: '',
     vibe: '', breastSize: '', assSize: '', dickSize: '',
     beard: 'none',
-    race: '', ears: 'normal', horns: 'none', wings: 'none', tail: 'none',
+    race: '', ears: '', horns: '', wings: '', tail: '',
+    markings: '', aura: '', halo: '', fangs: '', antenna: '', fur: '', scales: '', fins: '', gills: '', form: '', accessories: '',
   })
 
   const set = useCallback((key: string, val: string | string[]) => {
@@ -459,8 +609,14 @@ export default function OnboardingPage() {
     const isFantasy = data.gender === 'fantasy'
     const appearance = isFantasy ? {
       style: 'fantasy' as const,
-      gender: 'woman' as const, // Fantasy characters are presented as female
-      race: data.race, ears: data.ears, horns: data.horns, wings: data.wings, tail: data.tail,
+      gender: 'woman' as const,
+      race: data.race,
+      // All possible race-specific features (most will be empty for non-relevant races)
+      ears: data.ears, horns: data.horns, wings: data.wings, tail: data.tail,
+      markings: data.markings, aura: data.aura, halo: data.halo, fangs: data.fangs,
+      antenna: data.antenna, fur: data.fur, scales: data.scales, fins: data.fins,
+      gills: data.gills, form: data.form, accessories: data.accessories,
+      // Standard appearance fields
       build: data.build, skinTone: data.skinTone, hairColor: data.hairColor,
       hairLength: data.hairLength, eyeColor: data.eyeColor, clothingStyle: data.clothingStyle,
       breastSize: data.breastSize, assSize: data.assSize,
@@ -773,69 +929,37 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 3 — Fantasy features (ears, horns, wings, tail) */}
+        {/* STEP 3 — Fantasy features (dynamic per race) */}
         {step === 3 && data.gender === 'fantasy' && (
           <StepContainer
             title="Fantasy features"
-            subtitle="Customize your companion's unique traits."
+            subtitle={`Customize your ${FANTASY_RACES.find(r => r.id === data.race)?.label || 'companion'}'s unique traits.`}
           >
-            <div style={{ width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 24 }}>
-              {/* Ears */}
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Ears</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {FANTASY_EARS.map(e => (
-                    <button key={e.id} onClick={() => set('ears', e.id)} style={{
-                      padding: '10px 18px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                      border: data.ears === e.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
-                      background: data.ears === e.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                      color: data.ears === e.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
-                    }}>{e.label}</button>
-                  ))}
+            <div style={{ width: '100%', maxWidth: 560, display: 'flex', flexDirection: 'column', gap: 24 }}>
+              {(RACE_FEATURES[data.race] || []).map(group => (
+                <div key={group.key}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>{group.label}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {group.options.map(opt => {
+                      const val = (data as any)[group.key] || group.options[0]?.id
+                      const sel = val === opt.id
+                      return (
+                        <button key={opt.id} onClick={() => set(group.key, opt.id)} style={{
+                          padding: '10px 18px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                          border: sel ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                          background: sel ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                          color: sel ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
+                        }}>{opt.label}</button>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-              {/* Horns */}
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Horns</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {FANTASY_HORNS.map(h => (
-                    <button key={h.id} onClick={() => set('horns', h.id)} style={{
-                      padding: '10px 18px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                      border: data.horns === h.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
-                      background: data.horns === h.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                      color: data.horns === h.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
-                    }}>{h.label}</button>
-                  ))}
+              ))}
+              {(!RACE_FEATURES[data.race] || RACE_FEATURES[data.race].length === 0) && (
+                <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', padding: 40 }}>
+                  No special features for this race. Continue to body type.
                 </div>
-              </div>
-              {/* Wings */}
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Wings</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {FANTASY_WINGS.map(w => (
-                    <button key={w.id} onClick={() => set('wings', w.id)} style={{
-                      padding: '10px 18px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                      border: data.wings === w.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
-                      background: data.wings === w.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                      color: data.wings === w.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
-                    }}>{w.label}</button>
-                  ))}
-                </div>
-              </div>
-              {/* Tail */}
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Tail</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {FANTASY_TAILS.map(t => (
-                    <button key={t.id} onClick={() => set('tail', t.id)} style={{
-                      padding: '10px 18px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600,
-                      border: data.tail === t.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
-                      background: data.tail === t.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                      color: data.tail === t.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
-                    }}>{t.label}</button>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
             <NavButton onClick={goNext} label="Next →" />
           </StepContainer>
@@ -1035,7 +1159,7 @@ export default function OnboardingPage() {
               <div>
                 <SectionTitle>Hairstyle</SectionTitle>
                 <ImageGrid cols={5}>
-                  {(data.gender === 'man' ? HAIR_STYLES_MAN : HAIR_STYLES_WOMAN).map(h => (
+                  {(data.gender === 'man' ? HAIR_STYLES_MAN : HAIR_STYLES_WOMAN).filter(h => data.gender === 'fantasy' ? h.id !== 'hijab' : true).map(h => (
                     <ImageCard
                       key={h.id}
                       img={h.img}

@@ -243,10 +243,21 @@ const RACE_MAP: Record<string, string> = {
 }
 
 const EARS_MAP: Record<string, string> = {
-  normal: '',
+  normal: '', none: '',
   pointed_short: '(pointed elf ears:1.3)',
   pointed_long: '(long pointed elf ears:1.4)',
+  very_long: '(very long flowing elven ears:1.4)',
   animal: '(animal ears on top of head:1.3)',
+  cat_pointed: '(pointed cat ears on top of head:1.4)',
+  cat_round: '(round cat ears on top of head:1.4)',
+  cat_folded: '(folded cat ears on top of head:1.4)',
+  cat_tufted: '(tufted lynx cat ears on top of head:1.4)',
+  fox_pointed: '(pointed fox ears on top of head:1.4)',
+  fox_large: '(large fluffy fox ears on top of head:1.4)',
+  fox_round: '(round fox ears on top of head:1.4)',
+  wolf: '(wolf ears on top of head:1.4)',
+  fin_ears: '(fin-shaped ears, aquatic ear fins:1.4)',
+  shell_ears: '(shell-decorated ears, seashell ear accessories:1.3)',
 }
 
 const HORNS_MAP: Record<string, string> = {
@@ -255,23 +266,133 @@ const HORNS_MAP: Record<string, string> = {
   large: '(large curved horns:1.4)',
   ram: '(large ram horns curling around ears:1.4)',
   demon: '(demon horns protruding from forehead:1.4)',
+  crown: '(crown of horns around head:1.4)',
   antlers: '(deer antlers on head:1.3)',
 }
 
 const WINGS_MAP: Record<string, string> = {
   none: '',
   angel: '(large white feathered angel wings:1.4)',
+  angel_large: '(massive white feathered angel wings spread wide:1.5)',
+  golden_wings: '(golden glowing angel wings:1.4)',
+  fallen: '(broken damaged dark angel wings:1.4)',
   demon: '(dark leathery bat demon wings:1.4)',
+  demon_large: '(massive dark bat demon wings spread wide:1.5)',
   fairy: '(translucent glowing fairy wings:1.3)',
+  butterfly: '(colorful butterfly wings:1.4)',
+  dragonfly: '(delicate dragonfly wings:1.3)',
+  petal: '(petal-shaped flower wings:1.3)',
   dragon: '(large dragon wings:1.4)',
+  dragon_large: '(massive dragon wings spread wide:1.5)',
 }
 
 const TAIL_MAP: Record<string, string> = {
   none: '',
   demon: '(long demon tail with pointed tip:1.3)',
+  demon_thick: '(thick barbed demon tail:1.4)',
+  demon_whip: '(long whip-like demon tail:1.3)',
   fox: '(fluffy fox tail:1.3)',
-  cat: '(long cat tail:1.3)',
+  fox_multi: '(multiple fluffy fox tails, kitsune nine tails:1.5)',
+  fox_short: '(short fluffy fox tail:1.3)',
+  cat: '(long sleek cat tail:1.3)',
+  cat_fluffy: '(fluffy cat tail:1.3)',
+  cat_short: '(short bobbed cat tail:1.3)',
+  cat_striped: '(striped cat tail:1.3)',
   dragon: '(thick dragon tail with scales:1.3)',
+  dragon_spiked: '(spiked dragon tail:1.4)',
+  wolf: '(wolf tail:1.3)',
+  wolf_bushy: '(bushy wolf tail:1.3)',
+}
+
+// ─── Additional fantasy feature maps ─────────────────────────────────────
+const MARKINGS_MAP: Record<string, string> = {
+  none: '',
+  facial_tattoo: '(intricate facial tattoos:1.3)',
+  rune_marks: '(glowing magical rune markings on skin:1.3)',
+  freckles: '(cute freckles on face:1.2)',
+  war_paint: '(tribal war paint on face:1.3)',
+  glowing_veins: '(glowing veins visible under skin:1.4)',
+  body_marks: '(mystical body markings:1.3)',
+  tribal_scars: '(ritual tribal scars:1.3)',
+  pale_veins: '(pale visible veins under translucent skin:1.3)',
+  blood_tears: '(blood tears running from eyes:1.4)',
+  dark_circles: '(dark circles under eyes, undead appearance:1.3)',
+  whiskers: '(cat whisker marks on cheeks:1.3)',
+  whisker_marks: '(fox whisker marks on cheeks:1.3)',
+  facial_marks: '(tribal face markings:1.3)',
+  paw_pads: '(cat paw pads on palms:1.3)',
+  fangs: '(small cute fangs:1.2)',
+}
+
+const AURA_MAP: Record<string, string> = {
+  none: '',
+  nature_glow: '(soft green nature aura glow:1.3)',
+  moonlight: '(silver moonlight aura shimmer:1.3)',
+  golden: '(warm golden aura:1.3)',
+  dark_magic: '(dark purple magic aura:1.3)',
+  shadow: '(dark shadow wisps around body:1.3)',
+  purple_glow: '(purple mystical glow:1.3)',
+  holy_glow: '(divine holy white glow:1.4)',
+  divine_radiance: '(blinding divine radiance:1.4)',
+  subtle_shimmer: '(subtle ethereal body shimmer:1.2)',
+  dark_mist: '(dark vampire mist around:1.3)',
+  blood_red_glow: '(blood red ominous glow:1.3)',
+  body_shimmer: '(sparkling body shimmer:1.3)',
+  sparkle_trail: '(fairy sparkle trail:1.3)',
+  bioluminescent: '(bioluminescent glowing spots on skin:1.4)',
+  fire_aura: '(fire aura flames around body:1.4)',
+  ice_aura: '(ice frost aura cold mist:1.4)',
+  lightning_aura: '(lightning electricity crackling around:1.4)',
+  water_glow: '(water droplets floating around, aquatic glow:1.3)',
+  pearl_shimmer: '(iridescent pearl shimmer on skin:1.3)',
+}
+
+const HALO_MAP: Record<string, string> = {
+  none: '',
+  golden: '(golden glowing halo above head:1.4)',
+  broken: '(cracked broken halo above head:1.4)',
+  dark: '(dark corrupted halo above head:1.4)',
+}
+
+const FANGS_MAP: Record<string, string> = {
+  none: '', subtle: '(subtle small fangs:1.2)', prominent: '(prominent sharp fangs:1.3)', long: '(long sharp vampire fangs:1.4)',
+  small: '(small orc tusks:1.3)',
+}
+
+const ANTENNA_MAP: Record<string, string> = {
+  none: '', butterfly: '(butterfly antennae on head:1.3)', moth: '(feathery moth antennae:1.3)',
+}
+
+const FUR_MAP: Record<string, string> = {
+  none: '', hands_feet: '(fur on hands and feet:1.3)', scattered: '(scattered fur patches on body:1.3)',
+  fluffy_collar: '(fluffy fur collar around neck:1.3)', arm_leg: '(fur on arms and legs:1.3)',
+  partial: '(fur on chest back arms legs:1.3)', full: '(full body fur covering:1.4)',
+}
+
+const SCALES_MAP: Record<string, string> = {
+  none: '', scattered: '(scattered scales on face and neck:1.3)', partial: '(partial scale coverage on body:1.3)',
+  full: '(full body scale coverage dragon skin:1.4)', neckline: '(scales on neckline and shoulders:1.3)',
+  full_shimmer: '(full body iridescent shimmering scales:1.4)',
+}
+
+const FINS_MAP: Record<string, string> = {
+  none: '', dorsal: '(dorsal fin on back:1.3)', arm_fins: '(fin membranes on arms:1.3)',
+  crown_fin: '(fin crown on head like a fish:1.4)',
+}
+
+const GILLS_MAP: Record<string, string> = {
+  none: '', neck: '(gills on neck:1.3)', side: '(gills on sides of torso:1.3)',
+}
+
+const FORM_MAP: Record<string, string> = {
+  mostly_human: '(mostly human form:1.2)',
+  partial_wolf: '(partially transformed wolf-human hybrid, some wolf features:1.3)',
+  hybrid: '(full wolf-human hybrid form, werewolf:1.4)',
+}
+
+const ACCESSORIES_MAP: Record<string, string> = {
+  none: '', piercings: '(multiple piercings, ear and face piercings:1.3)',
+  bone_jewelry: '(bone jewelry and ornaments:1.3)', war_braids: '(hair braided with beads and bones:1.3)',
 }
 
 const FANTASY_SKIN_MAP: Record<string, string> = {
@@ -354,6 +475,29 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
     if (horns) parts.push(horns)
     if (wings) parts.push(wings)
     if (tail) parts.push(tail)
+    // Additional race-specific features
+    const markings = MARKINGS_MAP[profile.markings] || ''
+    if (markings) parts.push(markings)
+    const aura = AURA_MAP[profile.aura] || ''
+    if (aura) parts.push(aura)
+    const halo = HALO_MAP[profile.halo] || ''
+    if (halo) parts.push(halo)
+    const fangs = FANGS_MAP[profile.fangs] || ''
+    if (fangs) parts.push(fangs)
+    const antenna = ANTENNA_MAP[profile.antenna] || ''
+    if (antenna) parts.push(antenna)
+    const fur = FUR_MAP[profile.fur] || ''
+    if (fur) parts.push(fur)
+    const scalesF = SCALES_MAP[profile.scales] || ''
+    if (scalesF) parts.push(scalesF)
+    const fins = FINS_MAP[profile.fins] || ''
+    if (fins) parts.push(fins)
+    const gills = GILLS_MAP[profile.gills] || ''
+    if (gills) parts.push(gills)
+    const form = FORM_MAP[profile.form] || ''
+    if (form) parts.push(form)
+    const accessories = ACCESSORIES_MAP[profile.accessories] || ''
+    if (accessories) parts.push(accessories)
 
     // Body details
     if (includeBody) {
@@ -465,6 +609,19 @@ export function buildIdentityReinforcement(profile: Record<string, any>): string
     if (wings) parts.push(wings)
     const tail = TAIL_MAP[profile.tail] || ''
     if (tail) parts.push(tail)
+    // Extra features that define the character
+    const markings = MARKINGS_MAP[profile.markings] || ''
+    if (markings) parts.push(markings)
+    const fangs = FANGS_MAP[profile.fangs] || ''
+    if (fangs) parts.push(fangs)
+    const halo = HALO_MAP[profile.halo] || ''
+    if (halo) parts.push(halo)
+    const fins = FINS_MAP[profile.fins] || ''
+    if (fins) parts.push(fins)
+    const scales = SCALES_MAP[profile.scales] || ''
+    if (scales) parts.push(scales)
+    const gills = GILLS_MAP[profile.gills] || ''
+    if (gills) parts.push(gills)
     // Build
     const build = BUILD_MAP[profile.build] || ''
     if (build) parts.push(`(${build}:1.3)`)

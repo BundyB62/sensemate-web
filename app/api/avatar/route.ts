@@ -133,6 +133,57 @@ async function generateNovita(prompt: string, negPrompt: string, apiKey: string)
   }
 }
 
+// ─── Generate with Novita.ai animeRealisticXL (fantasy) ────────────────
+async function generateNovitaFantasy(prompt: string, negPrompt: string, apiKey: string): Promise<string | null> {
+  const fullPrompt = prompt +
+    ', 3d render, unreal engine 5, semi-realistic, fantasy, detailed skin texture, volumetric lighting, 8k'
+
+  try {
+    console.log('[Avatar] Trying Novita.ai animeRealisticXL (fantasy)...')
+    const submitRes = await fetch(NOVITA_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        extra: { response_image_type: 'jpeg', enable_nsfw_detection: false },
+        request: {
+          model_name: 'animeRealisticXL_animeXLReal_211225.safetensors',
+          prompt: fullPrompt,
+          negative_prompt: negPrompt,
+          width: 768, height: 1024,
+          image_num: 1, steps: 30, clip_skip: 2,
+          guidance_scale: 7,
+          seed: Math.floor(Math.random() * 2147483647),
+          sampler_name: 'DPM++ 2M Karras',
+        },
+      }),
+    })
+
+    if (!submitRes.ok) return null
+    const submitData = await submitRes.json()
+    const taskId = submitData.task_id
+    if (!taskId) return null
+
+    for (let i = 0; i < 30; i++) {
+      await new Promise(r => setTimeout(r, 1500))
+      const resultRes = await fetch(`${NOVITA_RESULT_URL}?task_id=${taskId}`, {
+        headers: { 'Authorization': `Bearer ${apiKey}` },
+      })
+      if (!resultRes.ok) continue
+      const resultData = await resultRes.json()
+      if (resultData.task?.status === 'TASK_STATUS_SUCCEED') {
+        const url = resultData.images?.[0]?.image_url
+        if (url) { console.log('[Avatar] ✅ Fantasy avatar success'); return url }
+        return null
+      }
+      if (resultData.task?.status === 'TASK_STATUS_FAILED') return null
+    }
+    return null
+  } catch (err) {
+    console.error('[Avatar] Fantasy Novita error:', err)
+    return null
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const cookieStore = await cookies()
@@ -154,29 +205,29 @@ export async function POST(request: Request) {
 
     const { companionId, appearance, emotion = 'neutral' } = await request.json()
 
-    // Fantasy characters generate avatars via the semi-realistic model
-    // (no skip — they go through the normal generation flow below)
-
     // Build prompt with emphasis weights for key features
     const prompt = buildAvatarPrompt(appearance, emotion, true)
     const negativePrompt = buildNegativePrompt(appearance)
+    const isFantasy = appearance?.style === 'fantasy'
 
-    console.log(`[Avatar] Appearance:`, JSON.stringify(appearance).substring(0, 300))
+    console.log(`[Avatar] ${isFantasy ? '🧝 FANTASY' : '📷 REALISTIC'} | Appearance:`, JSON.stringify(appearance).substring(0, 300))
     console.log(`[Avatar] Prompt: ${prompt.substring(0, 400)}`)
     console.log(`[Avatar] Negative: ${negativePrompt.substring(0, 200)}`)
 
     const falKey = process.env.FAL_API_KEY!
     let imageUrl: string | null = null
 
-    // Chain: Flux Pro → Flux Dev → Novita
-    imageUrl = await generateFal(prompt, falKey, true)  // Flux Pro (best quality)
-
-    if (!imageUrl) {
-      imageUrl = await generateFal(prompt, falKey, false)  // Flux Dev (fallback)
-    }
-
-    if (!imageUrl && process.env.NOVITA_API_KEY) {
-      imageUrl = await generateNovita(prompt, negativePrompt, process.env.NOVITA_API_KEY)
+    if (isFantasy && process.env.NOVITA_API_KEY) {
+      // Fantasy → use animeRealisticXL (semi-realistic 3D fantasy) directly
+      console.log('[Avatar] Using Novita animeRealisticXL for fantasy avatar')
+      imageUrl = await generateNovitaFantasy(prompt, negativePrompt, process.env.NOVITA_API_KEY)
+    } else {
+      // Realistic → Chain: Flux Pro → Flux Dev → Novita epicrealism
+      imageUrl = await generateFal(prompt, falKey, true)
+      if (!imageUrl) imageUrl = await generateFal(prompt, falKey, false)
+      if (!imageUrl && process.env.NOVITA_API_KEY) {
+        imageUrl = await generateNovita(prompt, negativePrompt, process.env.NOVITA_API_KEY)
+      }
     }
 
     if (!imageUrl) {
