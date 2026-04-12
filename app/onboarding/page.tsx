@@ -111,15 +111,21 @@ const FANTASY_SKIN = [
 ]
 
 const FANTASY_EYES = [
-  { id: 'blue', label: 'Blue' }, { id: 'green', label: 'Green' },
-  { id: 'hazel', label: 'Hazel' }, { id: 'amber', label: 'Amber' },
-  { id: 'brown', label: 'Brown' }, { id: 'dark_brown', label: 'Dark Brown' },
-  { id: 'grey', label: 'Grey' }, { id: 'violet', label: 'Violet' },
-  { id: 'red', label: 'Red (glowing)' }, { id: 'gold', label: 'Gold (glowing)' },
-  { id: 'silver', label: 'Silver' }, { id: 'slit', label: 'Slit pupils' },
-  { id: 'solid_white', label: 'Solid white (no pupil)' },
-  { id: 'solid_black', label: 'Solid black (void)' },
-  { id: 'heterochromia', label: 'Heterochromia (2 colors)' },
+  { id: 'blue', label: 'Blue', color: '#4a90d9' },
+  { id: 'green', label: 'Green', color: '#4a9d6b' },
+  { id: 'hazel', label: 'Hazel', color: '#8b6914' },
+  { id: 'amber', label: 'Amber', color: '#c4720a' },
+  { id: 'brown', label: 'Brown', color: '#6b3a1a' },
+  { id: 'dark_brown', label: 'Dark Brown', color: '#3a1a0a' },
+  { id: 'grey', label: 'Grey', color: '#808080' },
+  { id: 'violet', label: 'Violet', color: '#8B5CF6' },
+  { id: 'red', label: 'Red', color: '#DC2626' },
+  { id: 'gold', label: 'Gold', color: '#DAA520' },
+  { id: 'silver', label: 'Silver', color: '#C0C0C0' },
+  { id: 'slit', label: 'Slit pupils', color: '#9ACD32' },
+  { id: 'solid_white', label: 'White (no pupil)', color: '#F0F0F0' },
+  { id: 'solid_black', label: 'Black (void)', color: '#1a1a1a' },
+  { id: 'heterochromia', label: '2 colors', color: 'linear-gradient(135deg, #4a90d9 50%, #c4720a 50%)' },
 ]
 
 const FANTASY_CLOTHING = [
@@ -1045,30 +1051,17 @@ export default function OnboardingPage() {
               {/* Eye color — expanded for fantasy */}
               <div>
                 <SectionTitle>Eye Color</SectionTitle>
-                {data.gender === 'fantasy' ? (
-                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {FANTASY_EYES.map(e => (
-                      <button key={e.id} onClick={() => set('eyeColor', e.id)} style={{
-                        padding: '8px 14px', borderRadius: 10, cursor: 'pointer', fontSize: 12, fontWeight: 600,
-                        border: data.eyeColor === e.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
-                        background: data.eyeColor === e.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                        color: data.eyeColor === e.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
-                      }}>{e.label}</button>
-                    ))}
-                  </div>
-                ) : (
                   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                    {EYE_COLORS.map(e => (
-                      <ColorCircle
-                        key={e.id}
-                        color={e.color}
-                        label={e.label}
-                        selected={data.eyeColor === e.id}
-                        onClick={() => set('eyeColor', e.id)}
-                      />
-                    ))}
-                  </div>
-                )}
+                  {(data.gender === 'fantasy' ? FANTASY_EYES : EYE_COLORS).map(e => (
+                    <ColorCircle
+                      key={e.id}
+                      color={e.color}
+                      label={e.label}
+                      selected={data.eyeColor === e.id}
+                      onClick={() => set('eyeColor', e.id)}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
 
