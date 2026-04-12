@@ -687,27 +687,66 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
 
   // If an active roleplay scenario exists, use its setting + costume as the base
   if (activeScenario && activeScenario.photoSetting) {
-    // Still detect pose from user message
     const lower = userMessage.toLowerCase()
-    let pose = ''
-    if (/achteren|behind|butt|kont|kontje|rear|back\s*view|reet|billen|bil\b|ass\b|booty|arse|bips|achterwerk|achterste|anus|aars/i.test(lower)) pose = 'rear view from behind, camera behind her, back of body visible, showing bare butt, looking over shoulder at camera, posterior view'
-    else if (/tieten|tiet\b|borsten|borst\b|boobs?|breast|boezem|decolleté|tepel|nipple|cleavage/i.test(lower)) pose = 'showing breasts, chest visible, looking at camera seductively, close-up of chest'
-    else if (/kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen/i.test(lower)) pose = 'lying back, legs slightly parted, nude, intimate angle, looking at camera'
-    else if (/voeten|voet\b|feet|foot|toes|tenen|zolen/i.test(lower)) pose = 'feet visible and prominent, barefoot, close-up of feet'
-    else if (/knie[eë]n|knees|kneeling|op.*knie/i.test(lower)) pose = 'kneeling on the floor on her knees, looking up at camera from below, low angle shot'
-    else if (/lig|ligg|liggen|lying/i.test(lower)) pose = 'lying on her back, camera from above looking down, hair spread on pillow'
-    else if (/spreid|spread|benen.*open|legs.*open|wijd/i.test(lower)) pose = 'sitting with legs spread wide open facing camera, leaning back'
-    else if (/voorover|buig|bukken|bent\s*over/i.test(lower)) pose = 'bent over forward, looking back at camera over shoulder'
-    else if (/op.*vier|doggy|handen.*knie|kruip/i.test(lower)) pose = 'on all fours, looking back at camera over shoulder, arched back'
-    else if (/hurk|squat/i.test(lower)) pose = 'squatting down low, knees apart, looking at camera'
-    else if (/naakt|spiernaakt|naked|nude|bloot/i.test(lower)) pose = 'nude, artistic pose, full body visible'
-    else if (/topless/i.test(lower)) pose = 'topless, hands at sides'
-    else if (/vingeren|finger|masturbat|aanraken|strelen/i.test(lower)) pose = 'touching herself, eyes closed in pleasure, intimate'
-    else pose = 'seductive confident pose, looking at camera, medium shot'
 
-    // Always reinforce identity features (hijab, hair, eyes) AFTER costume to prevent them being overridden
+    // Same detection flags as non-scenario branch
+    const hasCloseUp = /close.?up|dichtbij|van dichtbij|ingezoomd|zoom|macro|detail/i.test(lower)
+    const hasAnus    = /anus|aars|asshole|gaatje/i.test(lower)
+    const hasButt    = /achteren|behind|butt|kont|kontje|rear|reet|billen|bil\b|ass\b|booty|bips|achterwerk|achterste/i.test(lower) || hasAnus
+    const hasBreasts = /tieten|tiet\b|borsten|borst\b|boobs?|breast|boezem|decolleté|tepel|nipple|cleavage/i.test(lower)
+    const hasPussy   = /kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit/i.test(lower)
+    const hasFeet    = /voeten|voet\b|feet|foot|toes|tenen|zolen|soles/i.test(lower)
+    const hasBentOver= /voorover|bend|buig|bukken|bent\s*over/i.test(lower)
+    const hasSpread  = /spreid|spread|open|wijd/i.test(lower)
+    const hasKneeling= /knie[eë]n|knees|kneeling|op.*knie/i.test(lower)
+    const hasLying   = /lig|ligg|liggen|lying|lay/i.test(lower)
+    const hasDoggy   = /op.*vier|doggy|handen.*knie|crawl|kruip/i.test(lower)
+    const hasSquat   = /hurk|squat/i.test(lower)
+    const hasNude    = /naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen/i.test(lower)
+    const hasFingering=/vingeren|finger|masturbat|aanraken|touch herself|strelen/i.test(lower)
+
+    // Explicit requests override the scenario costume (no point wearing nurse outfit while showing pussy)
+    const isExplicit = hasAnus || hasPussy || hasNude || hasFingering || (hasButt && (hasSpread || hasBentOver))
+
+    // Build pose description + poseId (mirrors non-scenario branch logic)
+    let pose = 'seductive confident pose, looking at camera, medium shot'
+    let scenarioPoseId: string | undefined = undefined
+
+    if (hasAnus)                        { pose = 'bent over forward showing bare ass from behind, nude, legs apart, rear view close-up of butt and anus visible, camera low behind her, looking back over shoulder'; scenarioPoseId = 'bent-over' }
+    else if (hasCloseUp && hasPussy)    { pose = 'extreme close-up macro photograph of vulva and pussy, intimate angle between legs, nude, very close camera, sharp focus'; scenarioPoseId = 'spread-front' }
+    else if (hasCloseUp && hasButt)     { pose = 'extreme close-up photograph of bare butt from behind, rear view macro shot, nude'; scenarioPoseId = 'rear-standing' }
+    else if (hasCloseUp && hasBreasts)  { pose = 'extreme close-up photograph of bare breasts and nipples, topless, macro detail shot of chest' }
+    else if (hasCloseUp && hasFeet)     { pose = 'extreme close-up macro photograph of bare feet and toes, very detailed, barefoot' }
+    else if (hasButt && hasSpread)      { pose = 'rear view from behind, bent over with legs spread wide, butt and intimate area visible, looking back over shoulder, nude'; scenarioPoseId = 'bent-over' }
+    else if (hasButt && hasBentOver)    { pose = 'bent over forward from behind, rear view, butt prominently visible, looking back over shoulder seductively, nude'; scenarioPoseId = 'bent-over' }
+    else if (hasButt && hasLying)       { pose = 'lying face down on bed, butt prominently visible, looking back at camera over shoulder, nude'; scenarioPoseId = 'lying-back' }
+    else if (hasButt && hasKneeling)    { pose = 'on her knees from behind, rear view, back arched, butt prominently visible, looking over shoulder'; scenarioPoseId = 'kneeling' }
+    else if (hasPussy && hasSpread)     { pose = 'lying on bed with legs spread wide open facing camera, nude, intimate area clearly visible, leaning back, looking at camera seductively'; scenarioPoseId = 'spread-front' }
+    else if (hasPussy && hasLying)      { pose = 'lying on her back on bed, legs parted, nude, intimate close-up from between legs, looking at camera'; scenarioPoseId = 'lying-back' }
+    else if (hasPussy)                  { pose = 'lying on bed, legs slightly parted, nude, intimate close-up, looking at camera seductively'; scenarioPoseId = 'lying-back' }
+    else if (hasBreasts && hasKneeling) { pose = 'kneeling on bed, topless, breasts visible and prominent, looking up at camera from below'; scenarioPoseId = 'kneeling' }
+    else if (hasDoggy)                  { pose = 'on all fours on bed, rear view from behind, back arched, looking back at camera over shoulder'; scenarioPoseId = 'doggy' }
+    else if (hasFingering)              { pose = 'touching herself intimately, lying on bed, hand between legs, eyes closed in pleasure, nude'; scenarioPoseId = 'lying-back' }
+    else if (hasBentOver)               { pose = 'bent over forward, rear view, looking back at camera over shoulder, butt visible'; scenarioPoseId = 'bent-over' }
+    else if (hasSpread)                 { pose = 'sitting with legs spread wide open facing camera, leaning back on hands, nude'; scenarioPoseId = 'spread-front' }
+    else if (hasKneeling)               { pose = 'kneeling on the floor, on her knees, looking up at camera from below, seductive'; scenarioPoseId = 'kneeling' }
+    else if (hasLying)                  { pose = 'lying on her back on bed, looking up at camera, hair spread on pillow'; scenarioPoseId = 'lying-back' }
+    else if (hasSquat)                  { pose = 'squatting down low, knees apart, looking at camera'; scenarioPoseId = 'squatting' }
+    else if (hasNude)                   { pose = 'fully nude, artistic pose, full body visible' }
+    else if (hasButt)                   { pose = 'rear view from behind, showing bare butt, looking over shoulder at camera'; scenarioPoseId = 'rear-standing' }
+    else if (hasBreasts)                { pose = 'showing breasts, chest visible, looking at camera seductively, close-up of chest' }
+    else if (hasFeet)                   { pose = 'feet visible and prominent in frame, barefoot, close-up of feet, legs stretched out' }
+    else if (/topless/i.test(lower))    { pose = 'topless, hands at sides, confident pose' }
+
     const identityReinforce = buildIdentityReinforcement(ap)
-    return { prompt: `${appearancePart}, ${activeScenario.photoCostume}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, photorealistic, 8k, professional photography` }
+
+    // Drop scenario costume when request is explicit/nude — costume contradicts the pose
+    const costumeStr = (!isExplicit && activeScenario.photoCostume) ? `, ${activeScenario.photoCostume}` : ''
+
+    return {
+      prompt: `${appearancePart}${costumeStr}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, photorealistic, 8k, professional photography`,
+      poseId: scenarioPoseId
+    }
   }
 
   // Extract pose/scenario hints from the user message
