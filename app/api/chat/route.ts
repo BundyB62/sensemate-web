@@ -689,6 +689,35 @@ function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   return false
 }
 
+// ─── Variety helpers ─────────────────────────────────────────────────────────
+function randPick<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)] }
+
+const LIGHTING_VAR = [
+  'warm golden bedroom lighting',
+  'soft diffused window light',
+  'moody candlelight intimate glow',
+  'cool blue twilight atmosphere',
+  'dramatic side lighting deep shadows',
+  'soft pink neon backlight',
+  'bright airy natural daylight',
+  'dim warm evening light',
+]
+const CAMERA_VAR = [
+  'shot from eye level',
+  'slight low angle shot',
+  '3/4 angle shot',
+  'slight overhead angle',
+  'intimate close-up portrait angle',
+  'wide medium shot',
+]
+const BED_VAR = [
+  'white hotel sheets',
+  'dark satin sheets',
+  'rumpled linen duvet',
+  'velvet bedcover',
+  'cream silk sheets',
+]
+
 // ─── Build a fallback photo prompt from user message + companion appearance ──
 function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeScenario?: { photoSetting: string; photoCostume: string } | null): { prompt: string; poseId?: string } {
   const ap = companion.appearance || {}
@@ -817,18 +846,57 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   else if (hasSquat) { scenario = 'squatting down low, knees apart, looking at camera at eye level, seductive confident pose, nude, bedroom'; detectedPoseId = 'squatting' }
 
   // ─── SINGLE BODY PARTS ─────────────────────────────────────────────────────
-  else if (hasButt) { scenario = 'rear view from behind, camera behind her, back of body visible, showing her bare butt and back, looking over her shoulder at camera, standing pose, shot from behind, nude, posterior view, bedroom'; detectedPoseId = 'rear-standing' }
+  else if (hasButt) {
+    scenario = randPick([
+      `rear view from behind, standing nude, showing bare butt, looking over shoulder at camera, ${randPick(BED_VAR)} bedroom`,
+      `rear view, kneeling on ${randPick(BED_VAR)}, back arched, butt prominent, glancing back seductively`,
+      `bent forward slightly, rear view, hands on wall, bare butt visible, looking back at camera`,
+      `sitting nude facing away from camera, bare butt on ${randPick(BED_VAR)}, turned head looking back`,
+    ])
+    detectedPoseId = 'rear-standing'
+  }
   // Breasts
-  else if (hasBreasts) scenario = 'showing her breasts, topless, chest visible and prominent, close-up of chest area, looking at camera seductively, bedroom, intimate warm lighting'
+  else if (hasBreasts) scenario = randPick([
+    `topless, sitting on ${randPick(BED_VAR)}, breasts bare and visible, hands resting on thighs, looking at camera seductively`,
+    `topless standing, arms at sides, chest prominent, confident direct gaze at camera`,
+    `topless lying on side on ${randPick(BED_VAR)}, breasts visible, looking at camera with desire`,
+    `topless close-up of chest and face, hands framing breasts, smiling seductively`,
+  ])
   // Pussy
-  else if (hasPussy) scenario = 'lying on bed, legs slightly parted, nude, intimate close-up, soft bedroom lighting, looking at camera seductively, sensual'
+  else if (hasPussy) {
+    scenario = randPick([
+      `lying on ${randPick(BED_VAR)}, legs slightly parted, nude, intimate close-up, looking at camera seductively`,
+      `sitting nude on ${randPick(BED_VAR)}, legs open toward camera, leaning back on hands, intimate angle`,
+      `nude on ${randPick(BED_VAR)}, one knee raised, intimate area visible, looking at camera with desire`,
+      `lying back nude, legs apart, close-up intimate angle from between legs, ${randPick(BED_VAR)}`,
+    ])
+    detectedPoseId = 'lying-back'
+  }
   // Feet
-  else if (hasFeet) scenario = 'feet visible and prominent in frame, barefoot, close-up of feet, legs stretched out, sitting on bed, soft lighting'
+  else if (hasFeet) scenario = randPick([
+    'feet and soles visible and prominent, barefoot, close-up of feet, legs stretched out on bed',
+    'lying on stomach, bare feet raised in air, close-up of soles and toes',
+    'sitting on edge of bed, barefoot, close-up of feet and ankles',
+  ])
 
   // ─── CLOTHING ──────────────────────────────────────────────────────────────
-  else if (hasNude) scenario = 'fully nude, artistic pose, full body visible, bedroom, intimate lighting'
-  else if (/topless/i.test(lower)) scenario = 'topless, breasts visible, hands at sides, confident pose, bedroom'
-  else if (/lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|jarretel|garter|kous|stockings|corset|bodystocking|bodysuit|babydoll|negligee|nachthemd|nachtpon/i.test(lower)) scenario = 'wearing sexy lace lingerie set, bedroom, seductive pose on bed, sensual warm lighting'
+  else if (hasNude) scenario = randPick([
+    `fully nude, standing confident pose, full body visible, ${randPick(BED_VAR)} bedroom`,
+    `fully nude lying on ${randPick(BED_VAR)}, artistic full body shot from above`,
+    `fully nude sitting on ${randPick(BED_VAR)}, knees drawn up, looking at camera`,
+    `fully nude leaning against wall, full body visible, bedroom setting`,
+  ])
+  else if (/topless/i.test(lower)) scenario = randPick([
+    'topless, breasts bare, sitting on bed, hands on thighs, confident direct look',
+    'topless standing, arms slightly raised, chest forward, seductive expression',
+    'topless lying on side, breasts visible, looking at camera over shoulder',
+  ])
+  else if (/lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|jarretel|garter|kous|stockings|corset|bodystocking|bodysuit|babydoll|negligee|nachthemd|nachtpon/i.test(lower)) scenario = randPick([
+    `wearing sexy lace lingerie set, ${randPick(BED_VAR)} bedroom, seductive pose on bed`,
+    'wearing sheer black lace bra and thong, standing pose, seductive look, bedroom mirror',
+    `wearing red lace lingerie, lying on ${randPick(BED_VAR)}, looking at camera with desire`,
+    'wearing elegant silk negligee, sitting on edge of bed, intimate bedroom lighting',
+  ])
   else if (/bikini|zwempak|swimsuit|badpak/i.test(lower)) scenario = '(wearing complete bikini set:1.5), (bikini top covering breasts:1.4), (bikini bottom:1.3), beach, sunny, wet skin, golden hour lighting, fully clothed in swimwear'
 
   // ─── OTHER ─────────────────────────────────────────────────────────────────
@@ -857,7 +925,9 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   else if (/wijn|wine|drink/i.test(lower)) scenario = 'sitting cozy with glass of wine, relaxed at home on couch, warm lighting, comfortable outfit, content smile'
 
   const identityReinforce = buildIdentityReinforcement(ap)
-  return { prompt: `${appearancePart}, ${scenario}, ${identityReinforce}, photorealistic, 8k, professional photography`, poseId: detectedPoseId }
+  // Append random lighting + camera angle to every photo for visual variety
+  const varietySuffix = `${randPick(LIGHTING_VAR)}, ${randPick(CAMERA_VAR)}`
+  return { prompt: `${appearancePart}, ${scenario}, ${identityReinforce}, ${varietySuffix}, photorealistic, 8k, professional photography`, poseId: detectedPoseId }
 }
 
 // ─── Detect pure English text (should be Dutch) ─────────────────────────────

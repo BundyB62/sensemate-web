@@ -84,6 +84,7 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
           steps: 30,
           clip_skip: 2,
           guidance_scale: 6,
+          seed: Math.floor(Math.random() * 2147483647),
           sampler_name: 'DPM++ 2M Karras',
           ...(poseId && getPoseBase64(poseId) ? {
             controlnet_units: [{
