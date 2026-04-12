@@ -423,6 +423,11 @@ export function buildNegativePrompt(profile: Record<string, any>): string {
     parts.push('skinny, thin, slim, lean, petite')
   }
 
+  // Hijab negative — prevent abaya/loose robe that hides body
+  if (profile.hairLength === 'hijab') {
+    parts.push('abaya, loose robe, shapeless dress, baggy clothing, full body covering, niqab, burqa, shapeless outfit')
+  }
+
   return parts.join(', ')
 }
 
@@ -444,6 +449,12 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
   let clothing = CLOTHING_MAP[profile.clothingStyle] || 'casual outfit'
   if (sfwMode && /lingerie|bikini|swimwear|nude|naked/i.test(clothing)) {
     clothing = 'elegant classy outfit'
+  }
+  // Hijab override: force body-visible clothing so avatar shows actual body proportions
+  // Without this, models default to a full abaya which hides all body features
+  const isHijabAvatar = profile.hairLength === 'hijab'
+  if (isHijabAvatar) {
+    clothing = 'form-fitting long dress hugging body curves, tight fitted modest outfit, waist clearly visible, body shape visible, NOT abaya NOT loose robe'
   }
 
   // Beard (men only)
