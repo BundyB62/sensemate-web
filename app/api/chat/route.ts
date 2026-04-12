@@ -626,61 +626,49 @@ function isRefusal(text: string): boolean {
   return false
 }
 
-// ─── Detect if user is asking for a photo (not refusing/complaining about photos) ──
+// ─── Detect if user is EXPLICITLY asking for a photo ─────────────────────────
+// STRICT: only trigger when user clearly requests a photo/image
+// Body part mentions alone do NOT trigger — that's just conversation
 function isPhotoRequest(text: string, lastAssistantMsg?: string): boolean {
   const lower = text.toLowerCase()
 
-  // First check if the user is REFUSING/STOPPING photos — NOT a photo request
-  // Be VERY specific to avoid false positives like "ik zie het niet, stuur het me"
+  // Never trigger if user is stopping/refusing photos
   if (/(wil geen|hoeft geen|stuur geen|geen foto|stop met foto|niet meer.*foto|no more photo|stop sending photo|hou op met|ophouden met)/i.test(lower)) return false
   if (/^(stop|genoeg|klaar|no more)\s*[.!]*$/i.test(lower)) return false
 
-  // Positive photo request patterns — broad matching for Dutch word order variations
-  // "stuur foto", "foto sturen", "stuur een fototje", etc.
-  if (/(stuur|verstuur|zend|geef).{0,30}(foto|pic|selfie|plaatje|afbeelding|beeld)/i.test(lower)) return true
-  if (/(foto|pic|selfie|plaatje|afbeelding|fototje).{0,30}(stuur|sturen|versturen|zenden|geven|maken)/i.test(lower)) return true
-  // "laat zien", "laat eens zien", "laat je zien"
-  if (/laat.{0,20}zien/i.test(lower)) return true
-  // "maak een foto/selfie"
-  if (/(maak|neem).{0,15}(foto|selfie)/i.test(lower)) return true
-  // Direct NSFW requests always count as photo requests
-  if (/\b(naakt|naked|nude|topless|bikini|lingerie|ondergoed|underwear|bloot|blote|spiernaakt|uitkleden|strippen)\b/i.test(lower)) return true
-  // Body part mentions = photo request (NL + EN, slang included)
-  if (/\b(tieten|tiet|borsten|borst|boobs?|breast|boezem|decolleté|decollete|tepel|tepels|nipple)/i.test(lower)) return true
-  if (/\b(kont|kontje|billen|bil|reet|achterwerk|achterste|butt|ass\b|booty|arse|bips|gat|anus|aars)\b/i.test(lower)) return true
-  if (/\b(kutje|kut|vagina|pussy|poesje|poes|gleuf|spleetje|schaamlippen|clit|clitoris)\b/i.test(lower)) return true
-  if (/\b(piemel|pik|lul|penis|dick|cock|eikel|ballen|balls)\b/i.test(lower)) return true
-  if (/\b(benen|dijen|thighs|legs|voeten|feet|toes|tenen)\b/i.test(lower)) return true
-  // "wil...zien" / "kan ik...zien" / "laat...zien"
-  if (/(wil|kan|mag|laat).{0,30}zien/i.test(lower)) return true
-  // English patterns
-  if (/(send|show|take|give).{0,15}(photo|pic|selfie|picture|image)/i.test(lower)) return true
-  // "I want a photo" / "can I see" / "let me see"
-  if (/(want|need|give me|let me see|can i see|show me).{0,15}(photo|pic|selfie|picture|you)/i.test(lower)) return true
-  // "sexy pic", "hot photo", "naughty selfie"
-  if (/(sexy|hot|naughty|dirty|cute|beautiful|pretty).{0,10}(photo|pic|selfie|picture)/i.test(lower)) return true
-  // "pose", "poseer"
-  if (/\b(pose|poseer)\b/i.test(lower)) return true
-  // Implicit visual requests — "how do you look", "show yourself", "let me see you"
-  if (/(hoe zie|hoe ziet).{0,15}(eruit|er uit|uit)/i.test(lower)) return true
-  if (/(laat je|laat jezelf|laat je zelf).{0,10}(zien)/i.test(lower)) return true
-  if (/(show yourself|show me yourself|what do you look like|let me see you)/i.test(lower)) return true
-  // "ik wil je zien" / "ik wil het zien" / "kan ik je zien"
-  if (/(wil je zien|wil het zien|wil jou zien|kan ik je zien|mag ik je zien)/i.test(lower)) return true
-  // "stuur het" / "stuur maar" / "kan je het sturen" — without explicit "foto" word
-  if (/(stuur het|stuur 'm|stuur em|stuur maar|kan je.*sturen|kun je.*sturen)/i.test(lower)) return true
-  // "ik wil een foto" / "kan je een foto" / "mag ik een foto"
-  if (/(wil|kan|mag|kun).{0,20}(foto|pic|selfie|plaatje|fototje)/i.test(lower)) return true
-  // "sexy foto", "leuke foto", "geile foto" — adjective + foto
-  if (/(sexy|leuk|geil|mooi|lekker|stoute?).{0,10}(foto|pic|selfie|plaatje|fototje)/i.test(lower)) return true
+  // ✅ Explicit photo request with "stuur/verstuur/zend/geef" + foto/selfie/pic
+  if (/(stuur|verstuur|zend|geef).{0,30}(foto|pic|selfie|plaatje|afbeelding|fototje)/i.test(lower)) return true
 
-  // Context-aware: if last assistant message mentioned foto/photo and user gives short affirmation
+  // ✅ "foto sturen/maken/nemen"
+  if (/(foto|selfie|fototje|pic|plaatje).{0,30}(stuur|sturen|versturen|zenden|geven|maken|nemen)/i.test(lower)) return true
+
+  // ✅ "maak een foto/selfie"
+  if (/(maak|neem).{0,15}(foto|selfie|fototje)/i.test(lower)) return true
+
+  // ✅ "ik wil een foto" / "kan je een foto" / "mag ik een foto sturen"
+  if (/(wil|kan|mag|kun).{0,20}(foto|selfie|fototje|pic|plaatje)/i.test(lower)) return true
+
+  // ✅ "stuur maar" / "stuur het" / "stuur 'm" — only when context is photos
+  if (/^(stuur\s*(maar|het|'m|em|nou)?|kom\s*maar)\s*[.!?😘🔥]*$/i.test(lower.trim())) return true
+
+  // ✅ English: "send/show/take a photo/pic/selfie"
+  if (/(send|show me|take).{0,15}(photo|pic|selfie|picture|image)/i.test(lower)) return true
+
+  // ✅ "laat zien" only when combined with visual/body context
+  if (/(laat.{0,10}(je|jezelf).{0,10}zien|laat.{0,10}(foto|pic|selfie).{0,10}zien)/i.test(lower)) return true
+
+  // ✅ "show yourself" / "let me see you" / "what do you look like"
+  if (/(show yourself|let me see you|what do you look like)/i.test(lower)) return true
+
+  // ✅ Pose request
+  if (/\b(poseer|pose voor|maak een pose)\b/i.test(lower)) return true
+
+  // ✅ Context-aware: user gives short "yes" after AI offered/mentioned a photo
   if (lastAssistantMsg) {
     const lastLower = lastAssistantMsg.toLowerCase()
     const lastMentionedPhoto = /(foto|photo|pic|selfie|stuur|komt-ie|hier is|verstuurd|gestuurd)/i.test(lastLower)
     if (lastMentionedPhoto) {
-      // Short affirmative responses in context of photos
-      if (/^(ja|yes|ok(e|é)?|sure|do(e)?\s*(maar|het)|stuur\s*(maar)?|kom\s*(maar)?|graag|please|alsjeblieft|go|send|nu|now|goed|prima|top|oke|oké|tuurlijk|natuurlijk|ja\s*(graag|please|alsjeblieft))\s*[.!?😘😏🔥💕]*\s*$/i.test(lower)) {
+      if (/^(ja|yes|ok(e|é)?|sure|do(e)?\s*(maar|het)|stuur\s*(maar)?|graag|please|alsjeblieft|go|send|nu|now|goed|prima|tuurlijk|natuurlijk)\s*[.!?😘😏🔥💕]*\s*$/i.test(lower)) {
         return true
       }
     }
