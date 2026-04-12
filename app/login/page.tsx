@@ -70,6 +70,9 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 style={{ padding: '13px 16px', fontSize: 15 }}
               />
+              <Link href="/forgot-password" style={{ display: 'block', textAlign: 'right', marginTop: 8, fontSize: 13, color: 'rgba(233,30,140,0.7)', textDecoration: 'none', fontWeight: 500 }}>
+                Forgot password?
+              </Link>
             </div>
 
             {error && (
