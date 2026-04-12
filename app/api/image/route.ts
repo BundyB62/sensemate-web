@@ -3,7 +3,7 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
-import { buildAppearanceDescription, buildBodyReinforcement, buildAnimeNegativePrompt } from '@/lib/avatarPrompt'
+import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatarPrompt'
 
 export const maxDuration = 60
 
@@ -13,8 +13,7 @@ const NOVITA_RESULT_URL = 'https://api.novita.ai/v3/async/task-result'
 
 // Model names
 const NOVITA_REALISTIC_MODEL = 'lustifySDXLNSFW_endgame_999340.safetensors'
-const NOVITA_ANIME_MODEL = 'sdxlYamersAnimeUltra_yamersAnimeV3_121537.safetensors'
-const NOVITA_GAME_MODEL = 'animeRealisticXL_animeXLReal_211225.safetensors'
+const NOVITA_FANTASY_MODEL = 'animeRealisticXL_animeXLReal_211225.safetensors'
 
 // ─── Pose skeleton mapping for ControlNet ──────────────────────────────────
 // Maps pose IDs to OpenPose skeleton image files in public/poses/
@@ -46,13 +45,10 @@ function isExplicitPrompt(prompt: string): boolean {
 
 // ─── Generate with Novita.ai (NSFW allowed) ────────────────────────────────
 async function generateNovita(prompt: string, apiKey: string, extraNegative?: string, poseId?: string, modelName?: string): Promise<string | null> {
-  const isAnimeModel = modelName === NOVITA_ANIME_MODEL
-  const isGameModel = modelName === NOVITA_GAME_MODEL
-  // Enhance prompt — each style uses different quality tokens
-  let fullPrompt = isAnimeModel
-    ? prompt + ', masterpiece, best quality, highres, anime style, detailed'
-    : isGameModel
-    ? prompt + ', 3d render, unreal engine 5, semi-realistic, game character, detailed skin texture, volumetric lighting'
+  const isFantasyModel = modelName === NOVITA_FANTASY_MODEL
+  // Enhance prompt — fantasy uses 3D quality tokens, realistic uses photo tokens
+  let fullPrompt = isFantasyModel
+    ? prompt + ', 3d render, unreal engine 5, semi-realistic, fantasy, detailed skin texture, volumetric lighting'
     : prompt + ', (photorealistic:1.4), RAW photo, 8k, sharp focus'
 
   // CRITICAL: Novita has a 1024 character limit for prompts
@@ -64,10 +60,8 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
     if (lastComma > 800) fullPrompt = fullPrompt.substring(0, lastComma)
   }
 
-  let negativePrompt = isAnimeModel
-    ? 'realistic, photograph, 3d render, photorealistic, deformed, ugly, blurry, low quality, bad anatomy, extra fingers, mutated hands, watermark, text, tattoo, tattoos, body art'
-    : isGameModel
-    ? 'cartoon, flat colors, cel shading, sketch, painting, deformed, ugly, blurry, low quality, bad anatomy, extra fingers, mutated hands, watermark, text, tattoo, tattoos, body art'
+  let negativePrompt = isFantasyModel
+    ? 'cartoon, flat colors, cel shading, sketch, anime, deformed, ugly, blurry, low quality, bad anatomy, extra fingers, mutated hands, watermark, text, tattoo, tattoos, body art'
     : 'cartoon, anime, illustration, 3d render, deformed, ugly, blurry, low quality, bad anatomy, extra fingers, mutated hands, watermark, text, tattoo, tattoos, body art, tattooed skin'
   if (extraNegative) {
     // Also truncate negative prompt if needed
@@ -341,25 +335,19 @@ export async function POST(request: Request) {
     const explicit = isExplicitPrompt(enrichedPrompt)
     const novitaKey = process.env.NOVITA_API_KEY
     const falKey = process.env.FAL_API_KEY!
-    const isAnime = appearance?.style === 'anime'
+    const isFantasy = appearance?.style === 'fantasy'
 
     // Combine all negative prompts
     const combinedNegative = [bodyNegative, extraNegativeFromAppearance].filter(Boolean).join(', ')
 
-    console.log(`[Image] ${isAnime ? '🎨 ANIME' : ''} ${explicit ? '🔞 NSFW' : '✅ SFW'} | Prompt: ${enrichedPrompt.substring(0, 200)}`)
+    console.log(`[Image] ${isFantasy ? '🧝 FANTASY' : ''} ${explicit ? '🔞 NSFW' : '✅ SFW'} | Prompt: ${enrichedPrompt.substring(0, 200)}`)
 
     let imageUrl: string | null = null
 
-    const isGame = appearance?.style === 'game'
-
-    if (isAnime && novitaKey) {
-      // ANIME → always use Novita with anime model
-      console.log(`[Image] Using Novita.ai ANIME model${poseId ? ` + ControlNet pose: ${poseId}` : ''}`)
-      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, NOVITA_ANIME_MODEL)
-    } else if (isGame && novitaKey) {
-      // GAME → semi-realistic 3D model
-      console.log(`[Image] Using Novita.ai GAME model (semi-realistic)${poseId ? ` + ControlNet pose: ${poseId}` : ''}`)
-      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, NOVITA_GAME_MODEL)
+    if (isFantasy && novitaKey) {
+      // FANTASY → semi-realistic 3D fantasy model
+      console.log(`[Image] Using Novita.ai FANTASY model (semi-realistic 3D)${poseId ? ` + ControlNet pose: ${poseId}` : ''}`)
+      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, NOVITA_FANTASY_MODEL)
     } else if (explicit && novitaKey) {
       // NSFW → Novita.ai (no content filter)
       console.log(`[Image] Using Novita.ai (NSFW allowed)${poseId ? ` + ControlNet pose: ${poseId}` : ''}`)
@@ -393,8 +381,8 @@ export async function POST(request: Request) {
 
     // Face merge — skip for anime characters (prompt-based consistency is enough)
     // For realistic: swap the avatar's face onto the generated image
-    console.log(`[Image] Face merge check: isAnime=${isAnime}, avatarUrl=${avatarUrl ? 'yes(' + avatarUrl.substring(0, 60) + '...)' : 'NONE'}, novitaKey=${novitaKey ? 'yes' : 'NONE'}`)
-    if (!isAnime && !isGame && avatarUrl && novitaKey) {
+    console.log(`[Image] Face merge check: isFantasy=${isFantasy}, avatarUrl=${avatarUrl ? 'yes(' + avatarUrl.substring(0, 60) + '...)' : 'NONE'}, novitaKey=${novitaKey ? 'yes' : 'NONE'}`)
+    if (!isFantasy && avatarUrl && novitaKey) {
       let mergedUrl: string | null = null
       for (let attempt = 1; attempt <= 2; attempt++) {
         mergedUrl = await mergeAvatarFace(imageUrl, avatarUrl, novitaKey)

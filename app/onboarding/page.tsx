@@ -4,10 +4,9 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ARCHETYPES } from '@/lib/personalities'
-import { ANIME_CHARACTERS, type AnimeCharacter } from '@/lib/animeCharacters'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type Gender = 'woman' | 'man' | 'nonbinary' | 'anime' | 'game'
+type Gender = 'woman' | 'man' | 'nonbinary' | 'fantasy'
 
 interface FormData {
   name: string
@@ -27,6 +26,12 @@ interface FormData {
   assSize: string
   dickSize: string
   beard: string
+  // Fantasy-specific
+  race: string
+  ears: string
+  horns: string
+  wings: string
+  tail: string
 }
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -36,8 +41,94 @@ const GENDERS = [
   { id: 'woman', label: 'Woman', img: '/onboarding/gender/woman.jpg' },
   { id: 'man', label: 'Man', img: '/onboarding/gender/man.jpg' },
   { id: 'nonbinary', label: 'Non-binary', img: '/onboarding/gender/nonbinary.jpg' },
-  { id: 'anime', label: 'Anime', img: '/onboarding/gender/anime.jpg' },
-  { id: 'game', label: 'Game', img: '/onboarding/gender/game.jpg' },
+  { id: 'fantasy', label: 'Fantasy', img: '/onboarding/gender/fantasy.jpg' },
+]
+
+// ─── Fantasy Data ───────────────────────────────────────────────────────────
+const FANTASY_RACES = [
+  { id: 'elf', label: 'Elf', emoji: '🧝' },
+  { id: 'dark_elf', label: 'Dark Elf', emoji: '🖤' },
+  { id: 'demon', label: 'Demon / Succubus', emoji: '😈' },
+  { id: 'angel', label: 'Angel', emoji: '😇' },
+  { id: 'vampire', label: 'Vampire', emoji: '🧛' },
+  { id: 'fairy', label: 'Fairy', emoji: '🧚' },
+  { id: 'orc', label: 'Orc', emoji: '👹' },
+  { id: 'dragon_kin', label: 'Dragon-kin', emoji: '🐉' },
+  { id: 'catgirl', label: 'Catgirl', emoji: '🐱' },
+  { id: 'foxgirl', label: 'Foxgirl / Kitsune', emoji: '🦊' },
+  { id: 'werewolf', label: 'Werewolf', emoji: '🐺' },
+  { id: 'mermaid', label: 'Mermaid / Siren', emoji: '🧜' },
+]
+
+const FANTASY_EARS = [
+  { id: 'normal', label: 'Normal' },
+  { id: 'pointed_short', label: 'Pointed (short)' },
+  { id: 'pointed_long', label: 'Pointed (long elf)' },
+  { id: 'animal', label: 'Animal ears' },
+]
+
+const FANTASY_HORNS = [
+  { id: 'none', label: 'None' },
+  { id: 'small', label: 'Small' },
+  { id: 'large', label: 'Large curved' },
+  { id: 'ram', label: 'Ram-style' },
+  { id: 'demon', label: 'Demon' },
+  { id: 'antlers', label: 'Antlers' },
+]
+
+const FANTASY_WINGS = [
+  { id: 'none', label: 'None' },
+  { id: 'angel', label: 'Angel (white feathers)' },
+  { id: 'demon', label: 'Demon (bat-like)' },
+  { id: 'fairy', label: 'Fairy (translucent)' },
+  { id: 'dragon', label: 'Dragon' },
+]
+
+const FANTASY_TAILS = [
+  { id: 'none', label: 'None' },
+  { id: 'demon', label: 'Demon tail' },
+  { id: 'fox', label: 'Fox tail (fluffy)' },
+  { id: 'cat', label: 'Cat tail' },
+  { id: 'dragon', label: 'Dragon tail' },
+]
+
+const FANTASY_SKIN = [
+  { id: 'porcelain', label: 'Porcelain', color: '#F5E6D3' },
+  { id: 'fair', label: 'Fair', color: '#F0D5B8' },
+  { id: 'warm_beige', label: 'Warm Beige', color: '#D4A574' },
+  { id: 'olive', label: 'Olive', color: '#B89B6A' },
+  { id: 'tan', label: 'Tan', color: '#A67C52' },
+  { id: 'brown', label: 'Brown', color: '#8B6914' },
+  { id: 'dark', label: 'Dark', color: '#4A2C0A' },
+  { id: 'blue', label: 'Blue', color: '#5B8DB8' },
+  { id: 'dark_blue', label: 'Dark Blue', color: '#2C4A6E' },
+  { id: 'green', label: 'Green', color: '#5B8B5A' },
+  { id: 'purple', label: 'Purple', color: '#8B5EA0' },
+  { id: 'red', label: 'Red', color: '#C0392B' },
+  { id: 'grey', label: 'Grey', color: '#808080' },
+  { id: 'gold', label: 'Gold', color: '#DAA520' },
+  { id: 'white', label: 'Snow White', color: '#F0F0F0' },
+]
+
+const FANTASY_EYES = [
+  { id: 'blue', label: 'Blue' }, { id: 'green', label: 'Green' },
+  { id: 'hazel', label: 'Hazel' }, { id: 'amber', label: 'Amber' },
+  { id: 'brown', label: 'Brown' }, { id: 'dark_brown', label: 'Dark Brown' },
+  { id: 'grey', label: 'Grey' }, { id: 'violet', label: 'Violet' },
+  { id: 'red', label: 'Red (glowing)' }, { id: 'gold', label: 'Gold (glowing)' },
+  { id: 'silver', label: 'Silver' }, { id: 'slit', label: 'Slit pupils' },
+  { id: 'solid_white', label: 'Solid white (no pupil)' },
+  { id: 'solid_black', label: 'Solid black (void)' },
+  { id: 'heterochromia', label: 'Heterochromia (2 colors)' },
+]
+
+const FANTASY_CLOTHING = [
+  { id: 'armor', label: 'Plate Armor' }, { id: 'leather', label: 'Leather Armor' },
+  { id: 'robes', label: 'Mage Robes' }, { id: 'elvish', label: 'Elvish Outfit' },
+  { id: 'royal', label: 'Royal Gown' }, { id: 'priestess', label: 'Priestess Robes' },
+  { id: 'tribal', label: 'Tribal' }, { id: 'dark', label: 'Dark Gothic' },
+  { id: 'minimal', label: 'Minimal / Wraps' }, { id: 'chains', label: 'Chains & Straps' },
+  { id: 'nothing', label: 'Nothing' },
 ]
 
 const RELATIONSHIPS = [
@@ -312,6 +403,7 @@ function randomizeAll(): FormData {
     assSize: !isMale ? pick(ASS_SIZES).id : '',
     dickSize: isMale ? pick(DICK_SIZES).id : '',
     beard: isMale ? pick(BEARD_STYLES).id : '',
+    race: '', ears: 'normal', horns: 'none', wings: 'none', tail: 'none',
   }
 }
 
@@ -327,7 +419,6 @@ export default function OnboardingPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [regenerating, setRegenerating] = useState(false)
   const [showBodyDetails, setShowBodyDetails] = useState(false)
-  const [selectedAnimeChar, setSelectedAnimeChar] = useState<AnimeCharacter | null>(null)
 
   const [data, setData] = useState<FormData>({
     name: '', gender: '' as Gender, relationshipStyle: 'lover',
@@ -336,6 +427,7 @@ export default function OnboardingPage() {
     hairLength: '', eyeColor: '', clothingStyle: '',
     vibe: '', breastSize: '', assSize: '', dickSize: '',
     beard: 'none',
+    race: '', ears: 'normal', horns: 'none', wings: 'none', tail: 'none',
   })
 
   const set = useCallback((key: string, val: string | string[]) => {
@@ -353,18 +445,14 @@ export default function OnboardingPage() {
 
     setLoading(true)
 
-    const isCharacter = (data.gender === 'anime' || data.gender === 'game') && selectedAnimeChar
-    const appearance = isCharacter ? {
-      style: selectedAnimeChar.category as 'anime' | 'game',
-      gender: selectedAnimeChar.gender,
-      animeCharacterId: selectedAnimeChar.id,
-      promptTags: selectedAnimeChar.promptTags,
-      identityTags: selectedAnimeChar.identityTags,
-      avatarUrl: selectedAnimeChar.avatarUrl,
-      hairColor: selectedAnimeChar.appearance.hairColor,
-      eyeColor: selectedAnimeChar.appearance.eyeColor,
-      bodyType: selectedAnimeChar.appearance.bodyType,
-      outfit: selectedAnimeChar.appearance.outfit,
+    const isFantasy = data.gender === 'fantasy'
+    const appearance = isFantasy ? {
+      style: 'fantasy' as const,
+      gender: 'woman' as const, // Fantasy characters are presented as female
+      race: data.race, ears: data.ears, horns: data.horns, wings: data.wings, tail: data.tail,
+      build: data.build, skinTone: data.skinTone, hairColor: data.hairColor,
+      hairLength: data.hairLength, eyeColor: data.eyeColor, clothingStyle: data.clothingStyle,
+      breastSize: data.breastSize, assSize: data.assSize,
     } : {
       gender: data.gender, age: data.age, ethnicity: data.ethnicity,
       build: data.build, skinTone: data.skinTone, hairColor: data.hairColor,
@@ -372,9 +460,6 @@ export default function OnboardingPage() {
       ...(data.gender === 'woman' || data.gender === 'nonbinary' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
       ...(data.gender === 'man' ? { dickSize: data.dickSize, beard: data.beard } : {}),
     }
-    const companionName = isCharacter ? selectedAnimeChar.name : data.name
-    const personalityId = isCharacter ? selectedAnimeChar.personalityArchetypeId : data.personality
-    const relStyle = isCharacter ? selectedAnimeChar.relationshipStyle : data.relationshipStyle
 
     let companionId = createdCompanionId
 
@@ -383,9 +468,9 @@ export default function OnboardingPage() {
       const { error } = await supabase
         .from('companions')
         .update({
-          name: companionName,
-          relationship_style: relStyle,
-          personality: { archetype: personalityId, gender: isCharacter ? selectedAnimeChar.gender : data.gender },
+          name: data.name,
+          relationship_style: data.relationshipStyle,
+          personality: { archetype: data.personality, gender: isFantasy ? 'woman' : data.gender },
           appearance,
         })
         .eq('id', companionId)
@@ -401,9 +486,9 @@ export default function OnboardingPage() {
         .from('companions')
         .insert({
           user_id: user.id,
-          name: companionName,
-          relationship_style: relStyle,
-          personality: { archetype: personalityId, gender: isCharacter ? selectedAnimeChar.gender : data.gender },
+          name: data.name,
+          relationship_style: data.relationshipStyle,
+          personality: { archetype: data.personality, gender: isFantasy ? 'woman' : data.gender },
           appearance,
         })
         .select()
@@ -420,9 +505,9 @@ export default function OnboardingPage() {
 
       // Insert welcome message (only for new companions)
       const welcomeMessages = [
-        `Hey! 😊 I'm ${companionName}. Nice to meet you! What's your name?`,
-        `Hi there! 💕 I'm ${companionName}. So glad you're here. Let's chat!`,
-        `Hey 😏 I'm ${companionName}. I'm curious about you... tell me something about yourself?`,
+        `Hey! 😊 I'm ${data.name}. Nice to meet you! What's your name?`,
+        `Hi there! 💕 I'm ${data.name}. So glad you're here. Let's chat!`,
+        `Hey 😏 I'm ${data.name}. I'm curious about you... tell me something about yourself?`,
       ]
       await supabase.from('messages').insert({
         companion_id: companion.id,
@@ -627,98 +712,33 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 2 — Character selection (when anime or game selected) */}
-        {step === 2 && (data.gender === 'anime' || data.gender === 'game') && (
+        {/* STEP 2 — Race (fantasy) or Age (realistic) */}
+        {step === 2 && data.gender === 'fantasy' && (
           <StepContainer
-            title={data.gender === 'anime' ? 'Choose your anime waifu' : 'Choose your game character'}
-            subtitle={data.gender === 'anime' ? 'Pick an iconic anime companion.' : 'Pick an iconic game companion — semi-realistic 3D style.'}
+            title="Choose a race"
+            subtitle="What kind of fantasy being will your companion be?"
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, width: '100%' }}>
-              {ANIME_CHARACTERS.filter(c => c.category === data.gender).map(char => {
-                const sel = selectedAnimeChar?.id === char.id
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, width: '100%' }}>
+              {FANTASY_RACES.map(r => {
+                const sel = data.race === r.id
                 return (
-                  <button
-                    key={char.id}
-                    onClick={() => {
-                      setSelectedAnimeChar(char)
-                      // Auto-populate form data with character info
-                      setData(prev => ({
-                        ...prev,
-                        name: char.name,
-                        personality: char.personalityArchetypeId,
-                        relationshipStyle: char.relationshipStyle,
-                      }))
-                    }}
-                    style={{
-                      padding: 0, borderRadius: 16, cursor: 'pointer', overflow: 'hidden',
-                      border: sel ? `2px solid ${char.accentColor}` : '1px solid rgba(255,255,255,0.08)',
-                      background: sel ? `rgba(233,30,140,0.1)` : 'rgba(255,255,255,0.02)',
-                      boxShadow: sel ? `0 4px 20px ${char.accentColor}40` : 'none',
-                      transition: 'all 0.25s', transform: sel ? 'scale(1.03)' : 'scale(1)',
-                      display: 'flex', flexDirection: 'column',
-                    }}
-                  >
-                    <div style={{
-                      width: '100%', aspectRatio: '3/4',
-                      background: `linear-gradient(135deg, ${char.accentColor}20, rgba(0,0,0,0.3))`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 48, color: 'rgba(255,255,255,0.15)',
-                    }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={char.avatarUrl}
-                        alt={char.name}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                      />
-                    </div>
-                    <div style={{ padding: '10px 8px', textAlign: 'center' }}>
-                      <div style={{
-                        fontSize: 14, fontWeight: 700, marginBottom: 2,
-                        color: sel ? char.accentColor : 'rgba(255,255,255,0.9)',
-                      }}>{char.name}</div>
-                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 1 }}>
-                        {char.category}
-                      </div>
-                    </div>
+                  <button key={r.id} onClick={() => { set('race', r.id); goNext() }} style={{
+                    padding: '18px 12px', borderRadius: 16, cursor: 'pointer',
+                    border: sel ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.08)',
+                    background: sel ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                    transition: 'all 0.2s', color: '#fff',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  }}>
+                    <span style={{ fontSize: 28 }}>{r.emoji}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700 }}>{r.label}</span>
                   </button>
                 )
               })}
             </div>
-
-            {/* Selected character info + create button */}
-            {selectedAnimeChar && (
-              <div style={{
-                marginTop: 24, padding: 20, borderRadius: 16, width: '100%',
-                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-                  <span style={{ fontSize: 24, fontWeight: 700, color: selectedAnimeChar.accentColor }}>{selectedAnimeChar.name}</span>
-                  <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
-                    {selectedAnimeChar.traits.join(' / ')}
-                  </span>
-                </div>
-                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: '0 0 16px' }}>{selectedAnimeChar.bio}</p>
-                <button
-                  onClick={handleCreate}
-                  style={{
-                    width: '100%', padding: '16px', fontSize: 16, fontWeight: 700,
-                    borderRadius: 14, border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(135deg, #e91e8c, #c026d3, #7c3aed)',
-                    color: 'white',
-                    boxShadow: '0 8px 32px rgba(233,30,140,0.3)',
-                    letterSpacing: '0.5px',
-                  }}
-                >
-                  Start chatting with {selectedAnimeChar.name} ✨
-                </button>
-              </div>
-            )}
           </StepContainer>
         )}
 
-        {/* STEP 2 — Age (realistic companions only) */}
-        {step === 2 && data.gender !== 'anime' && data.gender !== 'game' && (
+        {step === 2 && data.gender !== 'fantasy' && (
           <StepContainer
             title="How old?"
             subtitle="Choose an age range for your SenseMate."
@@ -746,8 +766,76 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 3 — Ethnicity */}
-        {step === 3 && (
+        {/* STEP 3 — Fantasy features (ears, horns, wings, tail) */}
+        {step === 3 && data.gender === 'fantasy' && (
+          <StepContainer
+            title="Fantasy features"
+            subtitle="Customize your companion's unique traits."
+          >
+            <div style={{ width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 24 }}>
+              {/* Ears */}
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Ears</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {FANTASY_EARS.map(e => (
+                    <button key={e.id} onClick={() => set('ears', e.id)} style={{
+                      padding: '10px 18px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                      border: data.ears === e.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                      background: data.ears === e.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                      color: data.ears === e.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
+                    }}>{e.label}</button>
+                  ))}
+                </div>
+              </div>
+              {/* Horns */}
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Horns</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {FANTASY_HORNS.map(h => (
+                    <button key={h.id} onClick={() => set('horns', h.id)} style={{
+                      padding: '10px 18px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                      border: data.horns === h.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                      background: data.horns === h.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                      color: data.horns === h.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
+                    }}>{h.label}</button>
+                  ))}
+                </div>
+              </div>
+              {/* Wings */}
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Wings</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {FANTASY_WINGS.map(w => (
+                    <button key={w.id} onClick={() => set('wings', w.id)} style={{
+                      padding: '10px 18px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                      border: data.wings === w.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                      background: data.wings === w.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                      color: data.wings === w.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
+                    }}>{w.label}</button>
+                  ))}
+                </div>
+              </div>
+              {/* Tail */}
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.6)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Tail</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {FANTASY_TAILS.map(t => (
+                    <button key={t.id} onClick={() => set('tail', t.id)} style={{
+                      padding: '10px 18px', borderRadius: 12, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                      border: data.tail === t.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                      background: data.tail === t.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                      color: data.tail === t.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
+                    }}>{t.label}</button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <NavButton onClick={goNext} label="Next →" />
+          </StepContainer>
+        )}
+
+        {/* STEP 3 — Ethnicity (realistic only) */}
+        {step === 3 && data.gender !== 'fantasy' && (
           <StepContainer
             title="Ethnicity"
             subtitle="What look are you drawn to?"
@@ -904,11 +992,11 @@ export default function OnboardingPage() {
             subtitle="Fine-tune the details."
           >
             <div style={{ width: '100%', maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 28 }}>
-              {/* Skin tone */}
+              {/* Skin tone — expanded for fantasy */}
               <div>
                 <SectionTitle>Skin Tone</SectionTitle>
                 <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {SKIN_TONES.map(s => (
+                  {(data.gender === 'fantasy' ? FANTASY_SKIN : SKIN_TONES).map(s => (
                     <ColorCircle
                       key={s.id}
                       color={s.color}
@@ -954,20 +1042,33 @@ export default function OnboardingPage() {
                 </ImageGrid>
               </div>
 
-              {/* Eye color */}
+              {/* Eye color — expanded for fantasy */}
               <div>
                 <SectionTitle>Eye Color</SectionTitle>
-                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {EYE_COLORS.map(e => (
-                    <ColorCircle
-                      key={e.id}
-                      color={e.color}
-                      label={e.label}
-                      selected={data.eyeColor === e.id}
-                      onClick={() => set('eyeColor', e.id)}
-                    />
-                  ))}
-                </div>
+                {data.gender === 'fantasy' ? (
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {FANTASY_EYES.map(e => (
+                      <button key={e.id} onClick={() => set('eyeColor', e.id)} style={{
+                        padding: '8px 14px', borderRadius: 10, cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                        border: data.eyeColor === e.id ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                        background: data.eyeColor === e.id ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                        color: data.eyeColor === e.id ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
+                      }}>{e.label}</button>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    {EYE_COLORS.map(e => (
+                      <ColorCircle
+                        key={e.id}
+                        color={e.color}
+                        label={e.label}
+                        selected={data.eyeColor === e.id}
+                        onClick={() => set('eyeColor', e.id)}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -983,19 +1084,35 @@ export default function OnboardingPage() {
             title="Clothing Style"
             subtitle="How does your SenseMate dress?"
           >
-            <ImageGrid cols={4}>
-              {(data.gender === 'man' ? CLOTHING_MAN : CLOTHING_WOMAN).map(c => (
-                <ImageCard
-                  key={c.id}
-                  img={c.img}
-                  label={c.label}
-                  selected={data.clothingStyle === c.id}
-                  onClick={() => set('clothingStyle', c.id)}
-                  aspectRatio="3/4"
-                  small
-                />
-              ))}
-            </ImageGrid>
+            {data.gender === 'fantasy' ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, width: '100%' }}>
+                {FANTASY_CLOTHING.map(c => {
+                  const sel = data.clothingStyle === c.id
+                  return (
+                    <button key={c.id} onClick={() => set('clothingStyle', c.id)} style={{
+                      padding: '16px 12px', borderRadius: 14, cursor: 'pointer', fontSize: 13, fontWeight: 600,
+                      border: sel ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.08)',
+                      background: sel ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                      color: sel ? '#e91e8c' : 'rgba(255,255,255,0.7)', transition: 'all 0.2s',
+                    }}>{c.label}</button>
+                  )
+                })}
+              </div>
+            ) : (
+              <ImageGrid cols={4}>
+                {(data.gender === 'man' ? CLOTHING_MAN : CLOTHING_WOMAN).map(c => (
+                  <ImageCard
+                    key={c.id}
+                    img={c.img}
+                    label={c.label}
+                    selected={data.clothingStyle === c.id}
+                    onClick={() => set('clothingStyle', c.id)}
+                    aspectRatio="3/4"
+                    small
+                  />
+                ))}
+              </ImageGrid>
+            )}
 
             <NavButton onClick={goNext} label="Almost done →" />
           </StepContainer>
@@ -1185,7 +1302,7 @@ export default function OnboardingPage() {
                 </button>
 
                 {/* Regenerate photo — hide for anime (fixed avatars) */}
-                {data.gender !== 'anime' && data.gender !== 'game' && (
+                {true /* always show for all types */ && (
                 <button
                   onClick={handleRegenerateAvatar}
                   disabled={regenerating}
@@ -1206,7 +1323,7 @@ export default function OnboardingPage() {
                 )}
 
                 {/* Edit appearance — go back to step 1 (hide for anime) */}
-                {data.gender !== 'anime' && data.gender !== 'game' && (
+                {true /* always show for all types */ && (
                 <button
                   onClick={() => { setAnimDir('back'); setStep(1) }}
                   style={{

@@ -154,18 +154,8 @@ export async function POST(request: Request) {
 
     const { companionId, appearance, emotion = 'neutral' } = await request.json()
 
-    // Anime characters use fixed avatar images — skip generation entirely
-    if (appearance?.style === 'anime' || appearance?.style === 'game') {
-      const avatarUrl = appearance.avatarUrl || '/avatars/anime/default.jpg'
-      if (companionId) {
-        await supabase
-          .from('companions')
-          .update({ avatar_url: avatarUrl })
-          .eq('id', companionId)
-          .eq('user_id', user.id)
-      }
-      return NextResponse.json({ url: avatarUrl })
-    }
+    // Fantasy characters generate avatars via the semi-realistic model
+    // (no skip — they go through the normal generation flow below)
 
     // Build prompt with emphasis weights for key features
     const prompt = buildAvatarPrompt(appearance, emotion, true)

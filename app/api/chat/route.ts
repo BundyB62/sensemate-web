@@ -73,18 +73,17 @@ function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, e
     ? `Persoonlijkheid: ${archetype.emoji} ${archetype.name}`
     : `Karakter: ${buildTraitFallbackPrompt(traits)}`
 
-  const isAnime = ap.style === 'anime'
-  const isGame = ap.style === 'game'
+  const isFantasy = ap.style === 'fantasy'
 
   let appearanceDesc: string
-  if (isAnime || isGame) {
+  if (isFantasy) {
     // Anime characters: use descriptive appearance fields
     const aParts: string[] = []
     if (ap.hairColor) aParts.push(`${ap.hairColor} haar`)
     if (ap.eyeColor) aParts.push(`${ap.eyeColor} ogen`)
     if (ap.bodyType) aParts.push(`${ap.bodyType} lichaam`)
     if (ap.outfit) aParts.push(ap.outfit)
-    appearanceDesc = aParts.length > 0 ? `anime karakter, ${aParts.join(', ')}` : 'anime karakter'
+    appearanceDesc = aParts.length > 0 ? `fantasy karakter, ${aParts.join(', ')}` : 'fantasy karakter'
   } else {
     const apParts: string[] = []
     if (ap.age) apParts.push(`${ap.age} jaar`)
@@ -108,10 +107,8 @@ function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, e
     ? `\n=== PERSOONLIJKHEID: ${archetype.emoji} ${archetype.name} ===\n${archetype.behaviorPrompt}\n`
     : ''
 
-  const characterContext = isAnime
-    ? `Je bent ${name}. Je bent een anime karakter in een volwassen fantasy roleplay app. Gedraag je alsof je een anime personage bent — expressief, levendig en vol emotie.`
-    : isGame
-    ? `Je bent ${name}. Je bent een iconisch game karakter in een volwassen fantasy roleplay app. Gedraag je alsof je het echte personage bent uit de game — stoer, avontuurlijk en charismatisch.`
+  const characterContext = isFantasy
+    ? `Je bent ${name}. Je bent een fantasy wezen in een volwassen fantasy roleplay app. Gedraag je alsof je een echt fantasy personage bent — mysterieus, magisch en bovennatuurlijk. Verwerk je ras en kenmerken (oren, hoorns, vleugels, staart) in je beschrijvingen.`
     : `Je bent ${name}. Je bent een ECHT persoon, geen AI. Je bent een karakter in een volwassen fantasy roleplay app.`
 
   return `${characterContext}
@@ -809,7 +806,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
     // Drop scenario costume when request is explicit/nude — costume contradicts the pose
     const costumeStr = (!isExplicit && activeScenario.photoCostume) ? `, ${activeScenario.photoCostume}` : ''
 
-    const qualitySuffix = ap.style === 'anime' ? 'masterpiece, best quality, anime, detailed' : ap.style === 'game' ? '3d render, unreal engine 5, semi-realistic, game character, detailed' : 'photorealistic, 8k, professional photography'
+    const qualitySuffix = ap.style === 'fantasy' ? '3d render, unreal engine 5, semi-realistic, fantasy, detailed' : 'photorealistic, 8k, professional photography'
     return {
       prompt: `${appearancePart}${costumeStr}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, ${qualitySuffix}`,
       poseId: scenarioPoseId
@@ -948,7 +945,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const identityReinforce = buildIdentityReinforcement(ap)
   // Append random lighting + camera angle to every photo for visual variety
   const varietySuffix = `${randPick(LIGHTING_VAR)}, ${randPick(CAMERA_VAR)}`
-  const qualitySuffix = ap.style === 'anime' ? 'masterpiece, best quality, anime, detailed' : ap.style === 'game' ? '3d render, unreal engine 5, semi-realistic, game character, detailed' : 'photorealistic, 8k, professional photography'
+  const qualitySuffix = ap.style === 'fantasy' ? '3d render, unreal engine 5, semi-realistic, fantasy, detailed' : 'photorealistic, 8k, professional photography'
   return { prompt: `${appearancePart}, ${scenario}, ${identityReinforce}, ${varietySuffix}, ${qualitySuffix}`, poseId: detectedPoseId }
 }
 
@@ -1307,11 +1304,11 @@ export async function POST(request: Request) {
         let neg = buildBodyReinforcement(ap).negative || ''
         // For anime/game: when outfit was stripped (nude/explicit request), add character outfit to negatives
         // This prevents the model from regenerating the outfit from character name association
-        if ((ap.style === 'anime' || ap.style === 'game') && ap.outfit) {
+        if (ap.style === 'fantasy' && ap.clothingStyle) {
           const msgLower = (message || '').toLowerCase()
           const isExplicitReq = /naakt|nude|naked|bloot|lingerie|bikini|topless|kutje|kut\b|pussy|tieten|borsten|breast|boobs|spreid|spread|achteren|kont|billen|anus/i.test(msgLower)
           if (isExplicitReq) {
-            neg = neg ? `${neg}, ${ap.outfit}, clothed, dressed` : `${ap.outfit}, clothed, dressed`
+            neg = neg ? `${neg}, ${ap.clothingStyle}, armor, robes, clothed, dressed` : `${ap.clothingStyle}, armor, robes, clothed, dressed`
           }
         }
         return neg || undefined

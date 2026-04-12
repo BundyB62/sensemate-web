@@ -221,36 +221,163 @@ export const EMOTION_EXPRESSIONS: Record<string, string> = {
   playful: 'playful bright smile mischievous eyes laughing',
 }
 
-// ─── Anime-specific negative prompt ──────────────────────────────────────
-export function buildAnimeNegativePrompt(): string {
-  return 'realistic, photograph, 3d render, photorealistic, skin pores, skin texture, wrinkles, deformed, ugly, blurry, low quality, bad anatomy, bad proportions, extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text, logo, signature'
+// ─── Fantasy-specific negative prompt (semi-realistic 3D) ────────────────
+export function buildFantasyNegativePrompt(): string {
+  return 'cartoon, flat colors, cel shading, sketch, anime, deformed, ugly, blurry, low quality, bad anatomy, bad proportions, extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text, logo, signature'
 }
 
-// ─── Game-specific negative prompt (semi-realistic 3D) ───────────────────
-export function buildGameNegativePrompt(): string {
-  return 'cartoon, flat colors, cel shading, sketch, painting, deformed, ugly, blurry, low quality, bad anatomy, bad proportions, extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text, logo, signature'
+// ─── Fantasy appearance maps ─────────────────────────────────────────────
+const RACE_MAP: Record<string, string> = {
+  elf: 'beautiful elf, ethereal elegant features',
+  dark_elf: 'dark elf drow, sharp angular features, dark skin',
+  demon: 'demon succubus, seductive demonic features',
+  angel: 'angel celestial being, radiant holy aura, divine beauty',
+  vampire: 'vampire, pale skin, sharp fangs, gothic beauty',
+  fairy: 'fairy fae, delicate small features, ethereal glow',
+  orc: 'orc, strong fierce features, tusks',
+  dragon_kin: 'dragonborn dragon-kin, draconic features, scales on skin',
+  catgirl: 'catgirl nekomimi, cat ears on head, cat tail, playful feline features',
+  foxgirl: 'foxgirl kitsune, fox ears on head, fluffy fox tail, sly feline features',
+  werewolf: 'werewolf lycan, wild feral features, amber eyes',
+  mermaid: 'mermaid siren, beautiful aquatic features, wet glistening skin',
+}
+
+const EARS_MAP: Record<string, string> = {
+  normal: '',
+  pointed_short: '(pointed elf ears:1.3)',
+  pointed_long: '(long pointed elf ears:1.4)',
+  animal: '(animal ears on top of head:1.3)',
+}
+
+const HORNS_MAP: Record<string, string> = {
+  none: '',
+  small: '(small horns on forehead:1.3)',
+  large: '(large curved horns:1.4)',
+  ram: '(large ram horns curling around ears:1.4)',
+  demon: '(demon horns protruding from forehead:1.4)',
+  antlers: '(deer antlers on head:1.3)',
+}
+
+const WINGS_MAP: Record<string, string> = {
+  none: '',
+  angel: '(large white feathered angel wings:1.4)',
+  demon: '(dark leathery bat demon wings:1.4)',
+  fairy: '(translucent glowing fairy wings:1.3)',
+  dragon: '(large dragon wings:1.4)',
+}
+
+const TAIL_MAP: Record<string, string> = {
+  none: '',
+  demon: '(long demon tail with pointed tip:1.3)',
+  fox: '(fluffy fox tail:1.3)',
+  cat: '(long cat tail:1.3)',
+  dragon: '(thick dragon tail with scales:1.3)',
+}
+
+const FANTASY_SKIN_MAP: Record<string, string> = {
+  // Normal human tones
+  porcelain: 'porcelain very pale white skin',
+  fair: 'fair light skin',
+  warm_beige: 'warm beige light-medium skin',
+  olive: 'olive medium skin',
+  tan: 'tan golden-brown skin',
+  brown: 'medium brown skin',
+  dark: 'deep dark brown skin',
+  // Fantasy colors
+  blue: 'light blue fantasy skin',
+  dark_blue: 'dark blue navy skin',
+  green: 'green skin',
+  purple: 'purple lavender skin',
+  red: 'red crimson skin',
+  grey: 'pale grey ashen skin',
+  gold: 'golden shimmering skin',
+  white: 'pure snow white pale skin',
+}
+
+const FANTASY_EYE_MAP: Record<string, string> = {
+  blue: 'bright vivid blue eyes',
+  green: 'vivid emerald green eyes',
+  hazel: 'hazel green-brown eyes',
+  amber: 'amber golden eyes',
+  brown: 'warm brown eyes',
+  dark_brown: 'deep dark brown eyes',
+  grey: 'steel grey eyes',
+  violet: 'violet purple eyes',
+  red: 'glowing red eyes',
+  gold: 'glowing golden eyes',
+  silver: 'silver metallic eyes',
+  slit: 'reptilian slit-pupil eyes',
+  solid_white: 'solid white glowing eyes no pupils',
+  solid_black: 'solid black void eyes',
+  heterochromia: 'heterochromia different colored eyes',
+}
+
+const FANTASY_CLOTHING_MAP: Record<string, string> = {
+  armor: 'wearing ornate fantasy plate armor, detailed engravings',
+  leather: 'wearing dark leather armor, straps and buckles, ranger outfit',
+  robes: 'wearing flowing magical robes, mystical patterns',
+  tribal: 'wearing tribal outfit, fur and bone accessories, primal',
+  royal: 'wearing royal elegant gown, crown, jewels, regal',
+  mage: 'wearing mage robes, arcane symbols, magical staff',
+  priestess: 'wearing white priestess robes, holy symbols, ethereal',
+  dark: 'wearing dark gothic outfit, black lace, chains, spikes',
+  minimal: 'wearing minimal clothing, cloth wraps, barely covered',
+  nothing: 'nude, no clothing',
+  chains: 'wearing chains and leather straps, bondage-style harness',
+  elvish: 'wearing elegant elvish outfit, leaf patterns, nature-themed',
 }
 
 // ─── Build a clean appearance description string (for chat photo prompts) ────
 // This gives a consistent, parseable appearance block without prompt engineering artifacts
 export function buildAppearanceDescription(profile: Record<string, any>, includeBody = true, includeClothing = true): string {
-  // Anime/game characters use promptTags directly instead of building from profile fields
-  if (profile.style === 'anime' || profile.style === 'game') {
-    let tags = profile.promptTags || ''
-    if (!includeClothing) {
-      // Strip outfit/clothing descriptions for nude/explicit requests
-      tags = tags
-        .replace(/,?\s*wearing [^,]+/gi, '')
-        .replace(/,?\s*(school uniform|sailor uniform|shrine maiden outfit|maid outfit|maid dress|idol costume|tactical bodysuit|fantasy armor|sorceress robes|royal attire|samurai hakama|open kimono|kimono|corset|boots|thigh-high boots|knee-high boots|stockings|white stockings|headband|frilly headband|cape|fur cape|black cape|dress|white dress|blouse|white blouse|skirt|pleated skirt|frilly skirt|crop top[^,]*|hotpants|choker[^,]*|tiara|silver tiara|microphone|sword[^,]*|katana[^,]*|magical staff|arcane symbols|neon accents|cyberpunk implants|leather and steel|silver accessories|white haori|red hakama|hair ribbons|bowing|warrior pose|tube top[^,]*|tactical pants|shoulder holster|beret|catsuit|high heels|guns|elegant dress|fur collar|pendant|bikini top|ripped stockings|military gear|sniper rifle|revealing robes|feather accessories|staff|dark lipstick|qipao dress|white boots|spiked bracelets|mini skirt|red gloves|suspenders|blindfold visor|gothic maid dress|black gloves|bodysuit|pistol holsters|adventurer gear|dual pistol)[^,]*/gi, '')
-        .replace(/,\s*,/g, ',').replace(/,\s*$/, '').replace(/^\s*,/, '')
-      // Force nude tokens with high weight — character name associations are very strong
-      // and will override implicit "nude" from the scenario without explicit emphasis
-      tags += ', (completely nude:1.6), (naked:1.5), (no clothing:1.4), bare skin'
+  // Fantasy characters — built from race + features + body
+  if (profile.style === 'fantasy') {
+    const race = RACE_MAP[profile.race] || 'fantasy woman'
+    const ears = EARS_MAP[profile.ears] || ''
+    const horns = HORNS_MAP[profile.horns] || ''
+    const wings = WINGS_MAP[profile.wings] || ''
+    const tail = TAIL_MAP[profile.tail] || ''
+    const skin = FANTASY_SKIN_MAP[profile.skinTone] || 'fair light skin'
+    const hairColor = HAIR_COLOR_MAP[profile.hairColor] || 'brown'
+    const hairLength = HAIR_LENGTH_MAP[profile.hairLength] || 'long flowing hair'
+    const eyeColor = FANTASY_EYE_MAP[profile.eyeColor] || 'blue eyes'
+    const build = BUILD_MAP[profile.build] || 'slim lean body'
+
+    const parts: string[] = [
+      `(${race}:1.3)`,
+      `(${skin}:1.2)`,
+      `(${hairColor} ${hairLength}:1.3)`,
+      `(${eyeColor}:1.3)`,
+      `(${build}:1.3)`,
+    ]
+    if (ears) parts.push(ears)
+    if (horns) parts.push(horns)
+    if (wings) parts.push(wings)
+    if (tail) parts.push(tail)
+
+    // Body details
+    if (includeBody) {
+      if (profile.breastSize) {
+        const breast = BREAST_MAP[profile.breastSize] || ''
+        if (breast) parts.push(`(${breast}:1.3)`)
+      }
+      if (profile.assSize) {
+        const ass = ASS_MAP[profile.assSize] || ''
+        if (ass) parts.push(`(${ass}:1.2)`)
+      }
     }
-    if (profile.style === 'game') {
-      return `${tags}, 3d render, unreal engine 5, semi-realistic, game character, detailed skin texture, volumetric lighting, highres`
+
+    // Clothing
+    if (includeClothing && profile.clothingStyle) {
+      const clothing = FANTASY_CLOTHING_MAP[profile.clothingStyle] || ''
+      if (clothing) parts.push(clothing)
+    } else if (!includeClothing) {
+      // Nude tokens for explicit requests
+      parts.push('(completely nude:1.5), (naked:1.4), bare skin')
     }
-    return `${tags}, anime style, masterpiece, best quality, highres, detailed`
+
+    parts.push('consistent appearance, same person throughout')
+    return parts.join(', ') + ', 3d render, unreal engine 5, semi-realistic, fantasy, detailed skin texture, volumetric lighting'
   }
 
   const gender = profile.gender === 'man' ? 'man' : 'woman'
@@ -314,9 +441,20 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
 // ─── Identity reinforcement — core features that must NEVER change ──────────
 // Repeated at the END of prompts to ensure hijab, hair color, eye color, body type persist
 export function buildIdentityReinforcement(profile: Record<string, any>): string {
-  // Anime/game: use identity tags from character definition
-  if (profile.style === 'anime' || profile.style === 'game') {
-    return profile.identityTags || ''
+  // Fantasy: reinforce race + distinctive features
+  if (profile.style === 'fantasy') {
+    const parts: string[] = []
+    const race = RACE_MAP[profile.race] || 'fantasy woman'
+    parts.push(`(${race}:1.3)`)
+    const ears = EARS_MAP[profile.ears] || ''
+    if (ears) parts.push(ears)
+    const horns = HORNS_MAP[profile.horns] || ''
+    if (horns) parts.push(horns)
+    const wings = WINGS_MAP[profile.wings] || ''
+    if (wings) parts.push(wings)
+    const eyeColor = FANTASY_EYE_MAP[profile.eyeColor] || 'blue eyes'
+    parts.push(`(${eyeColor}:1.2)`)
+    return parts.join(', ')
   }
 
   const parts: string[] = []
@@ -349,9 +487,9 @@ export function buildIdentityReinforcement(profile: Record<string, any>): string
 
 // Adds extra emphasis AND negative hints so the AI follows body type closely
 export function buildBodyReinforcement(profile: Record<string, any>): { emphasis: string; negative: string } {
-  // Anime/game: body is tag-driven, no reinforcement needed
-  if (profile.style === 'anime' || profile.style === 'game') {
-    return { emphasis: '', negative: '' }
+  // Fantasy: same body reinforcement as realistic (build/breast/ass work the same)
+  if (profile.style === 'fantasy') {
+    // Fall through to the realistic body reinforcement below
   }
 
   const emphasis: string[] = []
@@ -428,9 +566,8 @@ export function buildBodyReinforcement(profile: Record<string, any>): { emphasis
 
 // ─── Build negative prompt to prevent wrong features ──────────────────────
 export function buildNegativePrompt(profile: Record<string, any>): string {
-  // Anime/game: different negatives
-  if (profile.style === 'anime') return buildAnimeNegativePrompt()
-  if (profile.style === 'game') return buildGameNegativePrompt()
+  // Fantasy: semi-realistic 3D negatives
+  if (profile.style === 'fantasy') return buildFantasyNegativePrompt()
 
   const parts = [
     'cartoon, anime, illustration, painting, drawing, sketch, 3d render, cgi',
@@ -476,18 +613,11 @@ export function buildNegativePrompt(profile: Record<string, any>): string {
 
 // ─── Main prompt builder ──────────────────────────────────────────────────
 export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutral', sfwMode = true): string {
-  // Anime: avatar prompt uses character prompt tags directly
-  if (profile.style === 'anime') {
-    const tags = profile.promptTags || '1girl, anime style'
+  // Fantasy: semi-realistic 3D portrait using race + features
+  if (profile.style === 'fantasy') {
+    const desc = buildAppearanceDescription(profile, false, true)
     const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
-    return `${tags}, ${expression}, portrait, upper body, anime style, masterpiece, best quality, highres, detailed face, vibrant colors`
-  }
-
-  // Game: semi-realistic 3D avatar
-  if (profile.style === 'game') {
-    const tags = profile.promptTags || 'young woman, game character'
-    const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
-    return `${tags}, ${expression}, portrait, upper body, 3d render, unreal engine 5, semi-realistic, game character, detailed skin texture, volumetric lighting, highres, cinematic`
+    return `photorealistic full body portrait from head to toe, showing entire body including feet, ${desc}, ${expression}, looking at camera, standing pose, full length shot, fantasy environment, dramatic cinematic lighting, 8k ultra-detailed`
   }
 
   const gender = profile.gender === 'man' ? 'man' : 'woman'
