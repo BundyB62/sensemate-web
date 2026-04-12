@@ -154,6 +154,19 @@ export async function POST(request: Request) {
 
     const { companionId, appearance, emotion = 'neutral' } = await request.json()
 
+    // Anime characters use fixed avatar images — skip generation entirely
+    if (appearance?.style === 'anime') {
+      const avatarUrl = appearance.avatarUrl || '/avatars/anime/default.jpg'
+      if (companionId) {
+        await supabase
+          .from('companions')
+          .update({ avatar_url: avatarUrl })
+          .eq('id', companionId)
+          .eq('user_id', user.id)
+      }
+      return NextResponse.json({ url: avatarUrl })
+    }
+
     // Build prompt with emphasis weights for key features
     const prompt = buildAvatarPrompt(appearance, emotion, true)
     const negativePrompt = buildNegativePrompt(appearance)

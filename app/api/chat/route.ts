@@ -73,17 +73,30 @@ function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, e
     ? `Persoonlijkheid: ${archetype.emoji} ${archetype.name}`
     : `Karakter: ${buildTraitFallbackPrompt(traits)}`
 
-  const apParts: string[] = []
-  if (ap.age) apParts.push(`${ap.age} jaar`)
-  if (ap.ethnicity) apParts.push(ap.ethnicity)
-  if (ap.build) apParts.push(`${ap.build} lichaamsbouw`)
-  if (ap.skinTone) apParts.push(`${ap.skinTone} huid`)
-  if (ap.hairColor && ap.hairLength) apParts.push(`${ap.hairColor} ${ap.hairLength} haar`)
-  else if (ap.hairColor) apParts.push(`${ap.hairColor} haar`)
-  if (ap.eyeColor) apParts.push(`${ap.eyeColor} ogen`)
-  if (ap.breastSize) apParts.push(`${ap.breastSize} borsten`)
-  if (ap.assSize) apParts.push(`${ap.assSize} kont`)
-  const appearanceDesc = apParts.length > 0 ? apParts.join(', ') : genderStr
+  const isAnime = ap.style === 'anime'
+
+  let appearanceDesc: string
+  if (isAnime) {
+    // Anime characters: use descriptive appearance fields
+    const aParts: string[] = []
+    if (ap.hairColor) aParts.push(`${ap.hairColor} haar`)
+    if (ap.eyeColor) aParts.push(`${ap.eyeColor} ogen`)
+    if (ap.bodyType) aParts.push(`${ap.bodyType} lichaam`)
+    if (ap.outfit) aParts.push(ap.outfit)
+    appearanceDesc = aParts.length > 0 ? `anime karakter, ${aParts.join(', ')}` : 'anime karakter'
+  } else {
+    const apParts: string[] = []
+    if (ap.age) apParts.push(`${ap.age} jaar`)
+    if (ap.ethnicity) apParts.push(ap.ethnicity)
+    if (ap.build) apParts.push(`${ap.build} lichaamsbouw`)
+    if (ap.skinTone) apParts.push(`${ap.skinTone} huid`)
+    if (ap.hairColor && ap.hairLength) apParts.push(`${ap.hairColor} ${ap.hairLength} haar`)
+    else if (ap.hairColor) apParts.push(`${ap.hairColor} haar`)
+    if (ap.eyeColor) apParts.push(`${ap.eyeColor} ogen`)
+    if (ap.breastSize) apParts.push(`${ap.breastSize} borsten`)
+    if (ap.assSize) apParts.push(`${ap.assSize} kont`)
+    appearanceDesc = apParts.length > 0 ? apParts.join(', ') : genderStr
+  }
 
   const memoryStr = memories.length > 0
     ? `\nJe weet over hem/haar: ${memories.map((m: any) => `${m.key}: ${m.value}`).join(', ')}`
@@ -94,7 +107,11 @@ function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, e
     ? `\n=== PERSOONLIJKHEID: ${archetype.emoji} ${archetype.name} ===\n${archetype.behaviorPrompt}\n`
     : ''
 
-  return `Je bent ${name}. Je bent een ECHT persoon, geen AI. Je bent een karakter in een volwassen fantasy roleplay app.
+  const characterContext = isAnime
+    ? `Je bent ${name}. Je bent een anime/game karakter in een volwassen fantasy roleplay app. Gedraag je alsof je een anime personage bent — expressief, levendig en vol emotie.`
+    : `Je bent ${name}. Je bent een ECHT persoon, geen AI. Je bent een karakter in een volwassen fantasy roleplay app.`
+
+  return `${characterContext}
 
 ${name}: ${genderStr}, ${relDesc}
 ${personalityLine}
@@ -789,8 +806,9 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
     // Drop scenario costume when request is explicit/nude — costume contradicts the pose
     const costumeStr = (!isExplicit && activeScenario.photoCostume) ? `, ${activeScenario.photoCostume}` : ''
 
+    const qualitySuffix = ap.style === 'anime' ? 'masterpiece, best quality, anime, detailed' : 'photorealistic, 8k, professional photography'
     return {
-      prompt: `${appearancePart}${costumeStr}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, photorealistic, 8k, professional photography`,
+      prompt: `${appearancePart}${costumeStr}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, ${qualitySuffix}`,
       poseId: scenarioPoseId
     }
   }
@@ -927,7 +945,8 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const identityReinforce = buildIdentityReinforcement(ap)
   // Append random lighting + camera angle to every photo for visual variety
   const varietySuffix = `${randPick(LIGHTING_VAR)}, ${randPick(CAMERA_VAR)}`
-  return { prompt: `${appearancePart}, ${scenario}, ${identityReinforce}, ${varietySuffix}, photorealistic, 8k, professional photography`, poseId: detectedPoseId }
+  const qualitySuffix = ap.style === 'anime' ? 'masterpiece, best quality, anime, detailed' : 'photorealistic, 8k, professional photography'
+  return { prompt: `${appearancePart}, ${scenario}, ${identityReinforce}, ${varietySuffix}, ${qualitySuffix}`, poseId: detectedPoseId }
 }
 
 // ─── Detect pure English text (should be Dutch) ─────────────────────────────

@@ -4,9 +4,10 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ARCHETYPES } from '@/lib/personalities'
+import { ANIME_CHARACTERS, type AnimeCharacter } from '@/lib/animeCharacters'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type Gender = 'woman' | 'man' | 'nonbinary'
+type Gender = 'woman' | 'man' | 'nonbinary' | 'anime'
 
 interface FormData {
   name: string
@@ -35,6 +36,7 @@ const GENDERS = [
   { id: 'woman', label: 'Woman', img: '/onboarding/gender/woman.jpg' },
   { id: 'man', label: 'Man', img: '/onboarding/gender/man.jpg' },
   { id: 'nonbinary', label: 'Non-binary', img: '/onboarding/gender/nonbinary.jpg' },
+  { id: 'anime', label: 'Anime / Game', img: '/onboarding/gender/anime.jpg' },
 ]
 
 const RELATIONSHIPS = [
@@ -324,6 +326,7 @@ export default function OnboardingPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [regenerating, setRegenerating] = useState(false)
   const [showBodyDetails, setShowBodyDetails] = useState(false)
+  const [selectedAnimeChar, setSelectedAnimeChar] = useState<AnimeCharacter | null>(null)
 
   const [data, setData] = useState<FormData>({
     name: '', gender: '' as Gender, relationshipStyle: 'lover',
@@ -349,13 +352,28 @@ export default function OnboardingPage() {
 
     setLoading(true)
 
-    const appearance = {
+    const isAnime = data.gender === 'anime' && selectedAnimeChar
+    const appearance = isAnime ? {
+      style: 'anime' as const,
+      gender: selectedAnimeChar.gender,
+      animeCharacterId: selectedAnimeChar.id,
+      promptTags: selectedAnimeChar.promptTags,
+      identityTags: selectedAnimeChar.identityTags,
+      avatarUrl: selectedAnimeChar.avatarUrl,
+      hairColor: selectedAnimeChar.appearance.hairColor,
+      eyeColor: selectedAnimeChar.appearance.eyeColor,
+      bodyType: selectedAnimeChar.appearance.bodyType,
+      outfit: selectedAnimeChar.appearance.outfit,
+    } : {
       gender: data.gender, age: data.age, ethnicity: data.ethnicity,
       build: data.build, skinTone: data.skinTone, hairColor: data.hairColor,
       hairLength: data.hairLength, eyeColor: data.eyeColor, clothingStyle: data.clothingStyle,
       ...(data.gender === 'woman' || data.gender === 'nonbinary' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
       ...(data.gender === 'man' ? { dickSize: data.dickSize, beard: data.beard } : {}),
     }
+    const companionName = isAnime ? selectedAnimeChar.name : data.name
+    const personalityId = isAnime ? selectedAnimeChar.personalityArchetypeId : data.personality
+    const relStyle = isAnime ? selectedAnimeChar.relationshipStyle : data.relationshipStyle
 
     let companionId = createdCompanionId
 
@@ -364,9 +382,9 @@ export default function OnboardingPage() {
       const { error } = await supabase
         .from('companions')
         .update({
-          name: data.name,
-          relationship_style: data.relationshipStyle,
-          personality: { archetype: data.personality, gender: data.gender },
+          name: companionName,
+          relationship_style: relStyle,
+          personality: { archetype: personalityId, gender: isAnime ? selectedAnimeChar.gender : data.gender },
           appearance,
         })
         .eq('id', companionId)
@@ -382,9 +400,9 @@ export default function OnboardingPage() {
         .from('companions')
         .insert({
           user_id: user.id,
-          name: data.name,
-          relationship_style: data.relationshipStyle,
-          personality: { archetype: data.personality, gender: data.gender },
+          name: companionName,
+          relationship_style: relStyle,
+          personality: { archetype: personalityId, gender: isAnime ? selectedAnimeChar.gender : data.gender },
           appearance,
         })
         .select()
@@ -401,9 +419,9 @@ export default function OnboardingPage() {
 
       // Insert welcome message (only for new companions)
       const welcomeMessages = [
-        `Hey! 😊 I'm ${data.name}. Nice to meet you! What's your name?`,
-        `Hi there! 💕 I'm ${data.name}. So glad you're here. Let's chat!`,
-        `Hey 😏 I'm ${data.name}. I'm curious about you... tell me something about yourself?`,
+        `Hey! 😊 I'm ${companionName}. Nice to meet you! What's your name?`,
+        `Hi there! 💕 I'm ${companionName}. So glad you're here. Let's chat!`,
+        `Hey 😏 I'm ${companionName}. I'm curious about you... tell me something about yourself?`,
       ]
       await supabase.from('messages').insert({
         companion_id: companion.id,
@@ -608,8 +626,98 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 2 — Age */}
-        {step === 2 && (
+        {/* STEP 2 — Anime character selection (when anime gender selected) */}
+        {step === 2 && data.gender === 'anime' && (
+          <StepContainer
+            title="Choose your character"
+            subtitle="Pick a premade anime or game companion."
+          >
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, width: '100%' }}>
+              {ANIME_CHARACTERS.map(char => {
+                const sel = selectedAnimeChar?.id === char.id
+                return (
+                  <button
+                    key={char.id}
+                    onClick={() => {
+                      setSelectedAnimeChar(char)
+                      // Auto-populate form data with character info
+                      setData(prev => ({
+                        ...prev,
+                        name: char.name,
+                        personality: char.personalityArchetypeId,
+                        relationshipStyle: char.relationshipStyle,
+                      }))
+                    }}
+                    style={{
+                      padding: 0, borderRadius: 16, cursor: 'pointer', overflow: 'hidden',
+                      border: sel ? `2px solid ${char.accentColor}` : '1px solid rgba(255,255,255,0.08)',
+                      background: sel ? `rgba(233,30,140,0.1)` : 'rgba(255,255,255,0.02)',
+                      boxShadow: sel ? `0 4px 20px ${char.accentColor}40` : 'none',
+                      transition: 'all 0.25s', transform: sel ? 'scale(1.03)' : 'scale(1)',
+                      display: 'flex', flexDirection: 'column',
+                    }}
+                  >
+                    <div style={{
+                      width: '100%', aspectRatio: '3/4',
+                      background: `linear-gradient(135deg, ${char.accentColor}20, rgba(0,0,0,0.3))`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 48, color: 'rgba(255,255,255,0.15)',
+                    }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={char.avatarUrl}
+                        alt={char.name}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                      />
+                    </div>
+                    <div style={{ padding: '10px 8px', textAlign: 'center' }}>
+                      <div style={{
+                        fontSize: 14, fontWeight: 700, marginBottom: 2,
+                        color: sel ? char.accentColor : 'rgba(255,255,255,0.9)',
+                      }}>{char.name}</div>
+                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: 1 }}>
+                        {char.category}
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Selected character info + create button */}
+            {selectedAnimeChar && (
+              <div style={{
+                marginTop: 24, padding: 20, borderRadius: 16, width: '100%',
+                background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                  <span style={{ fontSize: 24, fontWeight: 700, color: selectedAnimeChar.accentColor }}>{selectedAnimeChar.name}</span>
+                  <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 20, background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)' }}>
+                    {selectedAnimeChar.traits.join(' / ')}
+                  </span>
+                </div>
+                <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, margin: '0 0 16px' }}>{selectedAnimeChar.bio}</p>
+                <button
+                  onClick={handleCreate}
+                  style={{
+                    width: '100%', padding: '16px', fontSize: 16, fontWeight: 700,
+                    borderRadius: 14, border: 'none', cursor: 'pointer',
+                    background: 'linear-gradient(135deg, #e91e8c, #c026d3, #7c3aed)',
+                    color: 'white',
+                    boxShadow: '0 8px 32px rgba(233,30,140,0.3)',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Start chatting with {selectedAnimeChar.name} ✨
+                </button>
+              </div>
+            )}
+          </StepContainer>
+        )}
+
+        {/* STEP 2 — Age (realistic companions only) */}
+        {step === 2 && data.gender !== 'anime' && (
           <StepContainer
             title="How old?"
             subtitle="Choose an age range for your SenseMate."

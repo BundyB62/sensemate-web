@@ -221,9 +221,20 @@ export const EMOTION_EXPRESSIONS: Record<string, string> = {
   playful: 'playful bright smile mischievous eyes laughing',
 }
 
+// ─── Anime-specific negative prompt ──────────────────────────────────────
+export function buildAnimeNegativePrompt(): string {
+  return 'realistic, photograph, 3d render, photorealistic, skin pores, skin texture, wrinkles, deformed, ugly, blurry, low quality, bad anatomy, bad proportions, extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text, logo, signature'
+}
+
 // ─── Build a clean appearance description string (for chat photo prompts) ────
 // This gives a consistent, parseable appearance block without prompt engineering artifacts
 export function buildAppearanceDescription(profile: Record<string, any>, includeBody = true, includeClothing = true): string {
+  // Anime characters use promptTags directly instead of building from profile fields
+  if (profile.style === 'anime') {
+    const tags = profile.promptTags || ''
+    return `${tags}, anime style, masterpiece, best quality, highres, detailed`
+  }
+
   const gender = profile.gender === 'man' ? 'man' : 'woman'
   const isMale = gender === 'man'
 
@@ -285,6 +296,11 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
 // ─── Identity reinforcement — core features that must NEVER change ──────────
 // Repeated at the END of prompts to ensure hijab, hair color, eye color, body type persist
 export function buildIdentityReinforcement(profile: Record<string, any>): string {
+  // Anime: use identity tags from character definition
+  if (profile.style === 'anime') {
+    return profile.identityTags || ''
+  }
+
   const parts: string[] = []
 
   // Hijab is the #1 identity feature — must always be present
@@ -315,6 +331,11 @@ export function buildIdentityReinforcement(profile: Record<string, any>): string
 
 // Adds extra emphasis AND negative hints so the AI follows body type closely
 export function buildBodyReinforcement(profile: Record<string, any>): { emphasis: string; negative: string } {
+  // Anime: body is tag-driven, no reinforcement needed
+  if (profile.style === 'anime') {
+    return { emphasis: '', negative: '' }
+  }
+
   const emphasis: string[] = []
   const negative: string[] = []
 
@@ -389,6 +410,9 @@ export function buildBodyReinforcement(profile: Record<string, any>): { emphasis
 
 // ─── Build negative prompt to prevent wrong features ──────────────────────
 export function buildNegativePrompt(profile: Record<string, any>): string {
+  // Anime: different negatives (allow anime, block realistic)
+  if (profile.style === 'anime') return buildAnimeNegativePrompt()
+
   const parts = [
     'cartoon, anime, illustration, painting, drawing, sketch, 3d render, cgi',
     'deformed, ugly, blurry, low quality, bad anatomy, bad proportions',
@@ -433,6 +457,13 @@ export function buildNegativePrompt(profile: Record<string, any>): string {
 
 // ─── Main prompt builder ──────────────────────────────────────────────────
 export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutral', sfwMode = true): string {
+  // Anime: avatar prompt uses character prompt tags directly
+  if (profile.style === 'anime') {
+    const tags = profile.promptTags || '1girl, anime style'
+    const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
+    return `${tags}, ${expression}, portrait, upper body, anime style, masterpiece, best quality, highres, detailed face, vibrant colors`
+  }
+
   const gender = profile.gender === 'man' ? 'man' : 'woman'
   const isMale = gender === 'man'
 
