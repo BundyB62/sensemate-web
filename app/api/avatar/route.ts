@@ -155,7 +155,7 @@ export async function POST(request: Request) {
     const { companionId, appearance, emotion = 'neutral' } = await request.json()
 
     // Anime characters use fixed avatar images — skip generation entirely
-    if (appearance?.style === 'anime') {
+    if (appearance?.style === 'anime' || appearance?.style === 'game') {
       const avatarUrl = appearance.avatarUrl || '/avatars/anime/default.jpg'
       if (companionId) {
         await supabase

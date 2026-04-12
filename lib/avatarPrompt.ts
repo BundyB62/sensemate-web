@@ -226,19 +226,26 @@ export function buildAnimeNegativePrompt(): string {
   return 'realistic, photograph, 3d render, photorealistic, skin pores, skin texture, wrinkles, deformed, ugly, blurry, low quality, bad anatomy, bad proportions, extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text, logo, signature'
 }
 
+// ─── Game-specific negative prompt (semi-realistic 3D) ───────────────────
+export function buildGameNegativePrompt(): string {
+  return 'cartoon, flat colors, cel shading, sketch, painting, deformed, ugly, blurry, low quality, bad anatomy, bad proportions, extra fingers, mutated hands, poorly drawn face, disfigured, watermark, text, logo, signature'
+}
+
 // ─── Build a clean appearance description string (for chat photo prompts) ────
 // This gives a consistent, parseable appearance block without prompt engineering artifacts
 export function buildAppearanceDescription(profile: Record<string, any>, includeBody = true, includeClothing = true): string {
-  // Anime characters use promptTags directly instead of building from profile fields
-  if (profile.style === 'anime') {
+  // Anime/game characters use promptTags directly instead of building from profile fields
+  if (profile.style === 'anime' || profile.style === 'game') {
     let tags = profile.promptTags || ''
     if (!includeClothing) {
       // Strip outfit/clothing descriptions for nude/explicit requests
-      // Remove "wearing ..." clauses and common clothing/accessory words
       tags = tags
         .replace(/,?\s*wearing [^,]+/gi, '')
-        .replace(/,?\s*(school uniform|sailor uniform|shrine maiden outfit|maid outfit|maid dress|idol costume|tactical bodysuit|fantasy armor|sorceress robes|royal attire|samurai hakama|open kimono|kimono|corset|boots|thigh-high boots|knee-high boots|stockings|white stockings|headband|frilly headband|cape|fur cape|black cape|dress|white dress|blouse|white blouse|skirt|pleated skirt|frilly skirt|crop top[^,]*|hotpants|choker[^,]*|tiara|silver tiara|microphone|sword[^,]*|katana[^,]*|magical staff|arcane symbols|neon accents|cyberpunk implants|leather and steel|silver accessories|white haori|red hakama|hair ribbons|bowing|warrior pose)[^,]*/gi, '')
+        .replace(/,?\s*(school uniform|sailor uniform|shrine maiden outfit|maid outfit|maid dress|idol costume|tactical bodysuit|fantasy armor|sorceress robes|royal attire|samurai hakama|open kimono|kimono|corset|boots|thigh-high boots|knee-high boots|stockings|white stockings|headband|frilly headband|cape|fur cape|black cape|dress|white dress|blouse|white blouse|skirt|pleated skirt|frilly skirt|crop top[^,]*|hotpants|choker[^,]*|tiara|silver tiara|microphone|sword[^,]*|katana[^,]*|magical staff|arcane symbols|neon accents|cyberpunk implants|leather and steel|silver accessories|white haori|red hakama|hair ribbons|bowing|warrior pose|tube top[^,]*|tactical pants|shoulder holster|beret|catsuit|glasses|high heels|guns|elegant dress|fur collar|pendant|bikini top|ripped stockings|military gear|sniper rifle|revealing robes|feather accessories|staff|dark lipstick|qipao dress|white boots|spiked bracelets|mini skirt|red gloves|suspenders|blindfold visor|gothic maid dress|black gloves|bodysuit|headset|face marks|pistol holsters|adventurer gear|dual pistol)[^,]*/gi, '')
         .replace(/,\s*,/g, ',').replace(/,\s*$/, '').replace(/^\s*,/, '')
+    }
+    if (profile.style === 'game') {
+      return `${tags}, 3d render, unreal engine 5, semi-realistic, game character, detailed skin texture, volumetric lighting, highres`
     }
     return `${tags}, anime style, masterpiece, best quality, highres, detailed`
   }
@@ -304,8 +311,8 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
 // ─── Identity reinforcement — core features that must NEVER change ──────────
 // Repeated at the END of prompts to ensure hijab, hair color, eye color, body type persist
 export function buildIdentityReinforcement(profile: Record<string, any>): string {
-  // Anime: use identity tags from character definition
-  if (profile.style === 'anime') {
+  // Anime/game: use identity tags from character definition
+  if (profile.style === 'anime' || profile.style === 'game') {
     return profile.identityTags || ''
   }
 
@@ -339,8 +346,8 @@ export function buildIdentityReinforcement(profile: Record<string, any>): string
 
 // Adds extra emphasis AND negative hints so the AI follows body type closely
 export function buildBodyReinforcement(profile: Record<string, any>): { emphasis: string; negative: string } {
-  // Anime: body is tag-driven, no reinforcement needed
-  if (profile.style === 'anime') {
+  // Anime/game: body is tag-driven, no reinforcement needed
+  if (profile.style === 'anime' || profile.style === 'game') {
     return { emphasis: '', negative: '' }
   }
 
@@ -418,8 +425,9 @@ export function buildBodyReinforcement(profile: Record<string, any>): { emphasis
 
 // ─── Build negative prompt to prevent wrong features ──────────────────────
 export function buildNegativePrompt(profile: Record<string, any>): string {
-  // Anime: different negatives (allow anime, block realistic)
+  // Anime/game: different negatives
   if (profile.style === 'anime') return buildAnimeNegativePrompt()
+  if (profile.style === 'game') return buildGameNegativePrompt()
 
   const parts = [
     'cartoon, anime, illustration, painting, drawing, sketch, 3d render, cgi',
@@ -470,6 +478,13 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
     const tags = profile.promptTags || '1girl, anime style'
     const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
     return `${tags}, ${expression}, portrait, upper body, anime style, masterpiece, best quality, highres, detailed face, vibrant colors`
+  }
+
+  // Game: semi-realistic 3D avatar
+  if (profile.style === 'game') {
+    const tags = profile.promptTags || 'young woman, game character'
+    const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
+    return `${tags}, ${expression}, portrait, upper body, 3d render, unreal engine 5, semi-realistic, game character, detailed skin texture, volumetric lighting, highres, cinematic`
   }
 
   const gender = profile.gender === 'man' ? 'man' : 'woman'

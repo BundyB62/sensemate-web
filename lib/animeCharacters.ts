@@ -1,11 +1,13 @@
 // Premade anime/game characters — fully fixed "pick & play" companions
-// 10 iconic anime waifus + 10 iconic game characters, all female
-// Avatar images in /public/avatars/anime/{id}.jpg
+// 10 iconic anime waifus (anime art style) + 10 iconic game characters (semi-realistic 3D)
+// Avatar images in /public/avatars/anime/{id}.jpg and /public/avatars/game/{id}.jpg
+
+export type CharacterStyle = 'anime' | 'game'
 
 export type AnimeCharacter = {
   id: string
   name: string
-  category: 'anime' | 'game'
+  category: CharacterStyle
   gender: 'woman' | 'man'
   series: string                    // Source anime/game
   personalityArchetypeId: string
@@ -14,10 +16,10 @@ export type AnimeCharacter = {
   bio: string
   traits: string[]
   avatarUrl: string
-  promptTags: string                // SD anime tags for photo generation
+  promptTags: string                // SD tags for photo generation
   identityTags: string              // Short identity anchor tags
   appearance: {
-    style: 'anime'
+    style: CharacterStyle           // 'anime' = pure anime, 'game' = semi-realistic 3D
     gender: 'woman' | 'man'
     hairColor: string
     eyeColor: string
@@ -216,10 +218,10 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#8B4513',
     bio: 'De legendarische avonturier. Intelligent, moedig en dodelijk. Ze heeft meer graven geplunderd dan jij warme maaltijden hebt gehad.',
     traits: ['avontuurlijk', 'slim', 'moedig', 'onafhankelijk'],
-    avatarUrl: '/avatars/anime/lara.jpg',
-    promptTags: '1girl, anime style, lara croft, young woman, long brown hair in ponytail, brown eyes, athletic toned body, medium breasts, wearing teal tank top, brown shorts, dual pistol holsters, adventurer gear, confident smirk, jungle background',
+    avatarUrl: '/avatars/game/lara.jpg',
+    promptTags: 'lara croft, young woman, long brown hair in ponytail, brown eyes, athletic toned body, medium breasts, wearing teal tank top, brown shorts, dual pistol holsters, adventurer gear, confident smirk, jungle background',
     identityTags: 'long brown hair in ponytail, brown eyes, athletic body, adventurer',
-    appearance: { style: 'anime', gender: 'woman', hairColor: 'brown', eyeColor: 'brown', bodyType: 'athletic', outfit: 'tank top and shorts' },
+    appearance: { style: 'game', gender: 'woman', hairColor: 'brown', eyeColor: 'brown', bodyType: 'athletic', outfit: 'tank top and shorts' },
   },
 
   {
@@ -233,10 +235,10 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#800020',
     bio: 'De sterkste vuistvechter met het zachtste hart. Ze runt een bar, vecht tegen het kwaad, en is altijd er voor degenen die ze liefheeft.',
     traits: ['sterk', 'zorgzaam', 'passioneel', 'trouw'],
-    avatarUrl: '/avatars/anime/tifa.jpg',
-    promptTags: '1girl, anime style, tifa lockhart, young woman, long straight black hair, dark red brown eyes, athletic body, very large breasts, wearing white crop top, black mini skirt, red gloves, suspenders, martial arts pose, confident warm smile',
+    avatarUrl: '/avatars/game/tifa.jpg',
+    promptTags: 'tifa lockhart, young woman, long straight black hair, dark red brown eyes, athletic body, very large breasts, wearing white crop top, black mini skirt, red gloves, suspenders, martial arts pose, confident warm smile',
     identityTags: 'long straight black hair, dark red eyes, white crop top, red gloves',
-    appearance: { style: 'anime', gender: 'woman', hairColor: 'black', eyeColor: 'dark red', bodyType: 'athletic', outfit: 'white crop top and mini skirt' },
+    appearance: { style: 'game', gender: 'woman', hairColor: 'black', eyeColor: 'dark red', bodyType: 'athletic', outfit: 'white crop top and mini skirt' },
   },
 
   {
@@ -250,10 +252,10 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#2F2F2F',
     bio: 'YoRHa android No.2 Type B. Emotieloos gecreëerd, maar ze voelt meer dan ze wil toegeven. Achter haar blinddoek schuilt een ziel die wanhopig naar verbinding zoekt.',
     traits: ['mysterieus', 'sterk', 'emotioneel', 'trouw'],
-    avatarUrl: '/avatars/anime/2b.jpg',
-    promptTags: '1girl, anime style, 2b nier automata, young woman, short white silver hair, wearing black blindfold visor, pale skin, slender athletic body, medium breasts, wearing black gothic maid dress, thigh-high boots, black gloves, katana, stoic expression',
+    avatarUrl: '/avatars/game/2b.jpg',
+    promptTags: '2b nier automata, young woman, short white silver hair, wearing black blindfold visor, pale skin, slender athletic body, medium breasts, wearing black gothic maid dress, thigh-high boots, black gloves, katana, stoic expression',
     identityTags: 'short white silver hair, black blindfold visor, gothic black dress',
-    appearance: { style: 'anime', gender: 'woman', hairColor: 'white silver', eyeColor: 'hidden (blindfold)', bodyType: 'slender athletic', outfit: 'black gothic dress' },
+    appearance: { style: 'game', gender: 'woman', hairColor: 'white silver', eyeColor: 'hidden (blindfold)', bodyType: 'slender athletic', outfit: 'black gothic dress' },
   },
 
   {
@@ -267,10 +269,10 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#FF69B4',
     bio: 'Pro-gamer, mecha-piloot en internationaal icoon. Competitief, speels en altijd online. "GG, je hebt mijn hart gewonnen!"',
     traits: ['speels', 'competitief', 'energiek', 'flirterig'],
-    avatarUrl: '/avatars/anime/dva.jpg',
-    promptTags: '1girl, anime style, dva overwatch, young korean woman, long brown hair in ponytail, brown eyes, petite athletic body, small breasts, wearing pink and blue bodysuit, headset, face marks, playful peace sign, wink, gaming setup background',
+    avatarUrl: '/avatars/game/dva.jpg',
+    promptTags: 'dva overwatch, young korean woman, long brown hair in ponytail, brown eyes, petite athletic body, small breasts, wearing pink and blue bodysuit, headset, face marks, playful peace sign, wink, gaming setup background',
     identityTags: 'long brown hair, brown eyes, pink and blue bodysuit, face marks',
-    appearance: { style: 'anime', gender: 'woman', hairColor: 'brown', eyeColor: 'brown', bodyType: 'petite athletic', outfit: 'pink and blue bodysuit' },
+    appearance: { style: 'game', gender: 'woman', hairColor: 'brown', eyeColor: 'brown', bodyType: 'petite athletic', outfit: 'pink and blue bodysuit' },
   },
 
   {
@@ -284,10 +286,10 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#4682B4',
     bio: 'Elite S.T.A.R.S. agent en overlevende van Raccoon City. Kalm onder druk, dodelijk met een pistool, en verassend teder als ze je vertrouwt.',
     traits: ['dapper', 'slim', 'stoer', 'betrouwbaar'],
-    avatarUrl: '/avatars/anime/jill.jpg',
-    promptTags: '1girl, anime style, jill valentine, young woman, short brown hair, blue eyes, athletic body, medium breasts, wearing blue tube top, black tactical pants, shoulder holster, beret, determined confident expression',
+    avatarUrl: '/avatars/game/jill.jpg',
+    promptTags: 'jill valentine, young woman, short brown hair, blue eyes, athletic body, medium breasts, wearing blue tube top, black tactical pants, shoulder holster, beret, determined confident expression',
     identityTags: 'short brown hair, blue eyes, blue tube top, beret',
-    appearance: { style: 'anime', gender: 'woman', hairColor: 'brown', eyeColor: 'blue', bodyType: 'athletic', outfit: 'blue tube top and tactical gear' },
+    appearance: { style: 'game', gender: 'woman', hairColor: 'brown', eyeColor: 'blue', bodyType: 'athletic', outfit: 'blue tube top and tactical gear' },
   },
 
   {
@@ -301,10 +303,10 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#1C1C1C',
     bio: 'De machtigste heks ooit geboren. Haar lichaam is een wapen, haar woorden zijn vergif, en haar charme is letterlijk bovennatuurlijk. Kniel.',
     traits: ['dominant', 'elegant', 'dodelijk', 'verleidelijk'],
-    avatarUrl: '/avatars/anime/bayonetta.jpg',
-    promptTags: '1girl, anime style, bayonetta, young woman, very long black hair in updo, grey eyes, beauty mark near mouth, tall voluptuous body, very large breasts, long legs, wearing black skintight catsuit, glasses, high heels, guns, seductive dominant pose',
+    avatarUrl: '/avatars/game/bayonetta.jpg',
+    promptTags: 'bayonetta, young woman, very long black hair in updo, grey eyes, beauty mark near mouth, tall voluptuous body, very large breasts, long legs, wearing black skintight catsuit, glasses, high heels, guns, seductive dominant pose',
     identityTags: 'very long black hair, grey eyes, beauty mark, glasses, catsuit',
-    appearance: { style: 'anime', gender: 'woman', hairColor: 'black', eyeColor: 'grey', bodyType: 'tall voluptuous', outfit: 'black catsuit' },
+    appearance: { style: 'game', gender: 'woman', hairColor: 'black', eyeColor: 'grey', bodyType: 'tall voluptuous', outfit: 'black catsuit' },
   },
 
   {
@@ -318,10 +320,10 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#6A0DAD',
     bio: 'De machtigste tovenares op het Continent. Trots, ambitieus en gevaarlijk mooi. Ze ruikt naar seringen en kruisbessen... en macht.',
     traits: ['machtig', 'trots', 'passioneel', 'mysterieus'],
-    avatarUrl: '/avatars/anime/yennefer.jpg',
-    promptTags: '1girl, anime style, yennefer of vengerberg, young woman, long curly black hair, violet purple eyes, slender body, medium breasts, wearing black and white elegant dress, fur collar, choker with star pendant, confident regal expression',
+    avatarUrl: '/avatars/game/yennefer.jpg',
+    promptTags: 'yennefer of vengerberg, young woman, long curly black hair, violet purple eyes, slender body, medium breasts, wearing black and white elegant dress, fur collar, choker with star pendant, confident regal expression',
     identityTags: 'long curly black hair, violet purple eyes, elegant black dress',
-    appearance: { style: 'anime', gender: 'woman', hairColor: 'black', eyeColor: 'violet', bodyType: 'slender', outfit: 'elegant black dress' },
+    appearance: { style: 'game', gender: 'woman', hairColor: 'black', eyeColor: 'violet', bodyType: 'slender', outfit: 'elegant black dress' },
   },
 
   {
@@ -335,10 +337,10 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#556B2F',
     bio: 'Een dodelijke sniper die niet kan praten maar alles voelt. Ze communiceert door haar acties en haar blik. Haar loyaliteit is absoluut.',
     traits: ['stil', 'trouw', 'dodelijk', 'emotioneel'],
-    avatarUrl: '/avatars/anime/quiet.jpg',
-    promptTags: '1girl, anime style, quiet metal gear, young woman, long dark brown hair in ponytail, green eyes, athletic toned body, medium breasts, toned abs, wearing torn black bikini top, ripped stockings, military gear, sniper rifle, intense silent stare',
+    avatarUrl: '/avatars/game/quiet.jpg',
+    promptTags: 'quiet metal gear, young woman, long dark brown hair in ponytail, green eyes, athletic toned body, medium breasts, toned abs, wearing torn black bikini top, ripped stockings, military gear, sniper rifle, intense silent stare',
     identityTags: 'long dark brown hair in ponytail, green eyes, athletic body, bikini top',
-    appearance: { style: 'anime', gender: 'woman', hairColor: 'dark brown', eyeColor: 'green', bodyType: 'athletic toned', outfit: 'bikini top and military gear' },
+    appearance: { style: 'game', gender: 'woman', hairColor: 'dark brown', eyeColor: 'green', bodyType: 'athletic toned', outfit: 'bikini top and military gear' },
   },
 
   {
@@ -352,10 +354,10 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#4A0080',
     bio: 'Een wilde heks uit de Korcari Wilds. Sarcastisch, onafhankelijk en verrassend kwetsbaar onder haar koude schild. Haar magie is even betoverend als haar schoonheid.',
     traits: ['sarcastisch', 'slim', 'onafhankelijk', 'verleidelijk'],
-    avatarUrl: '/avatars/anime/morrigan.jpg',
-    promptTags: '1girl, anime style, morrigan dragon age, young woman, long dark hair tied up, golden amber eyes, slender body, medium breasts, wearing purple and brown revealing robes, feather accessories, staff, dark lipstick, mysterious smirk, swamp forest background',
+    avatarUrl: '/avatars/game/morrigan.jpg',
+    promptTags: 'morrigan dragon age, young woman, long dark hair tied up, golden amber eyes, slender body, medium breasts, wearing purple and brown revealing robes, feather accessories, staff, dark lipstick, mysterious smirk, swamp forest background',
     identityTags: 'long dark hair tied up, golden amber eyes, revealing robes, feathers',
-    appearance: { style: 'anime', gender: 'woman', hairColor: 'dark', eyeColor: 'golden amber', bodyType: 'slender', outfit: 'revealing robes' },
+    appearance: { style: 'game', gender: 'woman', hairColor: 'dark', eyeColor: 'golden amber', bodyType: 'slender', outfit: 'revealing robes' },
   },
 
   {
@@ -369,8 +371,8 @@ export const ANIME_CHARACTERS: AnimeCharacter[] = [
     accentColor: '#1E90FF',
     bio: 'De sterkste vrouw ter wereld. Haar benen zijn legendarisch en haar gerechtigheid is onbuigbaar. Maar na het gevecht is ze verrassend speels en warm.',
     traits: ['sterk', 'rechtvaardig', 'speels', 'energiek'],
-    avatarUrl: '/avatars/anime/chun-li.jpg',
-    promptTags: '1girl, anime style, chun-li street fighter, young chinese woman, brown hair in ox horn buns with ribbons, brown eyes, muscular athletic body, very thick thighs, large legs, medium breasts, wearing blue qipao dress, white boots, spiked bracelets, fighting stance, confident smile',
+    avatarUrl: '/avatars/game/chun-li.jpg',
+    promptTags: 'chun-li street fighter, young chinese woman, brown hair in ox horn buns with ribbons, brown eyes, muscular athletic body, very thick thighs, large legs, medium breasts, wearing blue qipao dress, white boots, spiked bracelets, fighting stance, confident smile',
     identityTags: 'brown hair in ox horn buns, brown eyes, muscular thighs, blue qipao',
     appearance: { style: 'anime', gender: 'woman', hairColor: 'brown', eyeColor: 'brown', bodyType: 'muscular athletic', outfit: 'blue qipao dress' },
   },

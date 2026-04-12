@@ -7,7 +7,7 @@ import { ARCHETYPES } from '@/lib/personalities'
 import { ANIME_CHARACTERS, type AnimeCharacter } from '@/lib/animeCharacters'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
-type Gender = 'woman' | 'man' | 'nonbinary' | 'anime'
+type Gender = 'woman' | 'man' | 'nonbinary' | 'anime' | 'game'
 
 interface FormData {
   name: string
@@ -36,7 +36,8 @@ const GENDERS = [
   { id: 'woman', label: 'Woman', img: '/onboarding/gender/woman.jpg' },
   { id: 'man', label: 'Man', img: '/onboarding/gender/man.jpg' },
   { id: 'nonbinary', label: 'Non-binary', img: '/onboarding/gender/nonbinary.jpg' },
-  { id: 'anime', label: 'Anime / Game', img: '/onboarding/gender/anime.jpg' },
+  { id: 'anime', label: 'Anime', img: '/onboarding/gender/anime.jpg' },
+  { id: 'game', label: 'Game', img: '/onboarding/gender/game.jpg' },
 ]
 
 const RELATIONSHIPS = [
@@ -352,9 +353,9 @@ export default function OnboardingPage() {
 
     setLoading(true)
 
-    const isAnime = data.gender === 'anime' && selectedAnimeChar
-    const appearance = isAnime ? {
-      style: 'anime' as const,
+    const isCharacter = (data.gender === 'anime' || data.gender === 'game') && selectedAnimeChar
+    const appearance = isCharacter ? {
+      style: selectedAnimeChar.category as 'anime' | 'game',
       gender: selectedAnimeChar.gender,
       animeCharacterId: selectedAnimeChar.id,
       promptTags: selectedAnimeChar.promptTags,
@@ -371,9 +372,9 @@ export default function OnboardingPage() {
       ...(data.gender === 'woman' || data.gender === 'nonbinary' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
       ...(data.gender === 'man' ? { dickSize: data.dickSize, beard: data.beard } : {}),
     }
-    const companionName = isAnime ? selectedAnimeChar.name : data.name
-    const personalityId = isAnime ? selectedAnimeChar.personalityArchetypeId : data.personality
-    const relStyle = isAnime ? selectedAnimeChar.relationshipStyle : data.relationshipStyle
+    const companionName = isCharacter ? selectedAnimeChar.name : data.name
+    const personalityId = isCharacter ? selectedAnimeChar.personalityArchetypeId : data.personality
+    const relStyle = isCharacter ? selectedAnimeChar.relationshipStyle : data.relationshipStyle
 
     let companionId = createdCompanionId
 
@@ -384,7 +385,7 @@ export default function OnboardingPage() {
         .update({
           name: companionName,
           relationship_style: relStyle,
-          personality: { archetype: personalityId, gender: isAnime ? selectedAnimeChar.gender : data.gender },
+          personality: { archetype: personalityId, gender: isCharacter ? selectedAnimeChar.gender : data.gender },
           appearance,
         })
         .eq('id', companionId)
@@ -402,7 +403,7 @@ export default function OnboardingPage() {
           user_id: user.id,
           name: companionName,
           relationship_style: relStyle,
-          personality: { archetype: personalityId, gender: isAnime ? selectedAnimeChar.gender : data.gender },
+          personality: { archetype: personalityId, gender: isCharacter ? selectedAnimeChar.gender : data.gender },
           appearance,
         })
         .select()
@@ -626,14 +627,14 @@ export default function OnboardingPage() {
           </StepContainer>
         )}
 
-        {/* STEP 2 — Anime character selection (when anime gender selected) */}
-        {step === 2 && data.gender === 'anime' && (
+        {/* STEP 2 — Character selection (when anime or game selected) */}
+        {step === 2 && (data.gender === 'anime' || data.gender === 'game') && (
           <StepContainer
-            title="Choose your character"
-            subtitle="Pick a premade anime or game companion."
+            title={data.gender === 'anime' ? 'Choose your anime waifu' : 'Choose your game character'}
+            subtitle={data.gender === 'anime' ? 'Pick an iconic anime companion.' : 'Pick an iconic game companion — semi-realistic 3D style.'}
           >
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, width: '100%' }}>
-              {ANIME_CHARACTERS.map(char => {
+              {ANIME_CHARACTERS.filter(c => c.category === data.gender).map(char => {
                 const sel = selectedAnimeChar?.id === char.id
                 return (
                   <button
@@ -717,7 +718,7 @@ export default function OnboardingPage() {
         )}
 
         {/* STEP 2 — Age (realistic companions only) */}
-        {step === 2 && data.gender !== 'anime' && (
+        {step === 2 && data.gender !== 'anime' && data.gender !== 'game' && (
           <StepContainer
             title="How old?"
             subtitle="Choose an age range for your SenseMate."
@@ -1184,7 +1185,7 @@ export default function OnboardingPage() {
                 </button>
 
                 {/* Regenerate photo — hide for anime (fixed avatars) */}
-                {data.gender !== 'anime' && (
+                {data.gender !== 'anime' && data.gender !== 'game' && (
                 <button
                   onClick={handleRegenerateAvatar}
                   disabled={regenerating}
@@ -1205,7 +1206,7 @@ export default function OnboardingPage() {
                 )}
 
                 {/* Edit appearance — go back to step 1 (hide for anime) */}
-                {data.gender !== 'anime' && (
+                {data.gender !== 'anime' && data.gender !== 'game' && (
                 <button
                   onClick={() => { setAnimDir('back'); setStep(1) }}
                   style={{

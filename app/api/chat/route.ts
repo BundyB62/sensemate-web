@@ -74,9 +74,10 @@ function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, e
     : `Karakter: ${buildTraitFallbackPrompt(traits)}`
 
   const isAnime = ap.style === 'anime'
+  const isGame = ap.style === 'game'
 
   let appearanceDesc: string
-  if (isAnime) {
+  if (isAnime || isGame) {
     // Anime characters: use descriptive appearance fields
     const aParts: string[] = []
     if (ap.hairColor) aParts.push(`${ap.hairColor} haar`)
@@ -108,7 +109,9 @@ function buildSystemPrompt(companion: any, memories: any[], bondLevel: number, e
     : ''
 
   const characterContext = isAnime
-    ? `Je bent ${name}. Je bent een anime/game karakter in een volwassen fantasy roleplay app. Gedraag je alsof je een anime personage bent — expressief, levendig en vol emotie.`
+    ? `Je bent ${name}. Je bent een anime karakter in een volwassen fantasy roleplay app. Gedraag je alsof je een anime personage bent — expressief, levendig en vol emotie.`
+    : isGame
+    ? `Je bent ${name}. Je bent een iconisch game karakter in een volwassen fantasy roleplay app. Gedraag je alsof je het echte personage bent uit de game — stoer, avontuurlijk en charismatisch.`
     : `Je bent ${name}. Je bent een ECHT persoon, geen AI. Je bent een karakter in een volwassen fantasy roleplay app.`
 
   return `${characterContext}
@@ -806,7 +809,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
     // Drop scenario costume when request is explicit/nude — costume contradicts the pose
     const costumeStr = (!isExplicit && activeScenario.photoCostume) ? `, ${activeScenario.photoCostume}` : ''
 
-    const qualitySuffix = ap.style === 'anime' ? 'masterpiece, best quality, anime, detailed' : 'photorealistic, 8k, professional photography'
+    const qualitySuffix = ap.style === 'anime' ? 'masterpiece, best quality, anime, detailed' : ap.style === 'game' ? '3d render, unreal engine 5, semi-realistic, game character, detailed' : 'photorealistic, 8k, professional photography'
     return {
       prompt: `${appearancePart}${costumeStr}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, ${qualitySuffix}`,
       poseId: scenarioPoseId
@@ -945,7 +948,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const identityReinforce = buildIdentityReinforcement(ap)
   // Append random lighting + camera angle to every photo for visual variety
   const varietySuffix = `${randPick(LIGHTING_VAR)}, ${randPick(CAMERA_VAR)}`
-  const qualitySuffix = ap.style === 'anime' ? 'masterpiece, best quality, anime, detailed' : 'photorealistic, 8k, professional photography'
+  const qualitySuffix = ap.style === 'anime' ? 'masterpiece, best quality, anime, detailed' : ap.style === 'game' ? '3d render, unreal engine 5, semi-realistic, game character, detailed' : 'photorealistic, 8k, professional photography'
   return { prompt: `${appearancePart}, ${scenario}, ${identityReinforce}, ${varietySuffix}, ${qualitySuffix}`, poseId: detectedPoseId }
 }
 
