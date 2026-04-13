@@ -317,7 +317,7 @@ export async function POST(request: Request) {
     let enrichedPrompt = prompt
     let extraNegativeFromAppearance = ''
 
-    const promptAlreadyHasAppearance = /year old.*woman|year old.*man/i.test(prompt)
+    const promptAlreadyHasAppearance = /year old.*woman|year old.*man/i.test(prompt) || appearance?.style === 'fantasy'
 
     if (appearance && !promptAlreadyHasAppearance) {
       const appearanceDesc = buildAppearanceDescription(appearance, true, false)
