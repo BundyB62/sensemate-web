@@ -810,7 +810,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
     // Drop scenario costume when request is explicit/nude — costume contradicts the pose
     const costumeStr = (!isExplicit && activeScenario.photoCostume) ? `, ${activeScenario.photoCostume}` : ''
 
-    const qualitySuffix = ap.style === 'fantasy' ? '3d render, unreal engine 5, semi-realistic, fantasy, detailed' : 'photorealistic, 8k, professional photography'
+    const qualitySuffix = ap.style === 'fantasy' ? 'fantasy, detailed' : 'photorealistic, 8k, professional photography'
     return {
       prompt: `${appearancePart}${costumeStr}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, ${qualitySuffix}`,
       poseId: scenarioPoseId
@@ -949,7 +949,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const identityReinforce = buildIdentityReinforcement(ap)
   // Append random lighting + camera angle to every photo for visual variety
   const varietySuffix = `${randPick(LIGHTING_VAR)}, ${randPick(CAMERA_VAR)}`
-  const qualitySuffix = ap.style === 'fantasy' ? '3d render, unreal engine 5, semi-realistic, fantasy, detailed' : 'photorealistic, 8k, professional photography'
+  const qualitySuffix = ap.style === 'fantasy' ? 'fantasy, detailed' : 'photorealistic, 8k, professional photography'
   return { prompt: `${appearancePart}, ${scenario}, ${identityReinforce}, ${varietySuffix}, ${qualitySuffix}`, poseId: detectedPoseId }
 }
 

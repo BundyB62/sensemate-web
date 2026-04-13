@@ -558,7 +558,7 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
     }
 
     parts.push('consistent appearance, same person throughout')
-    return parts.join(', ') + ', 3d render, unreal engine 5, semi-realistic, fantasy, detailed skin texture, volumetric lighting'
+    return parts.join(', ')
   }
 
   const gender = profile.gender === 'man' ? 'man' : 'woman'
