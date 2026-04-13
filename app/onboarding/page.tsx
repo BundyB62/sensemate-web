@@ -338,46 +338,34 @@ const AGES = [
 
 const ETHNICITY_LIST = [
   // Europe
-  { id: 'scandinavian', label: 'Scandinavian', emoji: '🇸🇪' },
-  { id: 'northwest_european', label: 'Western European', emoji: '🇳🇱' },
-  { id: 'british', label: 'British', emoji: '🇬🇧' },
-  { id: 'german', label: 'German', emoji: '🇩🇪' },
-  { id: 'french', label: 'French', emoji: '🇫🇷' },
-  { id: 'irish', label: 'Irish', emoji: '🇮🇪' },
-  { id: 'mediterranean', label: 'Mediterranean', emoji: '🇮🇹' },
-  { id: 'east_european', label: 'Eastern European', emoji: '🇵🇱' },
-  // Latin America
-  { id: 'latin', label: 'Latina / Latino', emoji: '🇧🇷' },
-  { id: 'mexican', label: 'Mexican', emoji: '🇲🇽' },
-  { id: 'colombian', label: 'Colombian', emoji: '🇨🇴' },
-  { id: 'argentinian', label: 'Argentinian', emoji: '🇦🇷' },
-  // Asia
-  { id: 'japanese', label: 'Japanese', emoji: '🇯🇵' },
-  { id: 'korean', label: 'Korean', emoji: '🇰🇷' },
-  { id: 'chinese', label: 'Chinese', emoji: '🇨🇳' },
-  { id: 'thai', label: 'Thai', emoji: '🇹🇭' },
-  { id: 'filipino', label: 'Filipino', emoji: '🇵🇭' },
-  { id: 'vietnamese', label: 'Vietnamese', emoji: '🇻🇳' },
-  { id: 'indonesian', label: 'Indonesian', emoji: '🇮🇩' },
-  { id: 'south_asian', label: 'South Asian', emoji: '🇮🇳' },
+  { id: 'scandinavian', label: 'Scandinavian', img: '/onboarding/ethnicity/woman/scandinavian.jpg' },
+  { id: 'irish', label: 'Irish / Celtic', img: '/onboarding/ethnicity/woman/irish.jpg' },
+  { id: 'british', label: 'British', img: '/onboarding/ethnicity/woman/british.jpg' },
+  { id: 'east_european', label: 'Eastern European', img: '/onboarding/ethnicity/woman/east_european.jpg' },
+  { id: 'french', label: 'French', img: '/onboarding/ethnicity/woman/french.jpg' },
+  { id: 'mediterranean', label: 'Mediterranean', img: '/onboarding/ethnicity/woman/mediterranean.jpg' },
+  // Americas
+  { id: 'latina', label: 'Latina', img: '/onboarding/ethnicity/woman/latina.jpg' },
+  { id: 'brazilian', label: 'Brazilian', img: '/onboarding/ethnicity/woman/brazilian.jpg' },
+  { id: 'mexican', label: 'Mexican', img: '/onboarding/ethnicity/woman/mexican.jpg' },
+  // East Asia
+  { id: 'japanese', label: 'Japanese', img: '/onboarding/ethnicity/woman/japanese.jpg' },
+  { id: 'korean', label: 'Korean', img: '/onboarding/ethnicity/woman/korean.jpg' },
+  { id: 'southeast_asian', label: 'Southeast Asian', img: '/onboarding/ethnicity/woman/southeast_asian.jpg' },
+  // South Asia
+  { id: 'south_asian', label: 'South Asian', img: '/onboarding/ethnicity/woman/south_asian.jpg' },
   // Middle East
-  { id: 'middle_eastern', label: 'Middle Eastern', emoji: '🇦🇪' },
-  { id: 'turkish', label: 'Turkish', emoji: '🇹🇷' },
-  { id: 'persian', label: 'Persian', emoji: '🇮🇷' },
-  { id: 'lebanese', label: 'Lebanese', emoji: '🇱🇧' },
-  { id: 'moroccan', label: 'Moroccan', emoji: '🇲🇦' },
-  { id: 'egyptian', label: 'Egyptian', emoji: '🇪🇬' },
-  { id: 'arab', label: 'Arab / Gulf', emoji: '🇸🇦' },
+  { id: 'middle_eastern', label: 'Middle Eastern', img: '/onboarding/ethnicity/woman/middle_eastern.jpg' },
+  { id: 'turkish', label: 'Turkish', img: '/onboarding/ethnicity/woman/turkish.jpg' },
+  { id: 'persian', label: 'Persian', img: '/onboarding/ethnicity/woman/persian.jpg' },
+  { id: 'north_african', label: 'North African', img: '/onboarding/ethnicity/woman/north_african.jpg' },
   // Africa
-  { id: 'west_african', label: 'West African', emoji: '🇳🇬' },
-  { id: 'east_african', label: 'East African', emoji: '🇪🇹' },
-  { id: 'south_african', label: 'South African', emoji: '🇿🇦' },
+  { id: 'west_african', label: 'West African', img: '/onboarding/ethnicity/woman/west_african.jpg' },
+  { id: 'east_african', label: 'East African', img: '/onboarding/ethnicity/woman/east_african.jpg' },
   // Americas / Pacific
-  { id: 'caribbean', label: 'Caribbean', emoji: '🏝️' },
-  { id: 'native_american', label: 'Native American', emoji: '🦅' },
-  { id: 'polynesian', label: 'Polynesian', emoji: '🌺' },
-  // Mixed
-  { id: 'mixed', label: 'Mixed', emoji: '🌎' },
+  { id: 'caribbean', label: 'Caribbean', img: '/onboarding/ethnicity/woman/caribbean.jpg' },
+  { id: 'native_american', label: 'Native American', img: '/onboarding/ethnicity/woman/native_american.jpg' },
+  { id: 'polynesian', label: 'Polynesian', img: '/onboarding/ethnicity/woman/polynesian.jpg' },
 ]
 
 const BUILDS_WOMAN = [
@@ -1015,11 +1003,12 @@ export default function OnboardingPage() {
             <ImageGrid cols={4}>
               {ETHNICITY_LIST.map(e => {
                 const genderFolder = data.gender === 'man' ? 'man' : 'woman'
+                const imgSrc = e.img || `/onboarding/ethnicity/${genderFolder}/${e.id}.jpg`
                 return (
                   <ImageCard
                     key={e.id}
-                    img={`/onboarding/ethnicity/${genderFolder}/${e.id}.jpg`}
-                    label={`${e.emoji} ${e.label}`}
+                    img={imgSrc}
+                    label={e.label}
                     selected={data.ethnicity === e.id}
                     onClick={() => { set('ethnicity', e.id); goNext() }}
                     aspectRatio="3/4"

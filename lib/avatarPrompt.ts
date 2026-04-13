@@ -172,54 +172,53 @@ const SKIN_MAP: Record<string, string> = {
 }
 
 const ETHNICITY_MAP: Record<string, string> = {
-  // European
-  scandinavian: 'Scandinavian Nordic',
-  northwest_european: 'Northwestern European',
-  british: 'British English',
-  german: 'German Central European',
-  french: 'French',
-  mediterranean: 'Mediterranean Southern European',
-  east_european: 'Eastern European Slavic',
-  irish: 'Irish Celtic',
-  // Latin
-  latin: 'Latin American',
-  latino: 'Latin American',
-  brazilian: 'Brazilian',
-  mexican: 'Mexican',
-  colombian: 'Colombian',
-  argentinian: 'Argentinian',
-  // Asian
-  east_asian: 'East Asian',
-  japanese: 'Japanese',
-  korean: 'Korean',
-  chinese: 'Chinese',
-  southeast_asian: 'Southeast Asian',
-  thai: 'Thai',
-  filipino: 'Filipino',
-  vietnamese: 'Vietnamese',
-  indonesian: 'Indonesian',
-  south_asian: 'South Asian Indian',
-  // Middle Eastern
-  middle_eastern: 'Middle Eastern Arabian',
-  turkish: 'Turkish',
-  persian: 'Persian Iranian',
-  lebanese: 'Lebanese Levantine',
-  moroccan: 'Moroccan North African',
-  egyptian: 'Egyptian North African',
-  arab: 'Arab Arabian Gulf',
-  // African
-  african: 'African',
-  west_african: 'West African Nigerian',
-  east_african: 'East African Ethiopian Eritrean',
-  south_african: 'South African',
+  // Europe
+  scandinavian: 'Scandinavian Nordic, very pale porcelain skin, platinum blonde',
+  british: 'British English, fair rosy skin, light features',
+  irish: 'Irish Celtic, very pale freckled skin, red hair',
+  east_european: 'Eastern European Slavic, pale skin, angular sharp features',
+  french: 'French, light olive skin, chic elegant features',
+  mediterranean: 'Mediterranean Southern European, olive tan skin, Italian Greek',
   // Americas
-  caribbean: 'Caribbean',
-  native_american: 'Native American',
-  // Pacific
-  polynesian: 'Polynesian Pacific Islander',
-  // Mixed
-  european: 'European',
-  mixed: 'mixed ethnicity biracial',
+  latina: 'Latin American Latina, warm caramel tan skin, dark wavy hair',
+  brazilian: 'Brazilian, golden bronze skin, mixed-race features',
+  mexican: 'Mexican, warm brown skin, indigenous features',
+  // East Asia
+  japanese: 'Japanese, fair porcelain skin, delicate refined features',
+  korean: 'Korean, very fair flawless skin, v-shaped face',
+  southeast_asian: 'Southeast Asian, warm golden-tan skin, soft features, Thai Filipino',
+  // South Asia
+  south_asian: 'South Asian Indian, warm brown skin, large dark eyes',
+  // Middle East
+  middle_eastern: 'Middle Eastern Arabian, olive-tan skin, strong dark eyebrows',
+  turkish: 'Turkish Anatolian, olive Mediterranean skin, thick eyebrows',
+  persian: 'Persian Iranian, fair olive skin, green-hazel eyes',
+  north_african: 'North African Moroccan Berber, warm olive-tan skin, curly hair',
+  // Africa
+  west_african: 'West African Nigerian, very dark rich chocolate skin, broad features',
+  east_african: 'East African Ethiopian, medium dark brown skin, narrow nose, high cheekbones',
+  // Americas / Pacific
+  caribbean: 'Caribbean, dark brown skin, curly hair, mixed features',
+  native_american: 'Native American indigenous, warm reddish-brown skin, straight black hair',
+  polynesian: 'Polynesian Pacific Islander, warm brown tan skin, thick dark hair, full features',
+  // Backwards compatibility for old companions
+  latin: 'Latin American Latina, warm caramel tan skin',
+  northwest_european: 'Northwestern European, fair light skin',
+  german: 'German Central European, fair skin',
+  chinese: 'Chinese, fair skin, East Asian features',
+  thai: 'Thai, warm golden-tan skin',
+  filipino: 'Filipino, warm brown skin',
+  vietnamese: 'Vietnamese, fair light skin, East Asian features',
+  indonesian: 'Indonesian, warm brown skin',
+  lebanese: 'Lebanese Levantine, light olive skin',
+  moroccan: 'Moroccan North African, warm olive-tan skin',
+  egyptian: 'Egyptian North African, warm golden-tan skin',
+  arab: 'Arab Arabian Gulf, olive-tan skin',
+  colombian: 'Colombian, warm olive-tan skin',
+  argentinian: 'Argentinian, light olive skin',
+  african: 'African, dark brown skin',
+  south_african: 'South African, dark brown skin',
+  mixed: 'mixed ethnicity biracial, caramel skin',
 }
 
 const CLOTHING_MAP: Record<string, string> = {
