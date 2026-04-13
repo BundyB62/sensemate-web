@@ -26,6 +26,7 @@ interface FormData {
   assSize: string
   dickSize: string
   beard: string
+  features: string[]  // multi-select kenmerken
   // Fantasy-specific (dynamic per race)
   race: string
   ears: string
@@ -69,6 +70,32 @@ const FANTASY_RACES = [
   { id: 'foxgirl', label: 'Foxgirl / Kitsune', img: '/onboarding/fantasy/race/foxgirl.jpg' },
   { id: 'werewolf', label: 'Werewolf', img: '/onboarding/fantasy/race/werewolf.jpg' },
   { id: 'mermaid', label: 'Mermaid / Siren', img: '/onboarding/fantasy/race/mermaid.jpg' },
+]
+
+// ─── Facial features / kenmerken (multi-select) ────────────────────────────
+const FACIAL_FEATURES = [
+  { id: 'freckles', label: 'Freckles', emoji: '✨' },
+  { id: 'beauty_mark', label: 'Beauty mark', emoji: '•' },
+  { id: 'dimples', label: 'Dimples', emoji: '😊' },
+  { id: 'thick_brows', label: 'Thick eyebrows', emoji: '🤨' },
+  { id: 'thin_brows', label: 'Thin eyebrows', emoji: '〰️' },
+  { id: 'chubby_cheeks', label: 'Chubby cheeks', emoji: '🥰' },
+  { id: 'sharp_jaw', label: 'Sharp jawline', emoji: '💎' },
+  { id: 'high_cheekbones', label: 'High cheekbones', emoji: '👸' },
+  { id: 'round_face', label: 'Round face', emoji: '🌕' },
+  { id: 'full_lips', label: 'Full lips', emoji: '👄' },
+  { id: 'thin_lips', label: 'Thin lips', emoji: '—' },
+  { id: 'button_nose', label: 'Button nose', emoji: '🔘' },
+  { id: 'big_nose', label: 'Prominent nose', emoji: '👃' },
+  { id: 'nose_piercing', label: 'Nose piercing', emoji: '💍' },
+  { id: 'septum', label: 'Septum ring', emoji: '🔗' },
+  { id: 'lip_piercing', label: 'Lip piercing', emoji: '💋' },
+  { id: 'eyebrow_piercing', label: 'Brow piercing', emoji: '⚡' },
+  { id: 'ear_piercings', label: 'Ear piercings', emoji: '✦' },
+  { id: 'glasses', label: 'Glasses', emoji: '👓' },
+  { id: 'gap_teeth', label: 'Gap teeth', emoji: '🦷' },
+  { id: 'scar_face', label: 'Face scar', emoji: '⚔️' },
+  { id: 'rosy_cheeks', label: 'Rosy cheeks', emoji: '🌸' },
 ]
 
 // ─── Race-specific feature sets ─────────────────────────────────────────────
@@ -493,11 +520,22 @@ const HAIR_STYLES_WOMAN = [
   { id: 'bangs', label: 'Bangs', img: '/onboarding/hair/woman/bangs.jpg' },
   { id: 'curtain_bangs', label: 'Curtain Bangs', img: '/onboarding/hair/woman/curtain_bangs.jpg' },
   { id: 'ponytail', label: 'Ponytail', img: '/onboarding/hair/woman/ponytail.jpg' },
+  { id: 'low_ponytail', label: 'Low Ponytail', img: '/onboarding/hair/woman/low_ponytail.jpg' },
   { id: 'bun', label: 'Bun / Updo', img: '/onboarding/hair/woman/bun.jpg' },
-  { id: 'braids', label: 'Braids', img: '/onboarding/hair/woman/braids.jpg' },
+  { id: 'messy_bun', label: 'Messy Bun', img: '/onboarding/hair/woman/messy_bun.jpg' },
+  { id: 'pigtails', label: 'Pigtails', img: '/onboarding/hair/woman/pigtails.jpg' },
+  { id: 'twin_tails', label: 'Twin Tails', img: '/onboarding/hair/woman/twin_tails.jpg' },
+  { id: 'space_buns', label: 'Space Buns', img: '/onboarding/hair/woman/space_buns.jpg' },
+  { id: 'braids', label: 'French Braids', img: '/onboarding/hair/woman/braids.jpg' },
+  { id: 'french_braid', label: 'Single Braid', img: '/onboarding/hair/woman/french_braid.jpg' },
+  { id: 'fishtail', label: 'Fishtail Braid', img: '/onboarding/hair/woman/fishtail.jpg' },
+  { id: 'side_braid', label: 'Side Braid', img: '/onboarding/hair/woman/side_braid.jpg' },
+  { id: 'half_up', label: 'Half Up', img: '/onboarding/hair/woman/half_up.jpg' },
+  { id: 'slicked_back', label: 'Slicked Back', img: '/onboarding/hair/woman/slicked_back.jpg' },
   { id: 'afro', label: 'Afro', img: '/onboarding/hair/woman/afro.jpg' },
   { id: 'messy', label: 'Messy', img: '/onboarding/hair/woman/messy.jpg' },
   { id: 'dreadlocks', label: 'Dreadlocks', img: '/onboarding/hair/woman/dreadlocks.jpg' },
+  { id: 'cornrows', label: 'Cornrows', img: '/onboarding/hair/woman/cornrows.jpg' },
   { id: 'hijab', label: 'Hijab', img: '/onboarding/hair/woman/hijab.jpg' },
 ]
 const HAIR_STYLES_MAN = [
@@ -562,6 +600,7 @@ function randomizeAll(): FormData {
     assSize: !isMale ? pick(ASS_SIZES).id : '',
     dickSize: isMale ? pick(DICK_SIZES).id : '',
     beard: isMale ? pick(BEARD_STYLES).id : '',
+    features: [] as string[],
     race: '', ears: '', horns: '', wings: '', tail: '',
     markings: '', aura: '', halo: '', fangs: '', antenna: '', fur: '', scales: '', fins: '', gills: '', form: '', accessories: '',
   }
@@ -586,7 +625,7 @@ export default function OnboardingPage() {
     build: '', skinTone: '', hairColor: '',
     hairLength: '', eyeColor: '', clothingStyle: '',
     vibe: '', breastSize: '', assSize: '', dickSize: '',
-    beard: 'none',
+    beard: 'none', features: [] as string[],
     race: '', ears: '', horns: '', wings: '', tail: '',
     markings: '', aura: '', halo: '', fangs: '', antenna: '', fur: '', scales: '', fins: '', gills: '', form: '', accessories: '',
   })
@@ -624,7 +663,8 @@ export default function OnboardingPage() {
       gender: data.gender, age: data.age, ethnicity: data.ethnicity,
       build: data.build, skinTone: data.skinTone, hairColor: data.hairColor,
       hairLength: data.hairLength, eyeColor: data.eyeColor, clothingStyle: data.clothingStyle,
-      ...(data.gender === 'woman' || data.gender === 'nonbinary' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
+      ...(data.features.length > 0 ? { features: data.features } : {}),
+      ...(data.gender === 'woman' || data.gender === 'nonbinary' || data.gender === 'fantasy' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
       ...(data.gender === 'man' ? { dickSize: data.dickSize, beard: data.beard } : {}),
     }
 
@@ -716,7 +756,8 @@ export default function OnboardingPage() {
       gender: data.gender, age: data.age, ethnicity: data.ethnicity,
       build: data.build, skinTone: data.skinTone, hairColor: data.hairColor,
       hairLength: data.hairLength, eyeColor: data.eyeColor, clothingStyle: data.clothingStyle,
-      ...(data.gender === 'woman' || data.gender === 'nonbinary' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
+      ...(data.features.length > 0 ? { features: data.features } : {}),
+      ...(data.gender === 'woman' || data.gender === 'nonbinary' || data.gender === 'fantasy' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
       ...(data.gender === 'man' ? { dickSize: data.dickSize, beard: data.beard } : {}),
     }
     try {
@@ -1186,6 +1227,37 @@ export default function OnboardingPage() {
                       onClick={() => set('eyeColor', e.id)}
                     />
                   ))}
+                </div>
+              </div>
+              {/* Kenmerken / facial features — multi-select */}
+              <div>
+                <SectionTitle>Features (optional, pick any)</SectionTitle>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {FACIAL_FEATURES.map(f => {
+                    const sel = (data.features || []).includes(f.id)
+                    return (
+                      <button
+                        key={f.id}
+                        onClick={() => {
+                          const current = data.features || []
+                          if (sel) {
+                            set('features', current.filter((x: string) => x !== f.id))
+                          } else {
+                            set('features', [...current, f.id])
+                          }
+                        }}
+                        style={{
+                          padding: '8px 14px', borderRadius: 10, cursor: 'pointer', fontSize: 12, fontWeight: 600,
+                          border: sel ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.1)',
+                          background: sel ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
+                          color: sel ? '#e91e8c' : 'rgba(255,255,255,0.6)', transition: 'all 0.2s',
+                          display: 'flex', alignItems: 'center', gap: 6,
+                        }}
+                      >
+                        <span style={{ fontSize: 14 }}>{f.emoji}</span> {f.label}
+                      </button>
+                    )
+                  })}
                 </div>
               </div>
             </div>

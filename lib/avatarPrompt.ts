@@ -74,13 +74,23 @@ const HAIR_LENGTH_MAP: Record<string, string> = {
   medium: 'medium length hair',
   long: 'long flowing hair past shoulders',
   very_long: 'very long hair reaching the waist',
-  braids: 'long braided hair box braids',
-  curly: 'curly voluminous tight curls hair',
+  braids: 'long hair with two braids, french braid pigtails',
+  french_braid: 'single french braid down the back',
+  fishtail: 'fishtail braid over one shoulder',
+  side_braid: 'loose side braid over one shoulder',
+  pigtails: 'two high pigtails twin tails',
+  space_buns: 'two small space buns on top of head with hair down',
+  twin_tails: 'two long low twin tails',
+  half_up: 'half up half down hairstyle',
+  slicked_back: 'slicked back hair pulled away from face',
+  curly: 'curly voluminous curls hair',
   wavy: 'wavy beach waves hair',
   straight: 'straight sleek smooth hair',
   afro: 'natural afro hair big round shape',
   ponytail: 'high ponytail hairstyle',
+  low_ponytail: 'low ponytail at nape of neck',
   bun: 'elegant bun updo hairstyle',
+  messy_bun: 'messy loose bun on top of head',
   bangs: 'straight blunt bangs with long hair',
   curtain_bangs: 'curtain bangs framing face with long hair',
   fade: 'fade cut hair short on sides',
@@ -91,6 +101,34 @@ const HAIR_LENGTH_MAP: Record<string, string> = {
   cornrows: 'cornrow braids hairstyle',
   messy: 'messy tousled bedhead hair',
   hijab: 'wearing hijab headscarf covering hair',
+}
+
+// ─── Facial features / kenmerken ─────────────────────────────────────────
+export const FEATURES_MAP: Record<string, string> = {
+  freckles: '(cute freckles on nose and cheeks:1.3)',
+  beauty_mark: '(beauty mark mole on cheek:1.3)',
+  dimples: '(dimples when smiling:1.3)',
+  thick_brows: '(thick full dark eyebrows:1.4)',
+  thin_brows: '(thin arched eyebrows:1.3)',
+  chubby_cheeks: '(chubby round cheeks baby face:1.3)',
+  sharp_jaw: '(sharp defined jawline:1.3)',
+  high_cheekbones: '(high prominent cheekbones:1.3)',
+  round_face: '(round soft face shape:1.3)',
+  long_face: '(long oval face shape:1.2)',
+  nose_piercing: '(small nose stud piercing:1.4)',
+  septum: '(septum ring piercing in nose:1.4)',
+  lip_piercing: '(lip piercing ring:1.4)',
+  eyebrow_piercing: '(eyebrow piercing:1.4)',
+  ear_piercings: '(multiple ear piercings earrings:1.3)',
+  glasses: '(wearing glasses:1.4)',
+  gap_teeth: '(gap between front teeth diastema:1.3)',
+  full_lips: '(full plump lips:1.3)',
+  thin_lips: '(thin narrow lips:1.3)',
+  button_nose: '(small cute button nose:1.3)',
+  big_nose: '(prominent large nose:1.3)',
+  scar_face: '(small scar on face:1.3)',
+  dark_circles: '(dark circles under eyes tired look:1.2)',
+  rosy_cheeks: '(rosy pink blushing cheeks:1.3)',
 }
 
 const HAIR_COLOR_MAP: Record<string, string> = {
@@ -569,6 +607,14 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
     }
   }
 
+  // Facial features / kenmerken
+  if (profile.features && Array.isArray(profile.features)) {
+    for (const f of profile.features) {
+      const feat = FEATURES_MAP[f] || ''
+      if (feat) parts.push(feat)
+    }
+  }
+
   // Clothing style — skip when scenario overrides it
   if (includeClothing && profile.clothingStyle) {
     const clothing = CLOTHING_MAP[profile.clothingStyle] || ''
@@ -652,6 +698,14 @@ export function buildIdentityReinforcement(profile: Record<string, any>): string
   // Ethnicity
   const ethnicity = ETHNICITY_MAP[profile.ethnicity] || 'European'
   parts.push(`${ethnicity}`)
+
+  // Distinctive facial features (piercings, freckles, etc.)
+  if (profile.features && Array.isArray(profile.features)) {
+    for (const f of profile.features) {
+      const feat = FEATURES_MAP[f] || ''
+      if (feat) parts.push(feat)
+    }
+  }
 
   return parts.join(', ')
 }
