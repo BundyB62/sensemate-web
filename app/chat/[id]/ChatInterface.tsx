@@ -197,6 +197,11 @@ export default function ChatInterface({ companion, initialMessages }: { companio
       setLoading(false)
       inputRef.current?.focus()
 
+      // If user typed messages while AI was responding, flush them now
+      if (batchRef.current.length > 0 && !batchTimerRef.current) {
+        batchTimerRef.current = setTimeout(() => { batchTimerRef.current = null; flushBatch() }, 1500)
+      }
+
       if (data.generateImage) {
         setGenerating(true)
         const lid = `imgload_${Date.now()}`
@@ -227,7 +232,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
 
   const sendMessage = useCallback((ev?: React.FormEvent) => {
     ev?.preventDefault()
-    if (!input.trim() || loading) return
+    if (!input.trim()) return
     const msg = input.trim()
     setInput('')
     if (inputRef.current) inputRef.current.style.height = 'auto'
@@ -243,7 +248,13 @@ export default function ChatInterface({ companion, initialMessages }: { companio
     batchRef.current.push(msg)
     setBatching(true)
     if (batchTimerRef.current) clearTimeout(batchTimerRef.current)
-    batchTimerRef.current = setTimeout(() => { batchTimerRef.current = null; flushBatch() }, 3000)
+    // If AI is still responding, wait for it to finish before flushing
+    // Otherwise use the normal 3s batch window
+    if (loading) {
+      // Don't start a timer — flushBatch will be called when loading finishes
+    } else {
+      batchTimerRef.current = setTimeout(() => { batchTimerRef.current = null; flushBatch() }, 3000)
+    }
     inputRef.current?.focus()
   }, [input, loading, replyTo, flushBatch])
 
@@ -516,7 +527,7 @@ export default function ChatInterface({ companion, initialMessages }: { companio
             onBlur={ev => { ev.target.style.borderColor = 'rgba(255,255,255,0.08)' }}
           />
 
-          <button type="submit" disabled={!input.trim() || loading} style={{
+          <button type="submit" disabled={!input.trim()} style={{
             width: 38, height: 38, borderRadius: 19, flexShrink: 0,
             background: input.trim() && !loading ? accent : 'rgba(255,255,255,0.06)',
             border: 'none',
