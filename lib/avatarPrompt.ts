@@ -630,46 +630,16 @@ export function buildAppearanceDescription(profile: Record<string, any>, include
 // ─── Identity reinforcement — core features that must NEVER change ──────────
 // Repeated at the END of prompts to ensure hijab, hair color, eye color, body type persist
 export function buildIdentityReinforcement(profile: Record<string, any>): string {
-  // Fantasy: reinforce ALL distinctive features strongly for consistency
+  // Fantasy: short reinforcement — only the 3-4 most distinctive features
+  // (full description is already in appearancePart, this just anchors the key traits)
   if (profile.style === 'fantasy') {
     const parts: string[] = []
-    const race = RACE_MAP[profile.race] || 'fantasy woman'
-    parts.push(`(${race}:1.5)`)
-    // Skin
-    const skin = FANTASY_SKIN_MAP[profile.skinTone] || ''
-    if (skin) parts.push(`(${skin}:1.4)`)
-    // Hair
-    const hairColor = HAIR_COLOR_MAP[profile.hairColor] || ''
-    const hairLength = HAIR_LENGTH_MAP[profile.hairLength] || ''
-    if (hairColor || hairLength) parts.push(`(${hairColor} ${hairLength}:1.4)`)
-    // Eyes
-    const eyeColor = FANTASY_EYE_MAP[profile.eyeColor] || ''
-    if (eyeColor) parts.push(`(${eyeColor}:1.3)`)
-    // Features
+    const race = RACE_MAP[profile.race] || 'fantasy'
+    parts.push(race.split(',')[0]) // just the race name, not the full description
     const ears = EARS_MAP[profile.ears] || ''
-    if (ears) parts.push(ears)
+    if (ears) parts.push(ears.replace(/\(|\)|\:\d\.\d/g, '')) // strip weights for brevity
     const horns = HORNS_MAP[profile.horns] || ''
-    if (horns) parts.push(horns)
-    const wings = WINGS_MAP[profile.wings] || ''
-    if (wings) parts.push(wings)
-    const tail = TAIL_MAP[profile.tail] || ''
-    if (tail) parts.push(tail)
-    // Extra features that define the character
-    const markings = MARKINGS_MAP[profile.markings] || ''
-    if (markings) parts.push(markings)
-    const fangs = FANGS_MAP[profile.fangs] || ''
-    if (fangs) parts.push(fangs)
-    const halo = HALO_MAP[profile.halo] || ''
-    if (halo) parts.push(halo)
-    const fins = FINS_MAP[profile.fins] || ''
-    if (fins) parts.push(fins)
-    const scales = SCALES_MAP[profile.scales] || ''
-    if (scales) parts.push(scales)
-    const gills = GILLS_MAP[profile.gills] || ''
-    if (gills) parts.push(gills)
-    // Build
-    const build = BUILD_MAP[profile.build] || ''
-    if (build) parts.push(`(${build}:1.3)`)
+    if (horns) parts.push(horns.replace(/\(|\)|\:\d\.\d/g, ''))
     return parts.join(', ')
   }
 
@@ -689,22 +659,6 @@ export function buildIdentityReinforcement(profile: Record<string, any>): string
   // Eye color
   const eyeColor = EYE_COLOR_MAP[profile.eyeColor] || 'brown'
   parts.push(`(${eyeColor} eyes:1.3)`)
-
-  // Body type
-  const build = BUILD_MAP[profile.build] || 'slim'
-  parts.push(`(${build}:1.2)`)
-
-  // Ethnicity
-  const ethnicity = ETHNICITY_MAP[profile.ethnicity] || 'European'
-  parts.push(`${ethnicity}`)
-
-  // Distinctive facial features (piercings, freckles, etc.)
-  if (profile.features && Array.isArray(profile.features)) {
-    for (const f of profile.features) {
-      const feat = FEATURES_MAP[f] || ''
-      if (feat) parts.push(feat)
-    }
-  }
 
   return parts.join(', ')
 }

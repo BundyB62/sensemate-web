@@ -8,7 +8,8 @@ import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatar
 export const maxDuration = 60
 
 // Novita.ai — supports NSFW with enable_nsfw_detection: false
-const NOVITA_URL = 'https://api.novita.ai/v3/async/txt2img'
+const NOVITA_TXT2IMG_URL = 'https://api.novita.ai/v3/async/txt2img'
+const NOVITA_IMG2IMG_URL = 'https://api.novita.ai/v3/async/img2img'
 const NOVITA_RESULT_URL = 'https://api.novita.ai/v3/async/task-result'
 
 // Model names
@@ -71,7 +72,7 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
 
   try {
     // Step 1: Submit async task
-    const submitRes = await fetch(NOVITA_URL, {
+    const submitRes = await fetch(NOVITA_TXT2IMG_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -159,6 +160,114 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
     return null
   } catch (err) {
     console.error('[Image] Novita error:', err)
+    return null
+  }
+}
+
+// ─── Generate with Novita.ai img2img (avatar-based) ──────────────────────
+// Uses the avatar as reference image — keeps face/body consistent
+async function generateNovitaImg2Img(
+  prompt: string, avatarBase64: string, apiKey: string,
+  extraNegative?: string, poseId?: string, modelName?: string, denoising = 0.6
+): Promise<string | null> {
+  const isFantasyModel = modelName === NOVITA_FANTASY_MODEL
+  let fullPrompt = isFantasyModel
+    ? prompt + ', 3d render, semi-realistic, fantasy, detailed'
+    : prompt + ', (photorealistic:1.4), RAW photo, 8k'
+
+  if (fullPrompt.length > 1020) {
+    fullPrompt = fullPrompt.substring(0, 1020)
+    const lc = fullPrompt.lastIndexOf(',')
+    if (lc > 800) fullPrompt = fullPrompt.substring(0, lc)
+  }
+
+  let negativePrompt = isFantasyModel
+    ? 'cartoon, sketch, anime, deformed, ugly, blurry, low quality, bad anatomy, extra fingers, watermark, text'
+    : 'cartoon, anime, illustration, deformed, ugly, blurry, low quality, bad anatomy, extra fingers, watermark, text, tattoo'
+  if (extraNegative) negativePrompt += ', ' + extraNegative.substring(0, 300)
+
+  try {
+    console.log(`[Image] img2img submit (denoise: ${denoising}, model: ${(modelName || NOVITA_REALISTIC_MODEL).substring(0, 30)}...)`)
+    const submitRes = await fetch(NOVITA_IMG2IMG_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        extra: { response_image_type: 'jpeg', enable_nsfw_detection: false },
+        request: {
+          model_name: modelName || NOVITA_REALISTIC_MODEL,
+          prompt: fullPrompt,
+          negative_prompt: negativePrompt,
+          image_base64: avatarBase64,
+          width: 832,
+          height: 1216,
+          image_num: 1,
+          steps: 30,
+          clip_skip: 2,
+          guidance_scale: 6,
+          denoising_strength: denoising,
+          seed: Math.floor(Math.random() * 2147483647),
+          sampler_name: 'DPM++ 2M Karras',
+          ...(poseId && getPoseBase64(poseId) ? {
+            controlnet_units: [{
+              model: 't2i-adapter_xl_openpose',
+              weight: 0.65,
+              input_image: getPoseBase64(poseId),
+              module: 'openpose',
+              control_mode: 0,
+            }],
+          } : {}),
+        },
+      }),
+    })
+
+    if (!submitRes.ok) {
+      const err = await submitRes.text()
+      console.error(`[Image] img2img submit error (${submitRes.status}):`, err.substring(0, 300))
+      return null
+    }
+
+    const { task_id } = await submitRes.json()
+    if (!task_id) { console.error('[Image] img2img: no task_id'); return null }
+    console.log(`[Image] img2img task: ${task_id}`)
+
+    // Poll for result
+    for (let i = 0; i < 25; i++) {
+      await new Promise(r => setTimeout(r, 1500))
+      const res = await fetch(`${NOVITA_RESULT_URL}?task_id=${task_id}`, {
+        headers: { 'Authorization': `Bearer ${apiKey}` },
+      })
+      if (!res.ok) continue
+      const data = await res.json()
+      if (data.task?.status === 'TASK_STATUS_SUCCEED') {
+        const url = data.images?.[0]?.image_url
+        if (url) { console.log(`[Image] img2img success after ${(i+1)*1.5}s`); return url }
+        return null
+      }
+      if (data.task?.status === 'TASK_STATUS_FAILED') {
+        console.error('[Image] img2img failed:', data.task?.reason)
+        return null
+      }
+    }
+    console.error('[Image] img2img timed out')
+    return null
+  } catch (err) {
+    console.error('[Image] img2img error:', err)
+    return null
+  }
+}
+
+// ─── Download avatar and convert to base64 ───────────────────────────────
+async function getAvatarBase64(avatarUrl: string): Promise<string | null> {
+  try {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 8000)
+    const res = await fetch(avatarUrl, { signal: controller.signal })
+    clearTimeout(timeout)
+    if (!res.ok) return null
+    const buf = await res.arrayBuffer()
+    return Buffer.from(buf).toString('base64')
+  } catch {
+    console.error('[Image] Failed to download avatar for img2img')
     return null
   }
 }
@@ -340,38 +449,33 @@ export async function POST(request: Request) {
     // Combine all negative prompts
     const combinedNegative = [bodyNegative, extraNegativeFromAppearance].filter(Boolean).join(', ')
 
-    console.log(`[Image] ${isFantasy ? '🧝 FANTASY' : ''} ${explicit ? '🔞 NSFW' : '✅ SFW'} | Prompt: ${enrichedPrompt.substring(0, 200)}`)
+    const modelName = isFantasy ? NOVITA_FANTASY_MODEL : NOVITA_REALISTIC_MODEL
+    console.log(`[Image] ${isFantasy ? '🧝 FANTASY' : '📷 REALISTIC'} ${explicit ? '🔞 NSFW' : '✅ SFW'} | Prompt: ${enrichedPrompt.substring(0, 200)}`)
 
     let imageUrl: string | null = null
 
-    if (isFantasy && novitaKey) {
-      // FANTASY → semi-realistic 3D fantasy model
-      console.log(`[Image] Using Novita.ai FANTASY model (semi-realistic 3D)${poseId ? ` + ControlNet pose: ${poseId}` : ''}`)
-      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, NOVITA_FANTASY_MODEL)
-    } else if (explicit && novitaKey) {
-      // NSFW → Novita.ai (no content filter)
-      console.log(`[Image] Using Novita.ai (NSFW allowed)${poseId ? ` + ControlNet pose: ${poseId}` : ''}`)
-      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId)
-
-      // If Novita fails, try Flux as last resort (might be blocked but worth trying)
-      if (!imageUrl) {
-        console.log('[Image] Novita failed, trying Flux Dev as fallback')
-        imageUrl = await generateFlux(enrichedPrompt, falKey)
+    // ─── PRIMARY: img2img (avatar-based) — keeps face/body consistent ────
+    // Use the avatar as reference image so every photo looks like the same person
+    if (avatarUrl && novitaKey) {
+      const avatarB64 = await getAvatarBase64(avatarUrl)
+      if (avatarB64) {
+        console.log(`[Image] 🖼️ Using img2img (avatar-based)${poseId ? ` + pose: ${poseId}` : ''} | model: ${modelName.substring(0, 30)}`)
+        // Denoising: 0.55 = close to avatar (selfie), 0.65 = moderate change (poses), 0.75 = big change (explicit)
+        const denoise = explicit ? 0.70 : 0.55
+        imageUrl = await generateNovitaImg2Img(enrichedPrompt, avatarB64, novitaKey, combinedNegative, poseId, modelName, denoise)
       }
-    } else if (explicit && !novitaKey) {
-      // NSFW but no Novita key — try Flux anyway
-      console.warn('[Image] ⚠️ NSFW prompt but no NOVITA_API_KEY set! Trying Flux (may be blocked)')
-      imageUrl = await generateFlux(enrichedPrompt, falKey)
-    } else {
-      // SFW → Flux Dev (best quality)
-      console.log('[Image] Using Flux Dev (SFW)')
-      imageUrl = await generateFlux(enrichedPrompt, falKey)
+    }
 
-      // Flux failed → try Novita as fallback
-      if (!imageUrl && novitaKey) {
-        console.log('[Image] Flux failed, falling back to Novita')
-        imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative)
-      }
+    // ─── FALLBACK: txt2img (no avatar reference) ─────────────────────────
+    if (!imageUrl && novitaKey) {
+      console.log(`[Image] img2img failed or no avatar — falling back to txt2img`)
+      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, isFantasy ? NOVITA_FANTASY_MODEL : undefined)
+    }
+
+    // ─── LAST RESORT: Flux (SFW only) ───────────────────────────────────
+    if (!imageUrl && !explicit) {
+      console.log('[Image] Trying Flux Dev as last resort')
+      imageUrl = await generateFlux(enrichedPrompt, falKey)
     }
 
     if (!imageUrl) {
@@ -379,25 +483,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Image generation failed' }, { status: 500 })
     }
 
-    // Face merge — skip for anime characters (prompt-based consistency is enough)
-    // For realistic: swap the avatar's face onto the generated image
-    console.log(`[Image] Face merge check: isFantasy=${isFantasy}, avatarUrl=${avatarUrl ? 'yes(' + avatarUrl.substring(0, 60) + '...)' : 'NONE'}, novitaKey=${novitaKey ? 'yes' : 'NONE'}`)
-    if (!isFantasy && avatarUrl && novitaKey) {
-      let mergedUrl: string | null = null
-      for (let attempt = 1; attempt <= 2; attempt++) {
-        mergedUrl = await mergeAvatarFace(imageUrl, avatarUrl, novitaKey)
-        if (mergedUrl) {
-          console.log(`[Image] ✅ Face merged successfully (attempt ${attempt})`)
-          return NextResponse.json({ url: mergedUrl })
-        }
-        if (attempt < 2) {
-          console.warn(`[Image] Face merge attempt ${attempt} failed, retrying...`)
-          await new Promise(r => setTimeout(r, 1000))
-        }
-      }
-      // If merge fails after retries, return the original image anyway
-      console.warn('[Image] Face merge failed after 2 attempts, returning original image')
-    }
+    // No face merge needed — img2img already produces consistent results
 
     console.log(`[Image] ✅ Success: ${imageUrl.substring(0, 80)}...`)
     return NextResponse.json({ url: imageUrl })
