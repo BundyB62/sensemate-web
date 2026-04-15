@@ -810,28 +810,23 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
   const eyeColor = EYE_COLOR_MAP[profile.eyeColor] || 'brown'
   const expression = EMOTION_EXPRESSIONS[emotion] || EMOTION_EXPRESSIONS.neutral
 
-  // Clothing — SFW swap for profile avatar
+  // Clothing — always show what user selected
   let clothing = CLOTHING_MAP[profile.clothingStyle] || 'casual outfit'
-  if (sfwMode && /lingerie|bikini|swimwear|nude|naked/i.test(clothing)) {
-    clothing = 'elegant classy outfit'
-  }
 
   // Beard (men only)
   const beardDesc = isMale && profile.beard && profile.beard !== 'none'
     ? BEARD_MAP[profile.beard] || ''
     : ''
 
-  // Body details — skip explicit parts in SFW mode
+  // Body details — always include (user selected these, show them)
   const bodyParts: string[] = [build]
-  if (!sfwMode) {
-    if (!isMale && profile.breastSize) {
-      const breast = BREAST_MAP[profile.breastSize] || ''
-      if (breast) bodyParts.push(breast)
-    }
-    if (profile.assSize) {
-      const ass = ASS_MAP[profile.assSize] || ''
-      if (ass) bodyParts.push(ass)
-    }
+  if (!isMale && profile.breastSize) {
+    const breast = BREAST_MAP[profile.breastSize] || ''
+    if (breast) bodyParts.push(breast)
+  }
+  if (profile.assSize) {
+    const ass = ASS_MAP[profile.assSize] || ''
+    if (ass) bodyParts.push(ass)
   }
   const bodyDesc = bodyParts.join(', ')
 
@@ -860,6 +855,15 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
 
   const faceBlock = faceParts.join(', ')
 
+  // Facial features / kenmerken
+  const featureParts: string[] = []
+  if (profile.features && Array.isArray(profile.features)) {
+    for (const f of profile.features) {
+      const feat = FEATURES_MAP[f] || ''
+      if (feat) featureParts.push(feat)
+    }
+  }
+
   // Build the prompt — full body portrait from head to toe
   const prompt = [
     // Subject identity (most important — first tokens get highest weight)
@@ -867,6 +871,8 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
     `${age} ${ethnicity} ${gender}`,
     // Face details (second highest priority)
     faceBlock,
+    // Facial features (piercings, freckles, etc.)
+    ...(featureParts.length > 0 ? featureParts : []),
     // Body (higher emphasis for full body)
     `(${bodyDesc}:1.3)`,
     // Clothing
@@ -877,8 +883,6 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
     'looking at camera, standing pose, full length shot',
     'professional studio photography, soft warm directional lighting, neutral dark background',
     'shot on Sony A7R IV 35mm wide lens, 8k, ultra-detailed, photorealistic skin texture',
-    // Reinforcement of key features (repeat for emphasis)
-    `BREAK full body head to toe, ${eyeColor} eyes, ${isHijab ? `${hairColor} hijab headscarf` : `${hairColor} hair`}${beardDesc ? `, ${beardDesc}` : ''}, ${build}`,
   ].join(', ')
 
   return prompt
