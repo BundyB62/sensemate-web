@@ -108,7 +108,7 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
             ip_adapter: [{
               model: 'ip-adapter-faceid-plusv2_sdxl',
               image_base64: faceRefBase64,
-              weight: 0.7,
+              weight: 0.85,
             }],
           } : {}),
         },

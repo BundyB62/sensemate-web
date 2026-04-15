@@ -701,11 +701,11 @@ export function buildBodyReinforcement(profile: Record<string, any>): { emphasis
   // ─── Breast reinforcement — EVERY cup size covered ────────────────────────
   const breast = profile.breastSize || ''
   if (breast === 'cup-aa' || breast === 'cup-a') {
-    emphasis.push('(completely flat chest:1.7)', '(very small tiny breasts:1.6)', '(no cleavage flat-chested:1.5)', '(AA-cup breasts:1.5)')
-    negative.push('large breasts, big breasts, medium breasts, busty, cleavage, big chest, D-cup, C-cup, B-cup, round breasts, full breasts, breast implants, heavy breasts')
+    emphasis.push('BREAK (completely flat chest:1.8)', '(very small tiny breasts:1.7)', '(no cleavage flat-chested:1.6)', '(AA-cup breasts extremely small:1.6)')
+    negative.push('large breasts, big breasts, medium breasts, busty, cleavage, big chest, D-cup, C-cup, B-cup, round breasts, full breasts, breast implants, heavy breasts, huge breasts')
   } else if (breast === 'cup-b') {
-    emphasis.push('(small B-cup breasts:1.5)', '(modest small chest:1.4)')
-    negative.push('large breasts, big breasts, huge breasts, D-cup, DD-cup, busty, flat chest, cleavage')
+    emphasis.push('BREAK (small B-cup breasts:1.6)', '(modest small chest:1.5)', '(small breasts:1.4)')
+    negative.push('large breasts, big breasts, huge breasts, D-cup, DD-cup, busty, cleavage, heavy breasts')
   } else if (breast === 'cup-c') {
     emphasis.push('(medium C-cup breasts:1.4)', '(moderate chest size:1.3)')
     negative.push('flat chest, huge breasts, very large breasts, tiny breasts')
