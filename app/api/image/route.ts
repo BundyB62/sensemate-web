@@ -461,7 +461,12 @@ export async function POST(request: Request) {
       if (avatarB64) {
         console.log(`[Image] 🖼️ Using img2img (avatar-based)${poseId ? ` + pose: ${poseId}` : ''} | model: ${modelName.substring(0, 30)}`)
         // Denoising: 0.55 = close to avatar (selfie), 0.65 = moderate change (poses), 0.75 = big change (explicit)
-        const denoise = explicit ? 0.70 : 0.55
+        // Denoising: higher = more creative freedom (pose/clothing changes), lower = closer to avatar
+        // 0.50 = selfie/SFW (very close to avatar)
+        // 0.65 = sexy/lingerie (moderate changes)
+        // 0.82 = nude/explicit (needs freedom to remove clothing and change pose)
+        const hasExplicitPose = poseId && poseId !== ''
+        const denoise = hasExplicitPose ? 0.82 : explicit ? 0.78 : 0.50
         imageUrl = await generateNovitaImg2Img(enrichedPrompt, avatarB64, novitaKey, combinedNegative, poseId, modelName, denoise)
       }
     }
