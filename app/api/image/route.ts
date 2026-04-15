@@ -230,9 +230,9 @@ async function generateNovitaImg2Img(
     if (!task_id) { console.error('[Image] img2img: no task_id'); return null }
     console.log(`[Image] img2img task: ${task_id}`)
 
-    // Poll for result
-    for (let i = 0; i < 25; i++) {
-      await new Promise(r => setTimeout(r, 1500))
+    // Poll for result (20 attempts × 1.2s = 24s max — leaves room for cold start + download)
+    for (let i = 0; i < 20; i++) {
+      await new Promise(r => setTimeout(r, 1200))
       const res = await fetch(`${NOVITA_RESULT_URL}?task_id=${task_id}`, {
         headers: { 'Authorization': `Bearer ${apiKey}` },
       })
@@ -260,7 +260,7 @@ async function generateNovitaImg2Img(
 async function getAvatarBase64(avatarUrl: string): Promise<string | null> {
   try {
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 8000)
+    const timeout = setTimeout(() => controller.abort(), 5000)
     const res = await fetch(avatarUrl, { signal: controller.signal })
     clearTimeout(timeout)
     if (!res.ok) return null
