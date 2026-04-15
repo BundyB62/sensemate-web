@@ -837,11 +837,33 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const hasSquat = /hurk|squat/i.test(lower)
   const hasNude = /naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen/i.test(lower)
   const hasFingering = /vingeren|finger|masturbat|aanraken|touch herself|strelen/i.test(lower)
+  const hasToy = /dildo|vibrator|toy|speeltje|plug|butt\s*plug|buttplug/i.test(lower)
 
   let detectedPoseId: string | undefined = undefined
 
-  // ─── ANUS / EXTREMELY SPECIFIC (highest priority) ───────────────────────────
-  if (hasAnus) { scenario = 'bent over forward showing bare ass from behind, nude, legs apart, rear view close-up of butt and anus visible, camera low behind her, looking back over shoulder, intimate bedroom lighting'; detectedPoseId = 'bent-over' }
+  // ─── TOY / DILDO COMBOS (highest priority) ─────────────────────────────────
+  if (hasToy && hasAnus) { scenario = randPick([
+    'nude, inserting dildo toy in her ass from behind, bent over, rear view, anal penetration with toy, looking back at camera, bedroom',
+    'nude, on all fours, dildo toy inserted in her anus, rear view from behind, close-up of butt with toy, moaning expression',
+    'nude, lying on side, pushing dildo into her ass, close-up of anal toy insertion, pleasure expression, bedroom',
+  ]); detectedPoseId = 'bent-over' }
+  else if (hasToy && hasPussy) { scenario = randPick([
+    'nude, inserting dildo toy in her pussy, legs spread wide, close-up of vaginal penetration with toy, looking at camera with pleasure, bedroom',
+    'nude, lying back on bed, dildo toy between her legs entering pussy, spread legs, moaning, intimate close-up',
+    'nude, sitting with legs spread, pushing vibrator toy against pussy, pleasure expression, intimate bedroom',
+  ]); detectedPoseId = 'spread-front' }
+  else if (hasToy && hasButt) { scenario = randPick([
+    'nude, bent over, inserting dildo toy from behind, rear view, butt prominently visible, toy visible, bedroom',
+    'nude, on knees from behind, dildo toy near her butt, rear view, looking back seductively',
+  ]); detectedPoseId = 'bent-over' }
+  else if (hasToy) { scenario = randPick([
+    'nude, using dildo toy on herself, lying on bed, legs apart, pleasure expression, intimate close-up, bedroom',
+    'nude, holding vibrator toy between legs, eyes closed in pleasure, lying back on bed, moaning',
+    'nude, sitting on bed, inserting dildo toy, legs spread, looking at camera seductively, intimate bedroom lighting',
+  ]); detectedPoseId = 'lying-back' }
+
+  // ─── ANUS / EXTREMELY SPECIFIC ─────────────────────────────────────────────
+  else if (hasAnus) { scenario = 'bent over forward showing bare ass from behind, nude, legs apart, rear view close-up of butt and anus visible, camera low behind her, looking back over shoulder, intimate bedroom lighting'; detectedPoseId = 'bent-over' }
 
   // ─── CLOSE-UP COMBOS ──────────────────────────────────────────────────────
   else if (hasCloseUp && hasPussy) { scenario = 'extreme close-up macro photograph of vulva and pussy, intimate angle between legs, nude, very close camera, sharp focus on intimate area, soft bedroom lighting, no face visible'; detectedPoseId = 'spread-front' }
@@ -922,7 +944,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   else if (/bikini|zwempak|swimsuit|badpak/i.test(lower)) scenario = '(wearing complete bikini set:1.5), (bikini top covering breasts:1.4), (bikini bottom:1.3), beach, sunny, wet skin, golden hour lighting, fully clothed in swimwear'
 
   // ─── OTHER ─────────────────────────────────────────────────────────────────
-  else if (/dildo|vibrator|toy|speeltje/i.test(lower)) scenario = 'holding a toy, playful naughty expression, nude, bedroom, intimate'
+  // dildo/toy is now handled above in the TOY COMBOS section
   else if (/sexy|verleidel|geil|hot|heet|opwindend|stout|naughty|dirty|vies/i.test(lower)) scenario = 'seductive pose, bedroom, sensual warm lighting, looking at camera with desire'
   // Home/cozy scenarios
   else if (/bank|couch|sofa|knus|knuffelen/i.test(lower)) scenario = 'sitting cozy on soft couch, legs tucked under, wearing oversized sweater or comfy outfit, warm cozy living room, soft warm lighting, relaxed happy smile'
