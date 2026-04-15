@@ -837,7 +837,7 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const hasSquat = /hurk|squat/i.test(lower)
   const hasNude = /naakt|spiernaakt|naked|nude|bloot/i.test(lower)
   const hasTopless = /topless|bh\s*uit|bha\s*uit|tieten\s*zien|borsten\s*zien|shirt\s*uit|top\s*uit/i.test(lower)
-  const hasUndress = /uitkleden|strippen|kleed.*uit|trek.*uit|strip/i.test(lower)
+  const hasUndress = /uitkleden|uitgekleed|uitgetrokken|strippen|gestript|kleed.*uit|trek.*uit|strip\b|kleren.*uit|clothes.*off/i.test(lower)
   const hasFingering = /vingeren|finger|masturbat|aanraken|touch herself|strelen/i.test(lower)
   const hasToy = /dildo|vibrator|toy|speeltje|plug|butt\s*plug|buttplug/i.test(lower)
 

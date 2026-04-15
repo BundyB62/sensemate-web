@@ -458,33 +458,30 @@ export async function POST(request: Request) {
 
     const modelName = isFantasy ? NOVITA_FANTASY_MODEL : NOVITA_REALISTIC_MODEL
 
-    // Determine if the request needs FULL nudity (txt2img + IP-Adapter)
-    // vs clothed/semi-clothed (img2img with avatar reference)
-    // Lingerie, bikini, sexy = clothed → img2img (keeps clothing from prompt)
-    // Nude, spread, pussy, ass = naked → txt2img + IP-Adapter (needs freedom)
-    const needsNudity = /\b(naked|nude|topless|spiernaakt|naakt|bloot|pussy|vagina|kutje|kut\b|spread|spreid|anus|aars|dildo|vibrator|toy)\b/i.test(enrichedPrompt)
+    // Determine routing: img2img only for pure SFW (selfie, casual — no clothing change needed)
+    // Everything that changes/removes clothing → txt2img + IP-Adapter (needs creative freedom)
+    const needsClothingChange = explicit || /lingerie|bikini|underwear|nude|naked|topless|undress|uitgekleed|uitkleden|uitgetrokken/i.test(enrichedPrompt)
 
-    console.log(`[Image] ${isFantasy ? '🧝' : '📷'} ${needsNudity ? '🔞 NUDE' : explicit ? '👙 SEXY' : '✅ SFW'} | Prompt: ${enrichedPrompt.substring(0, 200)}`)
+    console.log(`[Image] ${isFantasy ? '🧝' : '📷'} ${needsClothingChange ? '🔄 CLOTHING CHANGE' : '✅ SFW'} | Prompt: ${enrichedPrompt.substring(0, 200)}`)
 
     let imageUrl: string | null = null
     let avatarB64: string | null = null
 
-    // Download avatar once (used by both img2img and IP-Adapter)
+    // Download avatar once
     if (avatarUrl && novitaKey) {
       avatarB64 = await getAvatarBase64(avatarUrl)
     }
 
-    if (needsNudity && avatarB64 && novitaKey) {
-      // ─── NUDE: txt2img + IP-Adapter FaceID ─────────────────────────────
-      // Full creative freedom for nudity/poses + avatar face consistency
-      console.log(`[Image] 🔞🖼️ txt2img + IP-Adapter FaceID${poseId ? ` + pose: ${poseId}` : ''}`)
+    if (needsClothingChange && avatarB64 && novitaKey) {
+      // ─── CLOTHING CHANGE: txt2img + IP-Adapter FaceID ──────────────────
+      // Any request that changes/removes clothing needs txt2img for freedom
+      // IP-Adapter keeps the face consistent with the avatar
+      console.log(`[Image] 🔄🖼️ txt2img + IP-Adapter FaceID${poseId ? ` + pose: ${poseId}` : ''}`)
       imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, modelName, avatarB64)
     } else if (avatarB64 && novitaKey) {
-      // ─── CLOTHED (SFW + lingerie/bikini/sexy): img2img ─────────────────
-      // Keeps face/body from avatar, allows clothing changes via denoising
-      const denoise = explicit ? 0.60 : 0.50 // slightly higher for lingerie/bikini
-      console.log(`[Image] 🖼️ img2img (avatar-based, denoise: ${denoise})`)
-      imageUrl = await generateNovitaImg2Img(enrichedPrompt, avatarB64, novitaKey, combinedNegative, poseId, modelName, denoise)
+      // ─── PURE SFW (selfie, casual — same clothing as avatar): img2img ──
+      console.log(`[Image] 🖼️ img2img (SFW — avatar-based, denoise: 0.50)`)
+      imageUrl = await generateNovitaImg2Img(enrichedPrompt, avatarB64, novitaKey, combinedNegative, poseId, modelName, 0.50)
     } else if (novitaKey) {
       // ─── No avatar: plain txt2img ──────────────────────────────────────
       console.log(`[Image] Using txt2img (no avatar available)`)
