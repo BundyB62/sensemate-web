@@ -742,10 +742,10 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   // Detect if user is requesting a specific outfit or body-part reveal
   // Split into two checks: one for "strip default clothing" and one for "is nude/explicit"
   const _msgCheck = userMessage.toLowerCase()
-  // hasOutfitOverride: strip default clothing (jellaba, casual, etc.) — includes clothed alternatives like lingerie/bikini
-  const hasOutfitOverride = /bikini|zwempak|swimsuit|badpak|lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|topless|naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen|jurk\b|dress\b|kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit|tieten|tiet\b|borsten|borst\b|boobs?|breast|tepel|nipple|ami\b|amini|göğüs|gogus|kalça|kalcasi|spreid|spread|wijd|achteren|kont\b|kontje|billen|bil\b|reet|anus|aars|doggy|voorover|bent.?over|op.*vier|handen.*knie|hurk|squat|knie[eë]n|kneeling/i.test(_msgCheck)
-  // isNudeRequest: actual nudity — does NOT include lingerie/bikini (those are clothed)
-  const isNudeRequest = /topless|naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen|kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit|tieten|tiet\b|borsten|borst\b|boobs?|breast|tepel|nipple|ami\b|amini|spreid|spread|wijd|achteren|kont\b|kontje|billen|bil\b|reet|anus|aars|doggy|voorover|bent.?over|op.*vier|handen.*knie|hurk|squat|knie[eë]n|kneeling/i.test(_msgCheck)
+  // hasOutfitOverride: strip default clothing (jellaba, casual, etc.) — includes ALL outfit changes
+  const hasOutfitOverride = /bikini|zwempak|swimsuit|badpak|lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|topless|naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen|kleed.*uit|trek.*uit|jurk\b|dress\b|kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit|tieten|tiet\b|borsten|borst\b|boobs?|breast|tepel|nipple|ami\b|amini|göğüs|gogus|kalça|kalcasi|spreid|spread|wijd|achteren|kont\b|kontje|billen|bil\b|reet|anus|aars|doggy|voorover|bent.?over|op.*vier|handen.*knie|hurk|squat|knie[eë]n|kneeling|dildo|vibrator|toy|speeltje/i.test(_msgCheck)
+  // isNudeRequest: ACTUAL nudity only — NOT lingerie/bikini/undressing (those are clothed/semi-clothed)
+  const isNudeRequest = /naakt|spiernaakt|naked|nude|bloot|kutje|kut\b|vagina|pussy|poesje|poes\b|gleuf|spleetje|schaamlippen|clit|ami\b|amini|spreid|spread|wijd|achteren|kont\b|kontje|billen|bil\b|reet|anus|aars|doggy|voorover|bent.?over|op.*vier|handen.*knie|hurk|squat|dildo|vibrator|toy|speeltje/i.test(_msgCheck)
 
   // Build appearance — skip clothing when: scenario has its own costume, OR user requests specific outfit/body parts
   // Pass isNudeRequest to control whether nude tokens are added (only for actual nudity, not lingerie/bikini)
@@ -835,7 +835,9 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   const hasLying = /lig|ligg|liggen|lying|lay/i.test(lower)
   const hasDoggy = /op.*vier|doggy|handen.*knie|crawl|kruip/i.test(lower)
   const hasSquat = /hurk|squat/i.test(lower)
-  const hasNude = /naakt|spiernaakt|naked|nude|bloot|uitkleden|strippen/i.test(lower)
+  const hasNude = /naakt|spiernaakt|naked|nude|bloot/i.test(lower)
+  const hasTopless = /topless|bh\s*uit|bha\s*uit|tieten\s*zien|borsten\s*zien|shirt\s*uit|top\s*uit/i.test(lower)
+  const hasUndress = /uitkleden|strippen|kleed.*uit|trek.*uit|strip/i.test(lower)
   const hasFingering = /vingeren|finger|masturbat|aanraken|touch herself|strelen/i.test(lower)
   const hasToy = /dildo|vibrator|toy|speeltje|plug|butt\s*plug|buttplug/i.test(lower)
 
@@ -923,17 +925,25 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
     'sitting on edge of bed, barefoot, close-up of feet and ankles',
   ])
 
-  // ─── CLOTHING ──────────────────────────────────────────────────────────────
+  // ─── UNDRESSING GRADATION ────────────────────────────────────────────────
+  // hasUndress ("kleed je uit") → lingerie (first step)
+  // hasTopless ("doe je bh uit") → topless (second step)
+  // hasNude ("naakt", "bloot") → fully nude (final step)
+  else if (hasUndress) scenario = randPick([
+    `(wearing sexy lingerie set:1.5), (lace bra and panties:1.4), NOT nude, seductive teasing pose, slowly undressing, ${randPick(BED_VAR)} bedroom`,
+    `(wearing matching bra and panties:1.5), (lingerie visible:1.4), NOT nude, pulling off outer clothing, teasing smile, bedroom`,
+    `(wearing sheer negligee:1.5), (see-through nightgown:1.4), NOT nude, standing seductively, bedroom`,
+  ])
+  else if (hasTopless) scenario = randPick([
+    '(topless:1.5), (bare breasts visible:1.4), (wearing only panties:1.3), NOT fully nude, sitting on bed, hands at sides, confident look',
+    '(topless:1.5), (breasts bare:1.4), (only wearing underwear bottom:1.3), standing, seductive expression',
+    '(topless:1.5), (no bra bare chest:1.4), (panties only:1.3), lying on side, looking at camera',
+  ])
   else if (hasNude) scenario = randPick([
     `fully nude, standing confident pose, full body visible, ${randPick(BED_VAR)} bedroom`,
     `fully nude lying on ${randPick(BED_VAR)}, artistic full body shot from above`,
     `fully nude sitting on ${randPick(BED_VAR)}, knees drawn up, looking at camera`,
     `fully nude leaning against wall, full body visible, bedroom setting`,
-  ])
-  else if (/topless/i.test(lower)) scenario = randPick([
-    'topless, breasts bare, sitting on bed, hands on thighs, confident direct look',
-    'topless standing, arms slightly raised, chest forward, seductive expression',
-    'topless lying on side, breasts visible, looking at camera over shoulder',
   ])
   else if (/lingerie|ondergoed|underwear|bh\b|bha\b|slipje|string|thong|jarretel|garter|kous|stockings|corset|bodystocking|bodysuit|babydoll|negligee|nachthemd|nachtpon/i.test(lower)) scenario = randPick([
     `(wearing sexy lace lingerie set:1.5), (lace bra and panties visible:1.4), NOT nude NOT naked, ${randPick(BED_VAR)} bedroom, seductive pose on bed`,
