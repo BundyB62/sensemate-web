@@ -454,27 +454,25 @@ export async function POST(request: Request) {
 
     let imageUrl: string | null = null
 
-    // ─── PRIMARY: img2img (avatar-based) — keeps face/body consistent ────
-    // Use the avatar as reference image so every photo looks like the same person
-    if (avatarUrl && novitaKey) {
+    if (explicit && novitaKey) {
+      // ─── NSFW: txt2img (full creative freedom for nudity/poses) ────────
+      // img2img can't remove clothing well — the avatar's outfit persists.
+      // txt2img gives the model full freedom for nude poses.
+      console.log(`[Image] 🔞 Using txt2img (NSFW — full creative freedom)${poseId ? ` + pose: ${poseId}` : ''}`)
+      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, modelName)
+    } else if (avatarUrl && novitaKey) {
+      // ─── SFW: img2img (avatar-based — keeps face/body consistent) ──────
       const avatarB64 = await getAvatarBase64(avatarUrl)
       if (avatarB64) {
-        console.log(`[Image] 🖼️ Using img2img (avatar-based)${poseId ? ` + pose: ${poseId}` : ''} | model: ${modelName.substring(0, 30)}`)
-        // Denoising: 0.55 = close to avatar (selfie), 0.65 = moderate change (poses), 0.75 = big change (explicit)
-        // Denoising: higher = more creative freedom (pose/clothing changes), lower = closer to avatar
-        // 0.50 = selfie/SFW (very close to avatar)
-        // 0.65 = sexy/lingerie (moderate changes)
-        // 0.82 = nude/explicit (needs freedom to remove clothing and change pose)
-        const hasExplicitPose = poseId && poseId !== ''
-        const denoise = hasExplicitPose ? 0.82 : explicit ? 0.78 : 0.50
-        imageUrl = await generateNovitaImg2Img(enrichedPrompt, avatarB64, novitaKey, combinedNegative, poseId, modelName, denoise)
+        console.log(`[Image] 🖼️ Using img2img (SFW — avatar-based, denoise: 0.50)`)
+        imageUrl = await generateNovitaImg2Img(enrichedPrompt, avatarB64, novitaKey, combinedNegative, poseId, modelName, 0.50)
       }
     }
 
-    // ─── FALLBACK: txt2img (no avatar reference) ─────────────────────────
+    // ─── FALLBACK: txt2img ───────────────────────────────────────────────
     if (!imageUrl && novitaKey) {
-      console.log(`[Image] img2img failed or no avatar — falling back to txt2img`)
-      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, isFantasy ? NOVITA_FANTASY_MODEL : undefined)
+      console.log(`[Image] Primary failed — falling back to txt2img`)
+      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, modelName)
     }
 
     // ─── LAST RESORT: Flux (SFW only) ───────────────────────────────────
