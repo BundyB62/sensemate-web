@@ -45,7 +45,7 @@ function isExplicitPrompt(prompt: string): boolean {
 }
 
 // ─── Generate with Novita.ai (NSFW allowed) ────────────────────────────────
-async function generateNovita(prompt: string, apiKey: string, extraNegative?: string, poseId?: string, modelName?: string): Promise<string | null> {
+async function generateNovita(prompt: string, apiKey: string, extraNegative?: string, poseId?: string, modelName?: string, faceRefBase64?: string): Promise<string | null> {
   const isFantasyModel = modelName === NOVITA_FANTASY_MODEL
   // Enhance prompt — fantasy uses 3D quality tokens, realistic uses photo tokens
   let fullPrompt = isFantasyModel
@@ -98,10 +98,17 @@ async function generateNovita(prompt: string, apiKey: string, extraNegative?: st
           ...(poseId && getPoseBase64(poseId) ? {
             controlnet_units: [{
               model: 't2i-adapter_xl_openpose',
-              weight: 0.7,
+              weight: 0.65,
               input_image: getPoseBase64(poseId),
               module: 'openpose',
               control_mode: 0,
+            }],
+          } : {}),
+          ...(faceRefBase64 ? {
+            ip_adapter: [{
+              model: 'ip-adapter-faceid-plusv2_sdxl',
+              image_base64: faceRefBase64,
+              weight: 0.7,
             }],
           } : {}),
         },
@@ -453,25 +460,31 @@ export async function POST(request: Request) {
     console.log(`[Image] ${isFantasy ? '🧝 FANTASY' : '📷 REALISTIC'} ${explicit ? '🔞 NSFW' : '✅ SFW'} | Prompt: ${enrichedPrompt.substring(0, 200)}`)
 
     let imageUrl: string | null = null
+    let avatarB64: string | null = null
 
-    if (explicit && novitaKey) {
-      // ─── NSFW: txt2img (full creative freedom for nudity/poses) ────────
-      // img2img can't remove clothing well — the avatar's outfit persists.
-      // txt2img gives the model full freedom for nude poses.
-      console.log(`[Image] 🔞 Using txt2img (NSFW — full creative freedom)${poseId ? ` + pose: ${poseId}` : ''}`)
-      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, modelName)
-    } else if (avatarUrl && novitaKey) {
-      // ─── SFW: img2img (avatar-based — keeps face/body consistent) ──────
-      const avatarB64 = await getAvatarBase64(avatarUrl)
-      if (avatarB64) {
-        console.log(`[Image] 🖼️ Using img2img (SFW — avatar-based, denoise: 0.50)`)
-        imageUrl = await generateNovitaImg2Img(enrichedPrompt, avatarB64, novitaKey, combinedNegative, poseId, modelName, 0.50)
-      }
+    // Download avatar once (used by both img2img and IP-Adapter)
+    if (avatarUrl && novitaKey) {
+      avatarB64 = await getAvatarBase64(avatarUrl)
     }
 
-    // ─── FALLBACK: txt2img ───────────────────────────────────────────────
+    if (explicit && avatarB64 && novitaKey) {
+      // ─── NSFW + IP-Adapter FaceID: txt2img with face reference ─────────
+      // Full creative freedom for nudity/poses + avatar face consistency
+      console.log(`[Image] 🔞🖼️ Using txt2img + IP-Adapter FaceID${poseId ? ` + pose: ${poseId}` : ''}`)
+      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, modelName, avatarB64)
+    } else if (!explicit && avatarB64 && novitaKey) {
+      // ─── SFW: img2img (avatar-based — keeps face/body/clothing) ────────
+      console.log(`[Image] 🖼️ Using img2img (SFW — avatar-based, denoise: 0.50)`)
+      imageUrl = await generateNovitaImg2Img(enrichedPrompt, avatarB64, novitaKey, combinedNegative, poseId, modelName, 0.50)
+    } else if (novitaKey) {
+      // ─── No avatar: plain txt2img ──────────────────────────────────────
+      console.log(`[Image] Using txt2img (no avatar available)`)
+      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, modelName)
+    }
+
+    // ─── FALLBACK: txt2img without IP-Adapter ────────────────────────────
     if (!imageUrl && novitaKey) {
-      console.log(`[Image] Primary failed — falling back to txt2img`)
+      console.log(`[Image] Primary failed — falling back to plain txt2img`)
       imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, modelName)
     }
 
