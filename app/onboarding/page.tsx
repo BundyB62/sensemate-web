@@ -327,13 +327,12 @@ const RELATIONSHIPS = [
 ]
 
 const AGES = [
-  { id: '18s', label: '18–20', desc: 'Young & fresh', emoji: '🌸' },
-  { id: '20s', label: '21–24', desc: 'Youthful energy', emoji: '✨' },
-  { id: '25s', label: '25–29', desc: 'In their prime', emoji: '🔥' },
-  { id: '30s', label: '30–35', desc: 'Confident & alluring', emoji: '💎' },
-  { id: '35s', label: '36–40', desc: 'Experienced charm', emoji: '🌹' },
-  { id: '40s', label: '41–45', desc: 'Mature & magnetic', emoji: '👑' },
-  { id: '45s', label: '46–50', desc: 'Timeless beauty', emoji: '🍷' },
+  { id: '18s', label: '18–22' },
+  { id: '20s', label: '23–28' },
+  { id: '25s', label: '29–34' },
+  { id: '30s', label: '35–40' },
+  { id: '35s', label: '41–46' },
+  { id: '40s', label: '47+' },
 ]
 
 const ETHNICITY_LIST = [
@@ -857,20 +856,22 @@ export default function OnboardingPage() {
         {step === 1 && (
           <StepContainer
             title="Who is your SenseMate?"
-            subtitle="Choose who you want to connect with."
+            subtitle="This shapes how your companion looks, sounds and feels."
           >
-            <ImageGrid cols={3}>
-              {GENDERS.map(g => (
-                <ImageCard
-                  key={g.id}
-                  img={g.img}
-                  label={g.label}
-                  selected={data.gender === g.id}
-                  onClick={() => { set('gender', g.id as Gender); goNext() }}
-                  aspectRatio="3/4"
-                />
-              ))}
-            </ImageGrid>
+            <div style={{ width: '100%', maxWidth: 720 }}>
+              <ImageGrid cols={2}>
+                {GENDERS.map(g => (
+                  <ImageCard
+                    key={g.id}
+                    img={g.img}
+                    label={g.label}
+                    selected={data.gender === g.id}
+                    onClick={() => { set('gender', g.id as Gender); goNext() }}
+                    aspectRatio="3/4"
+                  />
+                ))}
+              </ImageGrid>
+            </div>
 
             {/* Randomize button */}
             <button
@@ -883,23 +884,23 @@ export default function OnboardingPage() {
               style={{
                 marginTop: 32, padding: '16px 32px', fontSize: 16, fontWeight: 700,
                 borderRadius: 16, cursor: 'pointer',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: 'rgba(255,255,255,0.5)',
+                background: 'linear-gradient(135deg, rgba(233,30,140,0.08), rgba(124,58,237,0.08))',
+                border: '1px solid rgba(233,30,140,0.25)',
+                color: 'rgba(255,255,255,0.85)',
                 transition: 'all 0.3s ease',
                 display: 'flex', alignItems: 'center', gap: 10,
                 letterSpacing: '0.3px',
               }}
               onMouseEnter={ev => {
-                ev.currentTarget.style.background = 'linear-gradient(135deg, rgba(233,30,140,0.15), rgba(124,58,237,0.15))'
-                ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.4)'
+                ev.currentTarget.style.background = 'linear-gradient(135deg, rgba(233,30,140,0.2), rgba(124,58,237,0.2))'
+                ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.5)'
                 ev.currentTarget.style.color = '#fff'
                 ev.currentTarget.style.transform = 'scale(1.05)'
               }}
               onMouseLeave={ev => {
-                ev.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-                ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
-                ev.currentTarget.style.color = 'rgba(255,255,255,0.5)'
+                ev.currentTarget.style.background = 'linear-gradient(135deg, rgba(233,30,140,0.08), rgba(124,58,237,0.08))'
+                ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.25)'
+                ev.currentTarget.style.color = 'rgba(255,255,255,0.85)'
                 ev.currentTarget.style.transform = 'scale(1)'
               }}
             >
@@ -933,27 +934,25 @@ export default function OnboardingPage() {
         {step === 2 && data.gender !== 'fantasy' && (
           <StepContainer
             title="How old?"
-            subtitle="Choose an age range for your SenseMate."
+            subtitle="Pick an age range that feels right."
           >
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, width: '100%' }}>
-              {AGES.map(a => {
-                const selected = data.age === a.id
-                return (
-                  <button key={a.id} onClick={() => { set('age', a.id); goNext() }} style={{
-                    padding: '20px 16px', borderRadius: 16, cursor: 'pointer',
-                    background: selected ? 'rgba(233,30,140,0.15)' : 'rgba(255,255,255,0.03)',
-                    border: selected ? '2px solid rgba(233,30,140,0.6)' : '1px solid rgba(255,255,255,0.08)',
-                    boxShadow: selected ? '0 0 20px rgba(233,30,140,0.2)' : 'none',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                    transition: 'all 0.2s',
-                    color: '#fff',
-                  }}>
-                    <span style={{ fontSize: 28 }}>{a.emoji}</span>
-                    <span style={{ fontSize: 18, fontWeight: 700 }}>{a.label}</span>
-                    <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{a.desc}</span>
-                  </button>
-                )
-              })}
+            <div style={{ width: '100%', maxWidth: 720 }}>
+              <ImageGrid cols={3}>
+                {AGES.map(a => {
+                  // Non-binary falls back to woman portraits (no nb-specific age set yet)
+                  const genderDir = data.gender === 'man' ? 'man' : 'woman'
+                  return (
+                    <ImageCard
+                      key={a.id}
+                      img={`/onboarding/age/${genderDir}/${a.id}.jpg`}
+                      label={a.label}
+                      selected={data.age === a.id}
+                      onClick={() => { set('age', a.id); goNext() }}
+                      aspectRatio="3/4"
+                    />
+                  )
+                })}
+              </ImageGrid>
             </div>
           </StepContainer>
         )}
@@ -1000,10 +999,10 @@ export default function OnboardingPage() {
             title="Ethnicity"
             subtitle="What look are you drawn to?"
           >
-            <ImageGrid cols={4}>
+            <ImageGrid cols={3}>
               {ETHNICITY_LIST.map(e => {
                 const genderFolder = data.gender === 'man' ? 'man' : 'woman'
-                const imgSrc = e.img || `/onboarding/ethnicity/${genderFolder}/${e.id}.jpg`
+                const imgSrc = `/onboarding/ethnicity/${genderFolder}/${e.id}.jpg`
                 return (
                   <ImageCard
                     key={e.id}
@@ -1012,7 +1011,6 @@ export default function OnboardingPage() {
                     selected={data.ethnicity === e.id}
                     onClick={() => { set('ethnicity', e.id); goNext() }}
                     aspectRatio="3/4"
-                    small
                   />
                 )
               })}
@@ -1029,7 +1027,7 @@ export default function OnboardingPage() {
             {/* Build */}
             <div style={{ marginBottom: 32 }}>
               <SectionTitle>Build</SectionTitle>
-              <ImageGrid cols={data.gender === 'woman' ? 5 : 4}>
+              <ImageGrid cols={3}>
                 {(data.gender === 'man' ? BUILDS_MAN : BUILDS_WOMAN).map(b => (
                   <ImageCard
                     key={b.id}
@@ -1038,7 +1036,6 @@ export default function OnboardingPage() {
                     selected={data.build === b.id}
                     onClick={() => set('build', b.id)}
                     aspectRatio="3/4"
-                    small
                   />
                 ))}
               </ImageGrid>
@@ -1575,7 +1572,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 function ImageGrid({ cols, children }: { cols: number; children: React.ReactNode }) {
   return (
-    <div className="onb-image-grid" style={{
+    <div className="onb-image-grid" data-cols={cols} style={{
       display: 'grid',
       gridTemplateColumns: `repeat(${cols}, 1fr)`,
       gap: 12,

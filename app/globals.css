@@ -519,6 +519,11 @@ body {
   border-color: rgba(230,160,40,0.5) !important;
 }
 
+/* ─── Onboarding — center orphan card in 3-col grid (e.g. 22 items) ────── */
+.onb-image-grid[data-cols="3"] > :last-child:nth-child(3n+1) {
+  grid-column: 2;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    MOBILE RESPONSIVE — max-width: 768px
    Only affects mobile. Desktop remains 100% unchanged.
