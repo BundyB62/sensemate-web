@@ -104,6 +104,8 @@ const HAIR_LENGTH_MAP: Record<string, string> = {
 }
 
 // ─── Facial features / kenmerken ─────────────────────────────────────────
+// Weighted form is used by Novita (SD-XL); Flux Pro ignores weights and
+// requires natural-language phrasing — see FEATURES_NATURAL below.
 export const FEATURES_MAP: Record<string, string> = {
   freckles: '(cute freckles on nose and cheeks:1.3)',
   beauty_mark: '(beauty mark mole on cheek:1.3)',
@@ -129,6 +131,49 @@ export const FEATURES_MAP: Record<string, string> = {
   scar_face: '(small scar on face:1.3)',
   dark_circles: '(dark circles under eyes tired look:1.2)',
   rosy_cheeks: '(rosy pink blushing cheeks:1.3)',
+}
+
+// Natural-language phrases for Flux (no SD weights)
+const FEATURES_NATURAL: Record<string, string> = {
+  freckles: 'prominent freckles scattered across the nose and cheeks',
+  beauty_mark: 'a distinct beauty mark mole on the cheek',
+  dimples: 'noticeable dimples on the cheeks',
+  thick_brows: 'thick bold dark eyebrows',
+  thin_brows: 'thin arched eyebrows',
+  chubby_cheeks: 'soft round chubby cheeks',
+  sharp_jaw: 'a sharply defined chiseled jawline',
+  high_cheekbones: 'high prominent cheekbones',
+  round_face: 'a round soft face shape',
+  long_face: 'a long oval face shape',
+  nose_piercing: 'a small nose stud piercing',
+  septum: 'a septum ring piercing through the nose',
+  lip_piercing: 'a lip piercing ring',
+  eyebrow_piercing: 'an eyebrow piercing',
+  ear_piercings: 'multiple ear piercings with earrings',
+  glasses: 'wearing stylish glasses',
+  gap_teeth: 'a charming gap between the front teeth',
+  full_lips: 'full plump lips',
+  thin_lips: 'thin narrow lips',
+  button_nose: 'a small cute button nose',
+  big_nose: 'a prominent large nose',
+  scar_face: 'a small visible scar on the face',
+  dark_circles: 'subtle dark circles under the eyes',
+  rosy_cheeks: 'rosy pink blushing cheeks',
+}
+
+// Strip SD-style emphasis weights `(text:1.3)` → `text` for Flux/natural-LM models
+export function stripFluxWeights(prompt: string): string {
+  return prompt.replace(/\(([^()]+?):\d+(?:\.\d+)?\)/g, '$1')
+}
+
+// Build a natural-language sentence describing selected facial features
+export function buildFeaturesSentence(features: string[] | undefined): string {
+  if (!features || !Array.isArray(features) || features.length === 0) return ''
+  const phrases = features.map(f => FEATURES_NATURAL[f]).filter(Boolean)
+  if (phrases.length === 0) return ''
+  if (phrases.length === 1) return `with ${phrases[0]}`
+  const last = phrases.pop()
+  return `with ${phrases.join(', ')}, and ${last}`
 }
 
 const HAIR_COLOR_MAP: Record<string, string> = {
@@ -855,24 +900,20 @@ export function buildAvatarPrompt(profile: Record<string, any>, emotion = 'neutr
 
   const faceBlock = faceParts.join(', ')
 
-  // Facial features / kenmerken
-  const featureParts: string[] = []
-  if (profile.features && Array.isArray(profile.features)) {
-    for (const f of profile.features) {
-      const feat = FEATURES_MAP[f] || ''
-      if (feat) featureParts.push(feat)
-    }
-  }
+  // Facial features / kenmerken — natural-language sentence, front-loaded
+  // for Flux Pro adherence. Weighted versions are stripped by stripFluxWeights
+  // in the avatar route, so the natural sentence carries the emphasis.
+  const featuresSentence = buildFeaturesSentence(profile.features)
 
   // Build the prompt — full body portrait from head to toe
   const prompt = [
     // Subject identity (most important — first tokens get highest weight)
     `photorealistic full body portrait from head to toe, showing entire body including feet`,
     `${age} ${ethnicity} ${gender}`,
-    // Face details (second highest priority)
+    // Facial features early — Flux pays more attention to early tokens
+    ...(featuresSentence ? [featuresSentence] : []),
+    // Face details (eye/hair/skin)
     faceBlock,
-    // Facial features (piercings, freckles, etc.)
-    ...(featureParts.length > 0 ? featureParts : []),
     // Body (higher emphasis for full body)
     `(${bodyDesc}:1.3)`,
     // Clothing

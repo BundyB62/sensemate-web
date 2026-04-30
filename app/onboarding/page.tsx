@@ -1211,6 +1211,7 @@ export default function OnboardingPage() {
                       label={e.label}
                       selected={data.eyeColor === e.id}
                       onClick={() => set('eyeColor', e.id)}
+                      variant="iris"
                     />
                   ))}
                 </div>
@@ -1670,25 +1671,50 @@ function ImageCard({ img, label, sublabel, selected, onClick, aspectRatio = '3/4
   )
 }
 
-function ColorCircle({ color, label, selected, onClick }: {
+function ColorCircle({ color, label, selected, onClick, variant = 'solid' }: {
   color: string; label: string; selected: boolean; onClick: () => void
+  variant?: 'solid' | 'iris'
 }) {
+  // Iris variant: dark pupil center + colored ring + specular highlight
+  // Solid variant: glossy orb with subtle radial highlight (depth)
+  const orbBackground = variant === 'iris'
+    ? `radial-gradient(circle at 50% 50%, #0a0a0a 0%, #0a0a0a 18%, ${color} 24%, ${color} 78%, rgba(0,0,0,0.45) 100%)`
+    : `radial-gradient(circle at 35% 30%, ${withAlpha(color, 1)} 0%, ${color} 55%, ${darken(color, 0.25)} 100%)`
+
+  const size = 52
   return (
     <button
       onClick={onClick}
       title={label}
       style={{
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
         background: 'none', border: 'none', cursor: 'pointer', padding: 4,
       }}
     >
       <div style={{
-        width: 44, height: 44, borderRadius: '50%', background: color,
-        border: selected ? `3px solid ${ACCENT}` : '3px solid rgba(255,255,255,0.1)',
-        boxShadow: selected ? `0 0 16px rgba(233,30,140,0.5)` : 'none',
+        position: 'relative',
+        width: size, height: size, borderRadius: '50%',
+        background: orbBackground,
+        border: selected ? `2px solid ${ACCENT}` : '2px solid rgba(255,255,255,0.08)',
+        boxShadow: selected
+          ? `0 0 18px rgba(233,30,140,0.55), inset 0 -4px 8px rgba(0,0,0,0.35)`
+          : `inset 0 -3px 6px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.25)`,
         transition: 'all 0.25s',
-        transform: selected ? 'scale(1.15)' : 'scale(1)',
-      }} />
+        transform: selected ? 'scale(1.12)' : 'scale(1)',
+      }}>
+        {/* Specular highlight — small white dot top-left of the orb */}
+        <span style={{
+          position: 'absolute',
+          top: variant === 'iris' ? '22%' : '18%',
+          left: variant === 'iris' ? '32%' : '24%',
+          width: variant === 'iris' ? 6 : 10,
+          height: variant === 'iris' ? 6 : 10,
+          borderRadius: '50%',
+          background: 'rgba(255,255,255,0.85)',
+          filter: 'blur(0.5px)',
+          pointerEvents: 'none',
+        }} />
+      </div>
       <span style={{
         fontSize: 10, color: selected ? ACCENT : 'var(--muted-fg)',
         fontWeight: selected ? 600 : 400, transition: 'color 0.2s',
@@ -1697,6 +1723,28 @@ function ColorCircle({ color, label, selected, onClick }: {
       </span>
     </button>
   )
+}
+
+// Lighten/darken helpers for the orb gradient.
+// Accepts hex (#rgb, #rrggbb) or rgb(...) strings.
+function parseColor(c: string): [number, number, number] | null {
+  const m = c.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i)
+  if (m) {
+    const h = m[1].length === 3 ? m[1].split('').map(x => x + x).join('') : m[1]
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]
+  }
+  const rgb = c.match(/rgba?\((\d+)\D+(\d+)\D+(\d+)/i)
+  if (rgb) return [+rgb[1], +rgb[2], +rgb[3]]
+  return null
+}
+function darken(c: string, amount: number): string {
+  const rgb = parseColor(c); if (!rgb) return c
+  const f = 1 - Math.max(0, Math.min(1, amount))
+  return `rgb(${Math.round(rgb[0] * f)}, ${Math.round(rgb[1] * f)}, ${Math.round(rgb[2] * f)})`
+}
+function withAlpha(c: string, _a: number): string {
+  // Reserved for future tweaks; currently a passthrough so the gradient stays opaque.
+  return c
 }
 
 function ChipButton({ selected, onClick, children }: {

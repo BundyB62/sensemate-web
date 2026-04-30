@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
-import { buildAvatarPrompt, buildNegativePrompt } from '@/lib/avatarPrompt'
+import { buildAvatarPrompt, buildNegativePrompt, stripFluxWeights } from '@/lib/avatarPrompt'
 
 // Flux Pro v1.1 — best prompt adherence, supports high guidance + negative prompts
 const FLUX_PRO_URL = 'https://fal.run/fal-ai/flux-pro/v1.1'
@@ -223,8 +223,10 @@ export async function POST(request: Request) {
       imageUrl = await generateNovitaFantasy(prompt, negativePrompt, process.env.NOVITA_API_KEY)
     } else {
       // Realistic → Chain: Flux Pro → Flux Dev → Novita epicrealism
-      imageUrl = await generateFal(prompt, falKey, true)
-      if (!imageUrl) imageUrl = await generateFal(prompt, falKey, false)
+      // Flux ignores SD-style (text:weight) syntax, so strip weights for those calls.
+      const fluxPrompt = stripFluxWeights(prompt)
+      imageUrl = await generateFal(fluxPrompt, falKey, true)
+      if (!imageUrl) imageUrl = await generateFal(fluxPrompt, falKey, false)
       if (!imageUrl && process.env.NOVITA_API_KEY) {
         imageUrl = await generateNovita(prompt, negativePrompt, process.env.NOVITA_API_KEY)
       }
