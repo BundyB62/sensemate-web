@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
+import sharp from 'sharp'
 import { buildAppearanceDescription, buildBodyReinforcement } from '@/lib/avatarPrompt'
 
 export const maxDuration = 60
@@ -47,10 +48,10 @@ function isExplicitPrompt(prompt: string): boolean {
 // ─── Generate with Novita.ai (NSFW allowed) ────────────────────────────────
 async function generateNovita(prompt: string, apiKey: string, extraNegative?: string, poseId?: string, modelName?: string, faceRefBase64?: string): Promise<string | null> {
   const isFantasyModel = modelName === NOVITA_FANTASY_MODEL
-  // Enhance prompt — fantasy uses 3D quality tokens, realistic uses photo tokens
+  // Quality tokens go FIRST so they survive tail-truncation
   let fullPrompt = isFantasyModel
-    ? prompt + ', 3d render, unreal engine 5, semi-realistic, fantasy, detailed skin texture, volumetric lighting'
-    : prompt + ', (photorealistic:1.4), RAW photo, 8k, sharp focus'
+    ? '3d render, unreal engine 5, semi-realistic, fantasy, detailed skin texture, volumetric lighting, ' + prompt
+    : '(photorealistic:1.4), RAW photo, 8k, sharp focus, ' + prompt
 
   // CRITICAL: Novita has a 1024 character limit for prompts
   if (fullPrompt.length > 1020) {
@@ -179,8 +180,8 @@ async function generateNovitaImg2Img(
 ): Promise<string | null> {
   const isFantasyModel = modelName === NOVITA_FANTASY_MODEL
   let fullPrompt = isFantasyModel
-    ? prompt + ', 3d render, semi-realistic, fantasy, detailed'
-    : prompt + ', (photorealistic:1.4), RAW photo, 8k'
+    ? '3d render, semi-realistic, fantasy, detailed, ' + prompt
+    : '(photorealistic:1.4), RAW photo, 8k, ' + prompt
 
   if (fullPrompt.length > 1020) {
     fullPrompt = fullPrompt.substring(0, 1020)
@@ -275,6 +276,35 @@ async function getAvatarBase64(avatarUrl: string): Promise<string | null> {
     return Buffer.from(buf).toString('base64')
   } catch {
     console.error('[Image] Failed to download avatar for img2img')
+    return null
+  }
+}
+
+// IP-Adapter FaceID needs a tight face crop, but our avatars are full-body.
+// Heuristic: face sits in the upper-center of a portrait-oriented full-body shot.
+// Extract roughly the head region and resize to a square so the face occupies
+// most of the embedding input — much stronger identity transfer than feeding
+// the full body image (where the face is ~5% of pixels).
+async function getFaceCropBase64(avatarBase64: string): Promise<string | null> {
+  try {
+    const buf = Buffer.from(avatarBase64, 'base64')
+    const meta = await sharp(buf).metadata()
+    if (!meta.width || !meta.height) return null
+
+    // Top ~32% vertically, center ~55% horizontally — covers head + shoulders
+    const cropHeight = Math.round(meta.height * 0.32)
+    const cropWidth = Math.round(meta.width * 0.55)
+    const left = Math.round((meta.width - cropWidth) / 2)
+
+    const cropped = await sharp(buf)
+      .extract({ left, top: 0, width: cropWidth, height: cropHeight })
+      .resize(512, 512, { fit: 'cover', position: 'top' })
+      .jpeg({ quality: 92 })
+      .toBuffer()
+
+    return cropped.toString('base64')
+  } catch (e) {
+    console.error('[Image] Face crop failed, falling back to full avatar:', e)
     return null
   }
 }
@@ -466,18 +496,26 @@ export async function POST(request: Request) {
 
     let imageUrl: string | null = null
     let avatarB64: string | null = null
+    let faceCropB64: string | null = null
 
     // Download avatar once
     if (avatarUrl && novitaKey) {
       avatarB64 = await getAvatarBase64(avatarUrl)
+      // Pre-crop face for IP-Adapter — fall back to full avatar if crop fails
+      if (avatarB64) {
+        faceCropB64 = await getFaceCropBase64(avatarB64)
+        if (faceCropB64) console.log('[Image] 🔍 Face crop generated for IP-Adapter')
+      }
     }
 
     if (needsClothingChange && avatarB64 && novitaKey) {
       // ─── CLOTHING CHANGE: txt2img + IP-Adapter FaceID ──────────────────
       // Any request that changes/removes clothing needs txt2img for freedom
-      // IP-Adapter keeps the face consistent with the avatar
-      console.log(`[Image] 🔄🖼️ txt2img + IP-Adapter FaceID${poseId ? ` + pose: ${poseId}` : ''}`)
-      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, modelName, avatarB64)
+      // IP-Adapter keeps the face consistent with the avatar (use tight face
+      // crop for stronger identity, fall back to full avatar if crop failed)
+      const faceRef = faceCropB64 || avatarB64
+      console.log(`[Image] 🔄🖼️ txt2img + IP-Adapter FaceID (${faceCropB64 ? 'face-crop' : 'full-avatar'})${poseId ? ` + pose: ${poseId}` : ''}`)
+      imageUrl = await generateNovita(enrichedPrompt, novitaKey, combinedNegative, poseId, modelName, faceRef)
     } else if (avatarB64 && novitaKey) {
       // ─── PURE SFW (selfie, casual — same clothing as avatar): img2img ──
       console.log(`[Image] 🖼️ img2img (SFW — avatar-based, denoise: 0.50)`)

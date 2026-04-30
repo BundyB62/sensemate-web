@@ -811,8 +811,10 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
     const costumeStr = (!isExplicit && activeScenario.photoCostume) ? `, ${activeScenario.photoCostume}` : ''
 
     const qualitySuffix = ap.style === 'fantasy' ? 'fantasy, detailed' : 'photorealistic, 8k, professional photography'
+    // Pose FIRST so it survives the 1024-char Novita truncation; appearance details
+    // can safely be tail-truncated since IP-Adapter handles face identity.
     return {
-      prompt: `${appearancePart}${costumeStr}, ${identityReinforce}, ${pose}, ${activeScenario.photoSetting}, ${qualitySuffix}`,
+      prompt: `${pose}, ${activeScenario.photoSetting}, ${appearancePart}${costumeStr}, ${identityReinforce}, ${qualitySuffix}`,
       poseId: scenarioPoseId
     }
   }
@@ -982,7 +984,9 @@ function buildFallbackPhotoPrompt(userMessage: string, companion: any, activeSce
   // Append random lighting + camera angle to every photo for visual variety
   const varietySuffix = `${randPick(LIGHTING_VAR)}, ${randPick(CAMERA_VAR)}`
   const qualitySuffix = ap.style === 'fantasy' ? 'fantasy, detailed' : 'photorealistic, 8k, professional photography'
-  return { prompt: `${appearancePart}, ${scenario}, ${identityReinforce}, ${varietySuffix}, ${qualitySuffix}`, poseId: detectedPoseId }
+  // Pose/scenario FIRST so it survives Novita's 1024-char truncation; appearance
+  // details can safely be tail-truncated since IP-Adapter handles face identity.
+  return { prompt: `${scenario}, ${appearancePart}, ${identityReinforce}, ${varietySuffix}, ${qualitySuffix}`, poseId: detectedPoseId }
 }
 
 // ─── Detect pure English text (should be Dutch) ─────────────────────────────

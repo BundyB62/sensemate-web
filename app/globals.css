@@ -671,6 +671,13 @@ body {
     grid-template-columns: repeat(2, 1fr) !important;
   }
 
+  /* ─── Onboarding step 7 — stack avatar above form ───────────────────── */
+  .onb-step7-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+    justify-items: center !important;
+  }
+
   /* ─── Chat sidebar — full screen overlay on mobile ──────────────────── */
   .chat-sidebar {
     position: fixed !important;

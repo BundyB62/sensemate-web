@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -467,6 +467,20 @@ const CLOTHING_MAN = [
   { id: 'preppy', label: 'Preppy', img: '/onboarding/clothing/man/preppy.jpg' },
 ]
 
+const CLOTHING_GROUPS_WOMAN: { title: string; ids: string[] }[] = [
+  { title: 'Daily', ids: ['casual', 'streetwear', 'athletic', 'minimalist', 'preppy'] },
+  { title: 'Dressed up', ids: ['elegant', 'chic', 'vintage', 'luxury'] },
+  { title: 'Alternative', ids: ['bohemian', 'edgy', 'gothic', 'grunge'] },
+  { title: 'Intimate & beach', ids: ['lingerie', 'swimwear'] },
+  { title: 'Traditional', ids: ['jellaba'] },
+]
+
+const CLOTHING_GROUPS_MAN: { title: string; ids: string[] }[] = [
+  { title: 'Daily', ids: ['casual', 'streetwear', 'athletic', 'minimalist', 'preppy'] },
+  { title: 'Dressed up', ids: ['elegant', 'chic', 'luxury'] },
+  { title: 'Alternative', ids: ['bohemian', 'edgy', 'grunge'] },
+]
+
 const SKIN_TONES = [
   { id: 'porcelain', label: 'Porcelain', color: '#f5e6d3' },
   { id: 'fair', label: 'Fair', color: '#f0d5b8' },
@@ -543,13 +557,13 @@ const HAIR_STYLES_MAN = [
 ]
 
 const EYE_COLORS = [
-  { id: 'blue', label: 'Blue', color: '#4a90d9' },
-  { id: 'green', label: 'Green', color: '#4a9d6b' },
-  { id: 'hazel', label: 'Hazel', color: '#8b6914' },
-  { id: 'brown', label: 'Brown', color: '#6b3a1a' },
-  { id: 'dark_brown', label: 'Dark Brown', color: '#3a1a0a' },
-  { id: 'grey', label: 'Grey', color: '#808080' },
-  { id: 'amber', label: 'Amber', color: '#c4720a' },
+  { id: 'blue', label: 'Blue', img: '/onboarding/eye-color/blue.jpg' },
+  { id: 'green', label: 'Green', img: '/onboarding/eye-color/green.jpg' },
+  { id: 'hazel', label: 'Hazel', img: '/onboarding/eye-color/hazel.jpg' },
+  { id: 'brown', label: 'Brown', img: '/onboarding/eye-color/brown.jpg' },
+  { id: 'dark_brown', label: 'Dark Brown', img: '/onboarding/eye-color/dark_brown.jpg' },
+  { id: 'grey', label: 'Grey', img: '/onboarding/eye-color/grey.jpg' },
+  { id: 'amber', label: 'Amber', img: '/onboarding/eye-color/amber.jpg' },
 ]
 
 // ─── Random name lists ──────────────────────────────────────────────────────
@@ -605,6 +619,11 @@ export default function OnboardingPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [regenerating, setRegenerating] = useState(false)
   const [showBodyDetails, setShowBodyDetails] = useState(false)
+  const [previewAvatarUrl, setPreviewAvatarUrl] = useState<string | null>(null)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [previewError, setPreviewError] = useState(false)
+  const [previewExpanded, setPreviewExpanded] = useState(false)
+  const lastPreviewHashRef = useRef<string | null>(null)
 
   const [data, setData] = useState<FormData>({
     name: '', gender: '' as Gender, relationshipStyle: 'lover',
@@ -626,14 +645,9 @@ export default function OnboardingPage() {
   const goNext = () => { setAnimDir('forward'); setStep(s => Math.min(s + 1, totalSteps)) }
   const goBack = () => { setAnimDir('back'); setStep(s => Math.max(s - 1, 1)) }
 
-  async function handleCreate() {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
-
-    setLoading(true)
-
+  function buildAppearance() {
     const isFantasy = data.gender === 'fantasy'
-    const appearance = isFantasy ? {
+    return isFantasy ? {
       style: 'fantasy' as const,
       gender: 'woman' as const,
       race: data.race,
@@ -654,6 +668,53 @@ export default function OnboardingPage() {
       ...(data.gender === 'woman' || data.gender === 'nonbinary' || data.gender === 'fantasy' ? { breastSize: data.breastSize, assSize: data.assSize } : {}),
       ...(data.gender === 'man' ? { dickSize: data.dickSize, beard: data.beard } : {}),
     }
+  }
+
+  async function generatePreview(force = false) {
+    const appearance = buildAppearance()
+    const hash = JSON.stringify(appearance)
+    if (!force && hash === lastPreviewHashRef.current && previewAvatarUrl) return
+    lastPreviewHashRef.current = hash
+    setPreviewLoading(true)
+    setPreviewError(false)
+    try {
+      const res = await fetch('/api/avatar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appearance, emotion: 'neutral' }),
+      })
+      const result = await res.json()
+      if (result.url) setPreviewAvatarUrl(result.url)
+      else setPreviewError(true)
+    } catch (e) {
+      console.error('Preview gen failed:', e)
+      setPreviewError(true)
+    }
+    setPreviewLoading(false)
+  }
+
+  // Generate live avatar preview when user reaches step 7
+  useEffect(() => {
+    if (step === 7) generatePreview()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step])
+
+  // ESC closes the expanded avatar lightbox
+  useEffect(() => {
+    if (!previewExpanded) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setPreviewExpanded(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [previewExpanded])
+
+  async function handleCreate() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
+
+    setLoading(true)
+
+    const isFantasy = data.gender === 'fantasy'
+    const appearance = buildAppearance()
 
     let companionId = createdCompanionId
 
@@ -712,25 +773,33 @@ export default function OnboardingPage() {
       })
     }
 
-    setGenerating(true)
-    try {
-      console.log('[Onboarding] Generating avatar...', { companionId, appearance })
-      const res = await fetch('/api/avatar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ companionId, appearance, emotion: 'neutral' }),
-      })
-      const result = await res.json()
-      console.log('[Onboarding] Avatar result:', result)
-      if (result.url) {
-        setAvatarUrl(result.url)
-      } else {
-        console.error('[Onboarding] Avatar failed:', result.error || 'No URL returned')
+    // Reuse the live preview avatar if it matches current appearance — saves an
+    // expensive regeneration. Otherwise fall back to generating now.
+    const reusable = previewAvatarUrl && lastPreviewHashRef.current === JSON.stringify(appearance)
+    if (reusable && previewAvatarUrl) {
+      await supabase.from('companions').update({ avatar_url: previewAvatarUrl }).eq('id', companionId)
+      setAvatarUrl(previewAvatarUrl)
+    } else {
+      setGenerating(true)
+      try {
+        console.log('[Onboarding] Generating avatar...', { companionId, appearance })
+        const res = await fetch('/api/avatar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ companionId, appearance, emotion: 'neutral' }),
+        })
+        const result = await res.json()
+        console.log('[Onboarding] Avatar result:', result)
+        if (result.url) {
+          setAvatarUrl(result.url)
+        } else {
+          console.error('[Onboarding] Avatar failed:', result.error || 'No URL returned')
+        }
+      } catch (e) {
+        console.error('Avatar gen failed:', e)
       }
-    } catch (e) {
-      console.error('Avatar gen failed:', e)
+      setGenerating(false)
     }
-    setGenerating(false)
     setLoading(false)
     setAnimDir('forward')
     setStep(8)
@@ -1203,18 +1272,34 @@ export default function OnboardingPage() {
               {/* Eye color — expanded for fantasy */}
               <div>
                 <SectionTitle>Eye Color</SectionTitle>
+                {data.gender === 'fantasy' ? (
                   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                  {(data.gender === 'fantasy' ? FANTASY_EYES : EYE_COLORS).map(e => (
-                    <ColorCircle
-                      key={e.id}
-                      color={e.color}
-                      label={e.label}
-                      selected={data.eyeColor === e.id}
-                      onClick={() => set('eyeColor', e.id)}
-                      variant="iris"
-                    />
-                  ))}
-                </div>
+                    {FANTASY_EYES.map(e => (
+                      <ColorCircle
+                        key={e.id}
+                        color={e.color}
+                        label={e.label}
+                        selected={data.eyeColor === e.id}
+                        onClick={() => set('eyeColor', e.id)}
+                        variant="iris"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <ImageGrid cols={7}>
+                    {EYE_COLORS.map(e => (
+                      <ImageCard
+                        key={e.id}
+                        img={e.img}
+                        label={e.label}
+                        selected={data.eyeColor === e.id}
+                        onClick={() => set('eyeColor', e.id)}
+                        aspectRatio="1/1"
+                        small
+                      />
+                    ))}
+                  </ImageGrid>
+                )}
               </div>
               {/* Kenmerken / facial features — multi-select */}
               <div>
@@ -1260,9 +1345,10 @@ export default function OnboardingPage() {
           <StepContainer
             title="Clothing Style"
             subtitle="How does your SenseMate dress?"
+            maxWidth={data.gender === 'fantasy' ? 900 : 1200}
           >
             {data.gender === 'fantasy' ? (
-              <ImageGrid cols={4}>
+              <ImageGrid cols={5}>
                 {FANTASY_CLOTHING.map(c => (
                   <ImageCard
                     key={c.id}
@@ -1270,112 +1356,219 @@ export default function OnboardingPage() {
                     label={c.label}
                     selected={data.clothingStyle === c.id}
                     onClick={() => set('clothingStyle', c.id)}
-                    aspectRatio="3/4"
+                    aspectRatio="4/5"
                     small
                   />
                 ))}
               </ImageGrid>
             ) : (
-              <ImageGrid cols={4}>
-                {(data.gender === 'man' ? CLOTHING_MAN : CLOTHING_WOMAN).map(c => (
-                  <ImageCard
-                    key={c.id}
-                    img={c.img}
-                    label={c.label}
-                    selected={data.clothingStyle === c.id}
-                    onClick={() => set('clothingStyle', c.id)}
-                    aspectRatio="3/4"
-                    small
-                  />
-                ))}
-              </ImageGrid>
+              <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 28 }}>
+                {(() => {
+                  const all = data.gender === 'man' ? CLOTHING_MAN : CLOTHING_WOMAN
+                  const groups = data.gender === 'man' ? CLOTHING_GROUPS_MAN : CLOTHING_GROUPS_WOMAN
+                  const byId = Object.fromEntries(all.map(c => [c.id, c]))
+                  return groups.map(g => {
+                    const items = g.ids.map(id => byId[id]).filter(Boolean)
+                    if (items.length === 0) return null
+                    return (
+                      <div key={g.title}>
+                        <SectionTitle>{g.title}</SectionTitle>
+                        <ImageGrid cols={6}>
+                          {items.map(c => (
+                            <ImageCard
+                              key={c.id}
+                              img={c.img}
+                              label={c.label}
+                              selected={data.clothingStyle === c.id}
+                              onClick={() => set('clothingStyle', c.id)}
+                              aspectRatio="4/5"
+                              small
+                            />
+                          ))}
+                        </ImageGrid>
+                      </div>
+                    )
+                  })
+                })()}
+              </div>
             )}
 
-            <NavButton onClick={goNext} label="Almost done →" />
+            <div style={{ marginTop: 24, width: '100%', display: 'flex', justifyContent: 'center' }}>
+              <NavButton onClick={goNext} label="Almost done →" />
+            </div>
           </StepContainer>
         )}
 
-        {/* STEP 7 — Name & Personality + Preview */}
+        {/* STEP 7 — Name & Personality + Live Avatar Preview */}
         {step === 7 && (
           <StepContainer
-            title="Final touches"
-            subtitle="Give your SenseMate a name and personality."
+            title={data.name ? `Meet ${data.name}` : 'Bring them to life'}
+            subtitle="Pick a name and personality — we're already painting them."
+            maxWidth={1100}
           >
-            <div style={{ width: '100%', maxWidth: 520, display: 'flex', flexDirection: 'column', gap: 28 }}>
-              {/* Name */}
-              <div>
-                <SectionTitle>Name</SectionTitle>
-                <input
-                  type="text"
-                  className="input"
-                  value={data.name}
-                  onChange={e => set('name', e.target.value)}
-                  placeholder="Luna, Alex, Sophie..."
-                  maxLength={30}
-                  autoFocus
-                  style={{
-                    padding: '16px 20px', fontSize: 18, width: '100%',
-                    borderRadius: 16, background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    color: 'var(--fg)', outline: 'none',
-                    transition: 'border-color 0.3s',
-                  }}
-                  onFocus={e => e.currentTarget.style.borderColor = 'rgba(233,30,140,0.5)'}
-                  onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
-                />
-              </div>
-
-              {/* Personality archetype */}
-              <div>
-                <SectionTitle>Personality</SectionTitle>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
-                  {ARCHETYPES.map(arch => {
-                    const sel = data.personality === arch.id
-                    return (
-                      <button
-                        key={arch.id}
-                        onClick={() => set('personality', arch.id)}
+            <div className="onb-step7-grid" style={{
+              width: '100%', display: 'grid',
+              gridTemplateColumns: 'minmax(280px, 360px) 1fr',
+              gap: 48, alignItems: 'flex-start',
+            }}>
+              {/* ── Left: live avatar preview ───────────────────────────── */}
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+                <div style={{ position: 'relative' }}>
+                  <div style={{
+                    width: 320, height: 420, borderRadius: 24, overflow: 'hidden',
+                    border: '2px solid rgba(233,30,140,0.25)',
+                    boxShadow: '0 0 60px rgba(233,30,140,0.15), 0 20px 60px rgba(0,0,0,0.5)',
+                    background: 'rgba(255,255,255,0.03)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    {previewAvatarUrl && !previewLoading ? (
+                      <img
+                        src={previewAvatarUrl}
+                        alt={data.name || 'Preview'}
+                        onClick={() => setPreviewExpanded(true)}
                         style={{
-                          padding: '16px 14px', borderRadius: 16, cursor: 'pointer',
-                          textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 6,
-                          border: `1px solid ${sel ? 'rgba(233,30,140,0.6)' : 'rgba(255,255,255,0.06)'}`,
-                          background: sel ? 'rgba(233,30,140,0.12)' : 'rgba(255,255,255,0.02)',
-                          transition: 'all 0.25s',
-                          transform: sel ? 'scale(1.02)' : 'scale(1)',
-                          boxShadow: sel ? '0 4px 20px rgba(233,30,140,0.15)' : 'none',
+                          width: '100%', height: '100%', objectFit: 'cover',
+                          cursor: 'zoom-in',
                         }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{ fontSize: 22 }}>{arch.emoji}</span>
-                          <span style={{ fontSize: 14, fontWeight: 700, color: sel ? ACCENT : 'rgba(255,255,255,0.85)' }}>{arch.name}</span>
+                      />
+                    ) : previewLoading ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18, padding: 24, textAlign: 'center' }}>
+                        <div style={{
+                          width: 56, height: 56, borderRadius: '50%',
+                          border: '3px solid rgba(233,30,140,0.2)', borderTopColor: ACCENT,
+                          animation: 'animate-spin-slow 0.9s linear infinite',
+                        }} />
+                        <div style={{ color: 'rgba(255,255,255,0.6)', fontSize: 14, fontWeight: 500 }}>
+                          Painting your SenseMate...
                         </div>
-                        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1.4 }}>{arch.description}</span>
-                      </button>
-                    )
-                  })}
+                        <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>
+                          This usually takes 15–30 seconds.
+                        </div>
+                      </div>
+                    ) : previewError ? (
+                      <div style={{ textAlign: 'center', color: 'var(--muted-fg)', padding: 24 }}>
+                        <div style={{ fontSize: 36, marginBottom: 10 }}>📸</div>
+                        <div style={{ fontSize: 13 }}>Preview failed — you can still create.</div>
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', color: 'var(--muted-fg)' }}>
+                        <div style={{ fontSize: 36, marginBottom: 10 }}>✨</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Name badge */}
+                  {data.name && (
+                    <div style={{
+                      position: 'absolute', bottom: -16, left: '50%', transform: 'translateX(-50%)',
+                      padding: '10px 28px', borderRadius: 100,
+                      background: 'linear-gradient(135deg, rgba(91,66,243,0.9), rgba(233,30,140,0.9))',
+                      boxShadow: '0 4px 20px rgba(233,30,140,0.3)',
+                      fontSize: 18, fontWeight: 700, color: 'white', whiteSpace: 'nowrap',
+                      letterSpacing: '0.3px',
+                    }}>
+                      {data.name}
+                    </div>
+                  )}
                 </div>
+
+                {/* Try again button */}
+                <button
+                  onClick={() => generatePreview(true)}
+                  disabled={previewLoading}
+                  style={{
+                    marginTop: 16,
+                    padding: '10px 20px', fontSize: 13, fontWeight: 600,
+                    borderRadius: 12, cursor: previewLoading ? 'wait' : 'pointer',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    color: 'rgba(255,255,255,0.6)',
+                    transition: 'all 0.25s',
+                  }}
+                  onMouseEnter={ev => { if (!previewLoading) { ev.currentTarget.style.background = 'rgba(233,30,140,0.08)'; ev.currentTarget.style.borderColor = 'rgba(233,30,140,0.25)'; ev.currentTarget.style.color = ACCENT } }}
+                  onMouseLeave={ev => { ev.currentTarget.style.background = 'rgba(255,255,255,0.04)'; ev.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; ev.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
+                >
+                  {previewLoading ? 'Painting...' : '↻ Try another look'}
+                </button>
               </div>
 
-              {/* Create button */}
-              <button
-                onClick={handleCreate}
-                disabled={!data.name.trim() || !data.personality || loading}
-                style={{
-                  width: '100%', padding: '18px', fontSize: 17, fontWeight: 700,
-                  borderRadius: 16, border: 'none', cursor: 'pointer',
-                  background: data.name.trim() && data.personality
-                    ? 'linear-gradient(135deg, #e91e8c, #c026d3, #7c3aed)'
-                    : 'rgba(255,255,255,0.06)',
-                  color: data.name.trim() && data.personality ? 'white' : 'var(--muted-fg)',
-                  boxShadow: data.name.trim() && data.personality
-                    ? '0 8px 32px rgba(233,30,140,0.3), 0 0 60px rgba(233,30,140,0.1)'
-                    : 'none',
-                  transition: 'all 0.3s ease',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                Create {data.name || 'SenseMate'} ✨
-              </button>
+              {/* ── Right: name + personality + create ──────────────────── */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+                {/* Name */}
+                <div>
+                  <SectionTitle>Name</SectionTitle>
+                  <input
+                    type="text"
+                    className="input"
+                    value={data.name}
+                    onChange={e => set('name', e.target.value)}
+                    placeholder="Luna, Alex, Sophie..."
+                    maxLength={30}
+                    autoFocus
+                    style={{
+                      padding: '16px 20px', fontSize: 18, width: '100%',
+                      borderRadius: 16, background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      color: 'var(--fg)', outline: 'none',
+                      transition: 'border-color 0.3s',
+                    }}
+                    onFocus={e => e.currentTarget.style.borderColor = 'rgba(233,30,140,0.5)'}
+                    onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+                  />
+                </div>
+
+                {/* Personality archetype */}
+                <div>
+                  <SectionTitle>Personality</SectionTitle>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+                    {ARCHETYPES.map(arch => {
+                      const sel = data.personality === arch.id
+                      return (
+                        <button
+                          key={arch.id}
+                          onClick={() => set('personality', arch.id)}
+                          style={{
+                            padding: '16px 14px', borderRadius: 16, cursor: 'pointer',
+                            textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 6,
+                            border: `1px solid ${sel ? 'rgba(233,30,140,0.6)' : 'rgba(255,255,255,0.06)'}`,
+                            background: sel ? 'rgba(233,30,140,0.12)' : 'rgba(255,255,255,0.02)',
+                            transition: 'all 0.25s',
+                            transform: sel ? 'scale(1.02)' : 'scale(1)',
+                            boxShadow: sel ? '0 4px 20px rgba(233,30,140,0.15)' : 'none',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 22 }}>{arch.emoji}</span>
+                            <span style={{ fontSize: 14, fontWeight: 700, color: sel ? ACCENT : 'rgba(255,255,255,0.85)' }}>{arch.name}</span>
+                          </div>
+                          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', lineHeight: 1.4 }}>{arch.description}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Create button */}
+                <button
+                  onClick={handleCreate}
+                  disabled={!data.name.trim() || !data.personality || loading}
+                  style={{
+                    width: '100%', padding: '18px', fontSize: 17, fontWeight: 700,
+                    borderRadius: 16, border: 'none', cursor: 'pointer',
+                    background: data.name.trim() && data.personality
+                      ? 'linear-gradient(135deg, #e91e8c, #c026d3, #7c3aed)'
+                      : 'rgba(255,255,255,0.06)',
+                    color: data.name.trim() && data.personality ? 'white' : 'var(--muted-fg)',
+                    boxShadow: data.name.trim() && data.personality
+                      ? '0 8px 32px rgba(233,30,140,0.3), 0 0 60px rgba(233,30,140,0.1)'
+                      : 'none',
+                    transition: 'all 0.3s ease',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Create {data.name || 'SenseMate'} ✨
+                </button>
+              </div>
             </div>
           </StepContainer>
         )}
@@ -1534,17 +1727,55 @@ export default function OnboardingPage() {
           to { opacity: 1; transform: translateX(0); }
         }
       `}</style>
+
+      {/* ── Avatar lightbox (step 7 click-to-zoom) ── */}
+      {previewExpanded && previewAvatarUrl && (
+        <div
+          onClick={() => setPreviewExpanded(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 200,
+            background: 'rgba(4,2,10,0.92)', backdropFilter: 'blur(20px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 32, cursor: 'zoom-out',
+            animation: 'fadeIn 0.2s ease',
+          }}
+        >
+          <button
+            onClick={(e) => { e.stopPropagation(); setPreviewExpanded(false) }}
+            style={{
+              position: 'absolute', top: 20, right: 20,
+              width: 44, height: 44, borderRadius: 22,
+              background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)',
+              color: 'rgba(255,255,255,0.8)', fontSize: 22, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              backdropFilter: 'blur(10px)',
+            }}
+            aria-label="Close"
+          >×</button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={previewAvatarUrl}
+            alt={data.name || 'Avatar'}
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
+              borderRadius: 20, boxShadow: '0 20px 80px rgba(0,0,0,0.6)',
+              cursor: 'default',
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
 
-function StepContainer({ title, subtitle, children }: {
-  title: string; subtitle: string; children: React.ReactNode
+function StepContainer({ title, subtitle, children, maxWidth = 900 }: {
+  title: string; subtitle: string; children: React.ReactNode; maxWidth?: number
 }) {
   return (
-    <div style={{ width: '100%', maxWidth: 900, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div style={{ width: '100%', maxWidth, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ textAlign: 'center', marginBottom: 32 }}>
         <h1 style={{
           fontSize: 32, fontWeight: 800, letterSpacing: '-1px', marginBottom: 8,
